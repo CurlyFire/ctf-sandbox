@@ -16,7 +16,7 @@ The main goals of this project are:
 - Adapt those contexts with REST adapters, preferably with hypermedia
 - Develop all this code in TDD, following [Valentina Jemuovic's](https://github.com/valentinajemuovic) suggested way.  Her site is [Optivem journal](https://github.com/valentinajemuovic).  You can also follow her on [LinkedIn](https://www.linkedin.com/in/valentinajemuovic)
 
-# System use cases
+## System use cases
 - As a competitor, I want to sign up for future CTF competitions
 - As a competitor, I want to create a team of competitors
 - As a team leader, I want to assign competitors to my team
@@ -26,3 +26,11 @@ The main goals of this project are:
 - As a CTF organizer, I want to assign challenges to an upcoming CTF competition
 
 FURTHER USE CASES WILL PROBABLY BE ADDED IN THE OPEN SOURCE PROJECT
+
+## External systems
+- [Azure Rest API](https://learn.microsoft.com/en-us/rest/api/azure/)
+- System clock
+
+## System architecture style
+Front-end + Microservice backend
+
