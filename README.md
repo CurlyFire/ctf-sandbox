@@ -29,6 +29,7 @@ FURTHER USE CASES WILL PROBABLY BE ADDED IN THE OPEN SOURCE PROJECT
 
 ## External systems
 - [Azure Rest API](https://learn.microsoft.com/en-us/rest/api/azure/)
+- Auth0
 - System clock
 
 ## System architecture style
