@@ -1,0 +1,191 @@
+html {
+  font-size: 14px;
+  position: relative;
+  min-height: 100%;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+:root {
+  --ctf-primary: #4eff4e;     /* Adjusted for better contrast */
+  --ctf-background: #1a1a1a;
+  --ctf-text: #ffffff;        /* Changed to pure white for better contrast */
+  --ctf-accent: #90EE90;      /* Lighter green for better visibility */
+  --ctf-bg: #1a1a1a;
+  --ctf-card-bg: #2d2d2d;
+  --ctf-muted: #c0c0c0;       /* New variable for muted text with better contrast */
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem var(--ctf-primary);
+}
+
+body {
+  margin-bottom: 60px;
+  background-color: var(--ctf-bg);
+  color: var(--ctf-text);
+}
+
+.navbar {
+  background-color: var(--ctf-card-bg) !important;
+  border-bottom: 1px solid var(--ctf-primary);
+}
+
+.navbar-light .navbar-brand,
+.navbar-light .navbar-nav .nav-link {
+  color: var(--ctf-primary) !important;
+}
+
+.navbar-light .navbar-toggler {
+  border-color: var(--ctf-primary);
+  color: var(--ctf-text);
+}
+
+.navbar-toggler-icon {
+  filter: invert(1);
+}
+
+.btn-primary {
+  background-color: #2d2d2d;
+  border-color: var(--ctf-primary);
+  color: var(--ctf-text);
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: var(--ctf-primary);
+  border-color: var(--ctf-primary);
+  color: var(--ctf-bg);
+}
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  white-space: nowrap;
+  line-height: 60px;
+  background-color: var(--ctf-card-bg);
+  color: var(--ctf-primary);
+}
+
+.container {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.card {
+  background-color: var(--ctf-card-bg);
+  border: 1px solid var(--ctf-primary);
+  color: var(--ctf-text);
+}
+
+.card-text {
+  color: var(--ctf-text) !important;
+}
+
+.card-title {
+  color: var(--ctf-primary) !important;
+}
+
+.nav-link {
+  color: var(--ctf-text) !important;
+}
+
+.nav-link:hover {
+  color: var(--ctf-primary) !important;
+}
+
+a {
+  color: var(--ctf-primary);
+}
+
+a:hover {
+  color: var(--ctf-accent);
+}
+
+.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
+  color: var(--bs-secondary-color);
+  text-align: end;
+}
+
+.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
+  text-align: start;
+}
+
+.form-floating > label {
+  color: var(--ctf-text);
+}
+
+.form-control {
+  background-color: var(--ctf-bg) !important;
+  border: 1px solid var(--ctf-primary);
+  color: var(--ctf-text) !important;
+}
+
+.form-control::placeholder {
+  color: var(--ctf-muted) !important;
+}
+
+.form-control:focus {
+  border-color: var(--ctf-primary);
+  box-shadow: 0 0 0 0.25rem rgba(0, 255, 0, 0.25);
+}
+
+.form-check-input:checked {
+  background-color: var(--ctf-primary);
+  border-color: var(--ctf-primary);
+}
+
+pre {
+  font-family: 'Share Tech Mono', monospace;
+}
+
+.text-success {
+  color: var(--ctf-primary) !important;
+}
+
+.text-muted {
+  color: var(--ctf-muted) !important;
+}
+
+/* Animation for the title shadow effect */
+@keyframes glow {
+  0% { text-shadow: 0 0 5px var(--ctf-primary); }
+  50% { text-shadow: 0 0 20px var(--ctf-primary); }
+  100% { text-shadow: 0 0 5px var(--ctf-primary); }
+}
+
+h1.display-4 {
+  animation: glow 2s ease-in-out infinite;
+}
+
+.badge {
+  font-size: 0.9em;
+  padding: 0.4em 0.8em;
+}
+
+.badge.bg-success {
+  background-color: #2ea043 !important;  /* Darker green for better contrast */
+}
+
+.badge.bg-primary {
+  background-color: #1e88e5 !important;  /* Adjusted blue for better contrast */
+}
+
+.badge.bg-info {
+  background-color: #0dcaf0 !important;  /* Brighter cyan for better contrast */
+}
+
+/* Add specific styles for competition times */
+.competition-time {
+  color: var(--ctf-muted);
+  font-weight: 500;  /* Medium weight for better visibility */
+}

@@ -1,0 +1,82 @@
+@model IEnumerable<ctf_sandbox.Models.Competition>
+
+@{
+    ViewData["Title"] = "Competitions";
+}
+
+<h1>Competitions</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create New Competition</a>
+</p>
+
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>@Html.DisplayNameFor(model => model.Name)</th>
+                <th>@Html.DisplayNameFor(model => model.StartDate)</th>
+                <th>@Html.DisplayNameFor(model => model.EndDate)</th>
+                <th>Teams</th>
+                <th>Challenges</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                var now = DateTime.UtcNow;
+                string status;
+                if (now < item.StartDate)
+                    status = "Not Started";
+                else if (now > item.EndDate)
+                    status = "Ended";
+                else
+                    status = "Active";
+
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                    <td class="competition-date" data-utc-date="@item.StartDate.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")">Loading...</td>
+                    <td class="competition-date" data-utc-date="@item.EndDate.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")">Loading...</td>
+                    <td>@item.Teams.Count()</td>
+                    <td>@item.Challenges.Count()</td>
+                    <td>@status</td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary">Edit</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script>
+        function formatDate(utcDateString) {
+            const parsedDate = Date.parse(utcDateString);
+            if (isNaN(parsedDate)) return "Invalid date";
+
+            const date = new Date(parsedDate);
+            return new Intl.DateTimeFormat(undefined, {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false
+            }).format(date);
+        }
+
+        function updateDates() {
+            console.log("Updating dates…");
+            document.querySelectorAll(".competition-date").forEach(element => {
+                const utcDate = element.getAttribute("data-utc-date");
+                console.log(`Converting: ${utcDate} → ${formatDate(utcDate)}`);
+                element.textContent = formatDate(utcDate);
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", updateDates);
+    </script>
+}

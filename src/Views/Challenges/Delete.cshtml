@@ -1,0 +1,56 @@
+@model ctf_sandbox.Models.Challenge
+
+@{
+    ViewData["Title"] = "Delete Challenge";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title text-danger font-monospace mb-4">[Delete Challenge]</h2>
+                    
+                    <div class="alert alert-danger" role="alert">
+                        <i class="bi bi-exclamation-triangle"></i> 
+                        Are you sure you want to delete this challenge?
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="text-success font-monospace">@Model.Title</h5>
+                        <div class="mb-2">
+                            <span class="badge bg-success me-2">@Model.Points pts</span>
+                            <span class="badge bg-primary">@Model.Category</span>
+                            <span class="badge bg-info ms-2">@Model.ChallengeType</span>
+                        </div>
+                        <p class="card-text">@Model.Description</p>
+                        
+                        @if (Model is PlaintextChallenge plaintextChallenge)
+                        {
+                            <div class="mb-3">
+                                <h6 class="text-success font-monospace">Challenge Content</h6>
+                                <pre class="bg-dark text-light p-3 rounded"><code>@plaintextChallenge.Content</code></pre>
+                            </div>
+                        }
+
+                        <div class="text-muted">
+                            <small>
+                                <i class="bi bi-person"></i> Created by @Model.Creator.Email
+                                <br/>
+                                <i class="bi bi-clock"></i> Created at @Model.CreatedAt.ToString("g")
+                            </small>
+                        </div>
+                    </div>
+
+                    <form asp-action="Delete" class="d-inline">
+                        <input type="hidden" asp-for="Id" />
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger">Confirm Delete</button>
+                            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

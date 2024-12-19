@@ -1,0 +1,19 @@
+version: "3.8"
+services:
+  dev:
+    image: mcr.microsoft.com/devcontainers/dotnet:1-9.0-bookworm
+    volumes:
+      - .:/workspace:cached
+    command: sleep infinity
+    depends_on:
+      - mailpit
+    links:
+      - mailpit
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+
+  mailpit:
+    image: axllent/mailpit
+    ports:
+      - "8025:8025"   # Web UI
+      - "1025:1025"   # SMTP

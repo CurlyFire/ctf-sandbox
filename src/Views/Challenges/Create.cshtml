@@ -1,0 +1,69 @@
+@model ctf_sandbox.Models.PlaintextChallenge
+
+@{
+    ViewData["Title"] = "Create Challenge";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title text-success font-monospace mb-4">
+                        [New Challenge]
+                    </h2>
+
+                    <form asp-action="Create">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Title" class="form-control" placeholder="Challenge Title" />
+                            <label asp-for="Title">Title</label>
+                            <span asp-validation-for="Title" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <textarea asp-for="Description" class="form-control" style="height: 100px" placeholder="Challenge Description"></textarea>
+                            <label asp-for="Description">Description</label>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Points" class="form-control" placeholder="Points" />
+                            <label asp-for="Points">Points</label>
+                            <span asp-validation-for="Points" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Category" class="form-control" placeholder="Category" />
+                            <label asp-for="Category">Category</label>
+                            <span asp-validation-for="Category" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <textarea asp-for="Content" class="form-control" style="height: 200px" placeholder="Challenge Content"></textarea>
+                            <label asp-for="Content">Challenge Content</label>
+                            <span asp-validation-for="Content" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Flag" class="form-control" placeholder="Flag" />
+                            <label asp-for="Flag">Flag</label>
+                            <span asp-validation-for="Flag" class="text-danger"></span>
+                            <small class="form-text text-muted">The flag that participants need to find</small>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Create Challenge</button>
+                            <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

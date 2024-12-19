@@ -1,0 +1,49 @@
+@model IEnumerable<ctf_sandbox.Models.TeamMember>
+
+@{
+    ViewData["Title"] = "Team Invitations";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="row">
+    @if (!Model.Any())
+    {
+        <div class="col-12">
+            <p>You have no pending team invitations.</p>
+        </div>
+    }
+    else
+    {
+        @foreach (var invitation in Model)
+        {
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">@invitation.Team.Name</h5>
+                        @if (!string.IsNullOrEmpty(invitation.Team.Description))
+                        {
+                            <p class="card-text">@invitation.Team.Description</p>
+                        }
+                        <p class="card-text"><small class="text-muted">Team Owner: @invitation.Team.Owner.Email</small></p>
+                        <p class="card-text"><small class="text-muted">Invited: @invitation.JoinedAt.ToString("d")</small></p>
+                        
+                        <form asp-action="AcceptInvite" class="d-inline">
+                            <input type="hidden" name="id" value="@invitation.Id" />
+                            <button type="submit" class="btn btn-success">Accept</button>
+                        </form>
+                        
+                        <form asp-action="DeclineInvite" class="d-inline">
+                            <input type="hidden" name="id" value="@invitation.Id" />
+                            <button type="submit" class="btn btn-danger">Decline</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+<div>
+    <a asp-action="Index" class="btn btn-secondary">Back to Teams</a>
+</div>

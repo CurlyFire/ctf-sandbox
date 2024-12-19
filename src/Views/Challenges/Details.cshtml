@@ -1,0 +1,80 @@
+@model ctf_sandbox.Models.Challenge
+
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title text-success font-monospace mb-3">[@Model.Title]</h2>
+                    
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+                    
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            @TempData["ErrorMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+                    
+                    <div class="mb-3">
+                        <span class="badge bg-success me-2">@Model.Points pts</span>
+                        <span class="badge bg-primary">@Model.Category</span>
+                        <span class="badge bg-info ms-2">@Model.ChallengeType</span>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="text-success font-monospace">Description</h5>
+                        <p class="card-text">@Model.Description</p>
+                    </div>
+
+                    @if (Model is PlaintextChallenge plaintextChallenge)
+                    {
+                        <div class="mb-4">
+                            <h5 class="text-success font-monospace">Challenge Content</h5>
+                            <pre class="bg-dark text-light p-3 rounded"><code>@plaintextChallenge.Content</code></pre>
+                        </div>
+                    }
+
+                    <div class="mb-4">
+                        <h5 class="text-success font-monospace">Flag</h5>
+                        <div class="alert alert-info">
+                            <i class="bi bi-key"></i> @Model.Flag
+                        </div>
+                    </div>
+
+                    <div class="text-muted mb-4">
+                        <small>
+                            <i class="bi bi-person"></i> Created by @Model.Creator.Email
+                            <br/>
+                            <i class="bi bi-clock"></i> Created at @Model.CreatedAt.ToString("g")
+                        </small>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                        @if (User.Identity?.Name == Model.Creator.Email || User.IsInRole("Admin"))
+                        {
+                            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                                <i class="bi bi-pencil"></i> Edit
+                            </a>
+                            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Delete
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

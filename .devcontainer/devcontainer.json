@@ -1,0 +1,29 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/dotnet
+{
+	"name": "C# (.NET)",
+
+	"dockerComposeFile": [
+		"../docker-compose.yml"
+	  ],
+	  "service": "dev",
+	  "workspaceFolder": "/workspace",
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	"forwardPorts": [5191, 8025],
+
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	"postCreateCommand": "git config --global --add safe.directory /workspace && dotnet tool install --global dotnet-ef",
+
+    // Configure tool-specific properties.
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-dotnettools.csdevkit" // C# Dev Kit
+            ]
+        }
+    }
+
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	// "remoteUser": "root"
+}

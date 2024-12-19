@@ -1,0 +1,60 @@
+﻿@page
+@model RegisterModel
+
+@{
+    ViewData["Title"] = "Initialize Account";
+}
+
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="text-center font-monospace text-success mb-4">Initialize Account</h2>
+                    <div class="text-center mb-4">
+                        <div class="font-monospace" style="color: var(--ctf-primary)">
+                            <pre class="mb-0">
+ ___ ___ ___ ___ ___ ___ ___ 
+|_ -|  _|  _|_ -| . |   |  _|
+|___|_| |_| |___|___|_|_|_|  
+            </pre>
+                        </div>
+                    </div>
+                    <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        <div class="text-light mb-3">
+                            <p>Create your account credentials below:</p>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="handle@domain.com" />
+                            <label asp-for="Input.Email">Handle</label>
+                            <span asp-validation-for="Input.Email" class="text-danger"></span>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
+                            <label asp-for="Input.Password">Access Code</label>
+                            <span asp-validation-for="Input.Password" class="text-danger"></span>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
+                            <label asp-for="Input.ConfirmPassword">Verify Access Code</label>
+                            <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button id="registerSubmit" type="submit" class="btn btn-primary btn-lg font-monospace">CREATE ACCOUNT</button>
+                        </div>
+                        <div class="mt-3 text-center">
+                            <p>
+                                <a class="text-success" asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl">Access Existing Account</a>
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

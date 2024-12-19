@@ -1,0 +1,101 @@
+@model ctf_sandbox.Models.Competition
+
+@{
+    ViewData["Title"] = "Create Competition";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title text-success font-monospace mb-4">[New Competition]</h2>
+
+                    <form asp-action="Create" id="createCompetitionForm">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        
+                        <div class="form-floating mb-3">
+                            <input asp-for="Name" class="form-control" placeholder="Competition Name" />
+                            <label asp-for="Name">Name</label>
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="form-floating mb-3">
+                            <textarea asp-for="Description" class="form-control" style="height: 100px" placeholder="Competition Description"></textarea>
+                            <label asp-for="Description">Description</label>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <!-- Local UI fields (not model-bound) -->
+                        <div class="form-floating mb-3">
+                            <input class="form-control" type="datetime-local" id="StartDateLocal" placeholder="Start Date" />
+                            <label for="StartDateLocal">Start Date (Your Local Time)</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input class="form-control" type="datetime-local" id="EndDateLocal" placeholder="End Date" />
+                            <label for="EndDateLocal">End Date (Your Local Time)</label>
+                        </div>
+
+                        <!-- Hidden UTC model-bound inputs -->
+                        <input asp-for="StartDate" type="hidden" />
+                        <input asp-for="EndDate" type="hidden" />
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Create Competition</button>
+                            <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        $(document).ready(function () {
+            // Format local time correctly for datetime-local input
+            function getLocalNowForDatetimeLocal() {
+                const now = new Date();
+                const pad = n => n.toString().padStart(2, '0');
+
+                return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+            }
+
+            // Set minimum for start date to current local time
+            $('#StartDateLocal').attr('min', getLocalNowForDatetimeLocal());
+
+            // Keep EndDate after StartDate
+            $('#StartDateLocal').change(function () {
+                $('#EndDateLocal').attr('min', $(this).val());
+                if ($('#EndDateLocal').val() < $(this).val()) {
+                    $('#EndDateLocal').val($(this).val());
+                }
+            });
+
+            $('#createCompetitionForm').submit(function (e) {
+                const startLocal = new Date($('#StartDateLocal').val());
+                const endLocal = new Date($('#EndDateLocal').val());
+                const nowUtc = new Date();
+
+                if (startLocal < nowUtc) {
+                    alert('Start date cannot be in the past');
+                    return false;
+                }
+
+                if (endLocal <= startLocal) {
+                    alert('End date must be after start date');
+                    return false;
+                }
+
+                // Convert local time to UTC using toISOString (correct!)
+                $('#StartDate').val(startLocal.toISOString());
+                $('#EndDate').val(endLocal.toISOString());
+
+                // Let the form submit
+            });
+        });
+    </script>
+}
