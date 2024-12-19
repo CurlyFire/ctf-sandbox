@@ -14,7 +14,7 @@ The main goals of this project are:
 - Get my DDD Bounded Contexts framed correctly
 - Implement those bounded contextes in a hexagonal architecture
 - Adapt those contexts with REST adapters, preferably with hypermedia
-- Develop all this code in TDD, following [Valentina Jemuovic's](https://github.com/valentinajemuovic) suggested way.  Her site is [Optivem journal](https://github.com/valentinajemuovic).  You can also follow her on [LinkedIn](https://www.linkedin.com/in/valentinajemuovic)
+- Develop all this code in TDD, following [Valentina Jemuovic's](https://github.com/valentinajemuovic) suggested way.  Her site is [Optivem journal](journal.optivem.com).  You can also follow her on [LinkedIn](https://www.linkedin.com/in/valentinajemuovic)
 
 ## System use cases
 - As a competitor, I want to sign up for future CTF competitions
