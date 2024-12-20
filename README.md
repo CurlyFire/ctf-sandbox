@@ -35,3 +35,5 @@ FURTHER USE CASES WILL PROBABLY BE ADDED IN THE OPEN SOURCE PROJECT
 ## System architecture style
 Front-end + Microservice backend
 
+## Architecture diagram
+![diagram](images/C1.png)
