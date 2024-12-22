@@ -33,7 +33,7 @@ FURTHER USE CASES WILL PROBABLY BE ADDED IN THE OPEN SOURCE PROJECT
 - System clock
 
 ## System architecture style
-Front-end + Microservice backend
+Micro Frontends + Micro Services
 
 ## Architecture diagram
 ![diagram](images/C1.png)
