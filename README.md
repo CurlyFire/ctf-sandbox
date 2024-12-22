@@ -42,3 +42,22 @@ Micro Frontends + Micro Services
 
 ### Container diagram
 ![diagram](images/C2.png)
+
+## Tech stack
+Programming language: C#
+
+Frameworks: Blazor Web Assembly, ASP.Net Core
+
+Database: Sqlite
+
+Message Broker: ***Upcoming...***
+
+## Repository Strategy
+Multi-Repo
+
+## Branching Strategy
+Feature Branching
+
+## Deployment Model
+Microsoft Azure
+
