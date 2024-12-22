@@ -61,3 +61,15 @@ Feature Branching
 ## Deployment Model
 Microsoft Azure
 
+## Repositories
+[ctf-sandbox-frontend](https://github.com/CurlyFire/ctf-sandbox-frontend)
+
+Contains the main container application.  It's responsiblity is to authenticate users, display modules and to redirect requests to the underlying modules.
+
+[ctf-sandbox-users-frontend](https://github.com/CurlyFire/ctf-sandbox-users-frontend)
+
+Contains the users front end module.  It's responsiblity is to display all available functions for the users domain.
+
+[ctf-sandbox-users](https://github.com/CurlyFire/ctf-sandbox-users)
+
+Contains the users back end.  It's responsiblity is to provide functions for the users domain.
