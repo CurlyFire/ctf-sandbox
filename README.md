@@ -35,5 +35,10 @@ FURTHER USE CASES WILL PROBABLY BE ADDED IN THE OPEN SOURCE PROJECT
 ## System architecture style
 Micro Frontends + Micro Services
 
-## Architecture diagram
+## Architecture diagrams
+
+### System context diagram
 ![diagram](images/C1.png)
+
+### Container diagram
+![diagram](images/C2.png)
