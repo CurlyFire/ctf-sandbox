@@ -19,7 +19,8 @@
     "customizations": {
         "vscode": {
             "extensions": [
-                "ms-dotnettools.csdevkit" // C# Dev Kit
+                "ms-dotnettools.csdevkit", // C# Dev Kit
+				"github.vscode-github-actions" // GitHub Actions
             ]
         }
     }
