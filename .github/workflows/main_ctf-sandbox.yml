@@ -18,12 +18,15 @@ jobs:
       with:
         dotnet-version: '9.0.x'
 
+    - name: Build and publish
+      run: dotnet publish -c Release -o ./publish ./src/ctf-sandbox.csproj
+
     - name: Login to Google Cloud
       uses: google-github-actions/auth@v2
       with:
         credentials_json: '${{ secrets.GCP_SA_KEY }}'
 
-    - name: Setup Docker credentials
+    - name: Setup gcloud CLI
       uses: google-github-actions/setup-gcloud@v2
       with:
         project_id: ${{ secrets.GCP_PROJECT_ID }}

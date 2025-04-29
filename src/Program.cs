@@ -6,6 +6,15 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add this line to listen on the correct port:
+var port = Environment.GetEnvironmentVariable("PORT");
+if (port != null)
+{
+    builder.WebHost.ConfigureKestrel(options =>
+    {
+        options.ListenAnyIP(int.Parse(port));
+    });
+}
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
