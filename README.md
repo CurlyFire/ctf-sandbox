@@ -114,7 +114,7 @@ CI/CD is enabled for the main branch and will deploy to the UAT environement aut
 - [Windows Subsystem for Linux](https://learn.microsoft.com/en-us/windows/wsl/install)
 - [Docker desktop](https://www.docker.com/products/docker-desktop/)
 - [Visual Studio Code](https://code.visualstudio.com/)
-    - [Dev containers extenstion](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+    - [Dev containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
 
 ## Setup
 - Clone the repository
