@@ -1,4 +1,4 @@
-name: Deploy to Cloud Run
+name: Commit stage
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  build-and-deploy:
+  build-and-push:
     runs-on: ubuntu-latest
 
     steps:
@@ -36,14 +36,6 @@ jobs:
 
     - name: Build and push Docker image
       run: |
-        IMAGE="us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ctf-sandbox-repo/ctf-sandbox:$GITHUB_SHA"
+        IMAGE="us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ctf-sandbox-repo/ctf-sandbox:latest"
         docker build -t $IMAGE .
         docker push $IMAGE
-
-    - name: Deploy to Cloud Run
-      run: |
-        gcloud run deploy mvc-app \
-          --image=us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ctf-sandbox-repo/ctf-sandbox:$GITHUB_SHA \
-          --region=${{ secrets.GCP_REGION }} \
-          --platform=managed \
-          --allow-unauthenticated
