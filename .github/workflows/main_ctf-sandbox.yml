@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  build-and-push:
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -30,10 +30,10 @@ jobs:
       uses: google-github-actions/setup-gcloud@v2
       with:
         project_id: ${{ secrets.GCP_PROJECT_ID }}
+  push:
+    runs-on: ubuntu-latest
 
-    - name: Configure Docker to use gcloud credentials
-      run: gcloud auth configure-docker us-central1-docker.pkg.dev
-
+    steps:
     - name: Build and push Docker image
       run: |
         IMAGE="us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ctf-sandbox-repo/ctf-sandbox:latest"
