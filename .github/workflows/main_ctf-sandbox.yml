@@ -27,15 +27,15 @@ jobs:
       run: dotnet build -c Release ./src
 
     - name: Run tests
-      run: dotnet test --no-build -c Release --logger "junit;LogFilePath=test-results.xml" ./src
+      run: dotnet test --no-build -c Release --logger "trx;LogFilePath=test-results.trx" ./src
 
     - name: Publish test results
       uses: dorny/test-reporter@v1
       if: always()
       with:
         name: .NET Tests
-        path: test-results.xml
-        reporter: java-junit
+        path: '**/TestResults/*.trx'
+        reporter: dotnet-trx
 
     - name: Publish UI
       run: dotnet publish --no-build -c Release -o ./publish ./src/ctf-sandbox.csproj
