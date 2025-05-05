@@ -85,6 +85,9 @@ jobs:
       uses: google-github-actions/setup-gcloud@v2
       with:
         project_id: ${{ secrets.GCP_PROJECT_ID }}
+        
+    - name: Configure Docker to use gcloud credentials
+      run: gcloud auth configure-docker us-central1-docker.pkg.dev
 
     - name: Build and push Docker image
       run: |
