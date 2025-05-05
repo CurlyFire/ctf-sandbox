@@ -45,6 +45,7 @@ jobs:
     
     - name: Upload publish artifacts
       uses: actions/upload-artifact@v4
+      if : github.event_name == 'push'
       with:
         name: publish-output
         path: ./publish
