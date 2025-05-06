@@ -14,7 +14,7 @@ jobs:
 
     environment:
       name: acceptance
-      url: https://your-app-acceptance-url
+      url: https://mvc-app-663949819005.us-central1.run.app/
 
     steps:
     - name: Login to Google Cloud
@@ -31,11 +31,11 @@ jobs:
       run: |
         # NOTE: This workflow only triggers when the 'Commit stage' workflow completes
         #       due to a PUSH to the default branch. It will NOT trigger on pull_request runs.
-        IMAGE="us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ctf-sandbox-repo/ctf-sandbox:${{ github.sha }}"
+        IMAGE="us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ctf-sandbox-repo/ctf-sandbox:latest"
 
         echo "Deploying image: $IMAGE"
 
-        gcloud run deploy mvc-app-acceptance \
+        gcloud run deploy mvc-app \
           --image=$IMAGE \
           --region=${{ secrets.GCP_REGION }} \
           --platform=managed \
