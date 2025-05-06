@@ -1,0 +1,42 @@
+name: Deploy to Acceptance
+
+on:
+  workflow_run:
+    workflows: ["Commit stage CI"]
+    types:
+      - completed
+
+jobs:
+  deploy-to-acceptance:
+    name: CD / Deploy to Acceptance
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    environment:
+      name: acceptance
+      url: https://your-app-acceptance-url
+
+    steps:
+    - name: Login to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+    - name: Setup gcloud CLI
+      uses: google-github-actions/setup-gcloud@v2
+      with:
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+    - name: Deploy to Cloud Run (Acceptance)
+      run: |
+        # NOTE: This workflow only triggers when the 'Commit stage' workflow completes
+        #       due to a PUSH to the default branch. It will NOT trigger on pull_request runs.
+        IMAGE="us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ctf-sandbox-repo/ctf-sandbox:${{ github.sha }}"
+
+        echo "Deploying image: $IMAGE"
+
+        gcloud run deploy mvc-app-acceptance \
+          --image=$IMAGE \
+          --region=${{ secrets.GCP_REGION }} \
+          --platform=managed \
+          --allow-unauthenticated
