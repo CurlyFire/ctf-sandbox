@@ -10,6 +10,7 @@ jobs:
   deploy-to-acceptance:
     name: CD / Deploy to Acceptance
     runs-on: ubuntu-latest
+    # this is required even though the workflow_run event is supposed to be already filtered on the default branch
     if: >
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.head_branch == 'main'
