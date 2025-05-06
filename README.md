@@ -98,15 +98,13 @@ Google cloud platform
 https://github.com/users/CurlyFire/projects/4/views/1
 
 # Environments
-
-## UAT
 The CTF competition UI has all the features mentionned in the Sytem use cases section.  Mailpit is used as a SMPT server for invitations and registrations, however, the emails all stay there and can be seen from the mailpit UI.  If you require access to it, ask me and I will create a user for you to view all emails.
-
+## Acceptance
 - CTF competition : https://mvc-app-663949819005.us-central1.run.app
 - Mailpit : https://mailpit-ui-663949819005.us-central1.run.app
 
 # Deployment
-CI/CD is enabled for the main branch and will deploy to the UAT environement automatically.
+CI/CD is enabled for the main branch and will deploy to the Acceptance environement automatically.
 
 # Contribute
 ## Software requirements
