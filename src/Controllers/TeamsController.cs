@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using ctf_sandbox.Data;
 using ctf_sandbox.Models;
 
@@ -12,11 +13,16 @@ public class TeamsController : Controller
 {
     private readonly ApplicationDbContext _context;
     private readonly UserManager<IdentityUser> _userManager;
+    private readonly IEmailSender _emailSender;
 
-    public TeamsController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+    public TeamsController(
+        ApplicationDbContext context, 
+        UserManager<IdentityUser> userManager,
+        IEmailSender emailSender)
     {
         _context = context;
         _userManager = userManager;
+        _emailSender = emailSender;
     }
 
     // GET: Teams
@@ -95,7 +101,10 @@ public class TeamsController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Invite(int id, string email)
     {
-        var team = await _context.Teams.FindAsync(id);
+        var team = await _context.Teams
+            .Include(t => t.Owner)
+            .FirstOrDefaultAsync(t => t.Id == id);
+            
         if (team == null)
         {
             return NotFound();
@@ -133,6 +142,15 @@ public class TeamsController : Controller
 
         _context.TeamMembers.Add(teamMember);
         await _context.SaveChangesAsync();
+
+        // Send invitation email
+        var subject = $"Invitation to join team {team.Name}";
+        var message = $@"
+            <h2>Team Invitation</h2>
+            <p>You have been invited to join the team {team.Name} by {currentUser.Email}.</p>
+            <p>To accept or decline this invitation, please visit your <a href='{Url.Action("Invitations", "Teams", null, Request.Scheme)}'>team invitations page</a>.</p>";
+        
+        await _emailSender.SendEmailAsync(email, subject, message);
 
         return RedirectToAction(nameof(Index));
     }
