@@ -20,7 +20,7 @@ The main goals of this project are:
 The big ball of mud was created with github copilot agent mode using Claude Sonnet 3.5.  I just wanted to create something that worked without being clean.
 
 # System use cases
-- As a competitor, I want to sign up for future CTF competitions
+- As a competitor or challenge creator, I want to sign up for future CTF competitions
 - As a competitor, I want to create a team of competitors
 - As a team leader, I want to assign competitors to my team
 - As a team leader, I want to particate in a CTF competition
@@ -105,6 +105,9 @@ The CTF competition UI has all the features mentionned in the Sytem use cases se
 
 # Deployment
 CI/CD is enabled for the main branch and will deploy to the Acceptance environement automatically.
+
+## Manual testing
+[Procedure](docs/manualtesting.md)
 
 # Contribute
 ## Software requirements

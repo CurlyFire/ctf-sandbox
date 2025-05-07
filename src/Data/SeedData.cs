@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 
 namespace ctf_sandbox.Data;
 
@@ -6,7 +7,8 @@ public static class SeedData
 {
     public static async Task Initialize(IServiceProvider serviceProvider, 
         UserManager<IdentityUser> userManager, 
-        RoleManager<IdentityRole> roleManager)
+        RoleManager<IdentityRole> roleManager,
+        IConfiguration configuration)
     {
         // Seed roles
         string[] roles = { "Admin", "User" };
@@ -19,7 +21,14 @@ public static class SeedData
         }
 
         // Seed admin user
-        var adminEmail = "admin@ctfarena.com";
+        var adminEmail = configuration["AdminAccount:Email"];
+        var adminPassword = configuration["AdminAccount:Password"];
+        
+        if (string.IsNullOrEmpty(adminEmail) || string.IsNullOrEmpty(adminPassword))
+        {
+            throw new InvalidOperationException("Admin account configuration is missing in appsettings.json");
+        }
+
         var adminUser = await userManager.FindByEmailAsync(adminEmail);
 
         if (adminUser == null)
@@ -31,7 +40,7 @@ public static class SeedData
                 EmailConfirmed = true
             };
 
-            var result = await userManager.CreateAsync(adminUser, "CTFAdmin123!");
+            var result = await userManager.CreateAsync(adminUser, adminPassword);
             if (result.Succeeded)
             {
                 await userManager.AddToRoleAsync(adminUser, "Admin");

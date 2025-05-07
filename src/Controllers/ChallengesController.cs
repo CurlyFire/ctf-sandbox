@@ -76,12 +76,14 @@ public class ChallengesController : Controller
     }
 
     // GET: Challenges/Create
+    [Authorize]
     public IActionResult Create()
     {
         return View();
     }
 
     // POST: Challenges/Create
+    [Authorize]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create([Bind("Title,Description,Flag,Points,Category,Content")] PlaintextChallenge challenge)
