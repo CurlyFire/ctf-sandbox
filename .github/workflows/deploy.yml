@@ -9,7 +9,13 @@ on:
       environment:
         required: true
         type: string
-
+    secrets:
+      GCP_SA_KEY:
+        required: true
+      GCP_PROJECT_ID:
+        required: true
+      GCP_REGION:
+        required: true
 jobs:
   deploy:
     runs-on: ubuntu-latest
