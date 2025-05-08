@@ -54,8 +54,8 @@ jobs:
         projectBaseDir: ./src
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
-        SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
+        SONAR_PROJECT_KEY: CurlyFire_ctf-sandbox
+        SONAR_ORGANIZATION: CurlyFire
 
     - name: Publish UI
       run: dotnet publish --no-build -c Release -o ./publish ./src/ctf-sandbox.csproj
