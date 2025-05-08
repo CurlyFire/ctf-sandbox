@@ -19,6 +19,12 @@ The main goals of this project are:
 ## Artificial intelligence
 The big ball of mud was created with github copilot agent mode using Claude Sonnet 3.5.  I just wanted to create something that worked without being clean.
 
+## 🚦 Pipeline Dashboard
+
+| Component       | Commit Stage Status |
+|-----------------|---------------------|
+| ctf-sandbox     | ![ctf-sandbox Status](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/commit-stage_CI.yml/badge.svg) |
+
 # System use cases
 - As a competitor or challenge creator, I want to sign up for future CTF competitions
 - As a competitor, I want to create a team of competitors
