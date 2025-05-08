@@ -48,6 +48,13 @@ jobs:
         path: '**/TestResults/*.trx'
         reporter: dotnet-trx
 
+    - name: SonarCloud Scan
+      uses: SonarSource/sonarcloud-github-action@v2
+      with:
+        projectBaseDir: ./src
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
     - name: Publish UI
       run: dotnet publish --no-build -c Release -o ./publish ./src/ctf-sandbox.csproj
 
