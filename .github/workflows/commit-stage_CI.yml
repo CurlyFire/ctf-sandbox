@@ -53,7 +53,7 @@ jobs:
 
     - name: Build Docker image
       run: |
-        IMAGE="us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ctf-sandbox-repo/ctf-sandbox:latest"
+        IMAGE="us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ctf-sandbox-repo/ctf-sandbox:${{ github.sha }}"
         docker build -t $IMAGE .
 
     - name: Login to Google Cloud
@@ -75,5 +75,5 @@ jobs:
     - name: Push Docker image
       if: github.event_name == 'push'
       run: |
-        IMAGE="us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ctf-sandbox-repo/ctf-sandbox:latest"
+        IMAGE="us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ctf-sandbox-repo/ctf-sandbox:${{ github.sha }}"
         docker push $IMAGE
