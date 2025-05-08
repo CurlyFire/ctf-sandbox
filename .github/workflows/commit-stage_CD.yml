@@ -16,3 +16,7 @@ jobs:
     with:
       version: ${{ github.event.workflow_run.head_sha }}
       environment: acceptance
+    secrets:
+      GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+      GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+      GCP_REGION: ${{ secrets.GCP_REGION }}
