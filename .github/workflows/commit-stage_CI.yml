@@ -50,12 +50,8 @@ jobs:
 
     - name: SonarCloud Scan
       uses: SonarSource/sonarcloud-github-action@v2
-      with:
-        projectBaseDir: ./src
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        SONAR_PROJECT_KEY: CurlyFire_ctf-sandbox
-        SONAR_ORGANIZATION: CurlyFire
 
     - name: Publish UI
       run: dotnet publish --no-build -c Release -o ./publish ./src/ctf-sandbox.csproj
