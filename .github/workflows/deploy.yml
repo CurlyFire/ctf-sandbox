@@ -1,21 +1,19 @@
-name: Deploy
+name: Deploy Full Environment
 
 on:
-  workflow_call:
+  workflow_dispatch:
     inputs:
       version:
+        description: "Image SHA to deploy"
         required: true
         type: string
       environment:
+        description: "Target environment name"
         required: true
-        type: string
-    secrets:
-      GCP_SA_KEY:
-        required: true
-      GCP_PROJECT_ID:
-        required: true
-      GCP_REGION:
-        required: true
+        type: choice
+        options:
+          - uat
+          - production
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -31,13 +29,103 @@ jobs:
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
 
-      - name: Deploy to Cloud Run
+      - name: Deploy environment
+        shell: bash
         run: |
-          IMAGE="us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ctf-sandbox-repo/ctf-sandbox:${{ inputs.version }}"
-          echo "Deploying image: $IMAGE"
+          set -e
 
-          gcloud run deploy mvc-app \
-            --image=$IMAGE \
-            --region=${{ secrets.GCP_REGION }} \
+          VERSION="${{ inputs.version }}"
+          REGION="${{ secrets.GCP_REGION }}"
+          PROJECT="${{ secrets.GCP_PROJECT_ID }}"
+          ENV="${{ inputs.environment }}"
+
+          echo "✅ Deploying .NET 9 MVC App"
+          gcloud run deploy mvc-app-$ENV \
+            --image=us-central1-docker.pkg.dev/$PROJECT/ctf-sandbox-repo/ctf-sandbox:$VERSION \
+            --region=$REGION \
             --platform=managed \
-            --allow-unauthenticated
+            --allow-unauthenticated \
+            --network=default \
+            --subnet=default \
+            --vpc-egress=all-traffic
+
+          echo "✅ Deploying rqlite (initial)"
+          gcloud run deploy rqlite-$ENV \
+            --image=rqlite/rqlite \
+            --port=4001 \
+            --region=$REGION \
+            --platform=managed \
+            --ingress=internal \
+            --min-instances=1 \
+            --max-instances=1 \
+            --allow-unauthenticated \
+            --args="--http-addr=0.0.0.0:4001"
+
+          echo "📡 Retrieving rqlite URL"
+          RQLITE_URL=$(gcloud run services describe rqlite-$ENV \
+            --region=$REGION \
+            --platform=managed \
+            --format='value(status.url)' | sed 's|^https://||')
+
+          echo "🔁 Updating rqlite HTTP_ADV_ADDR=$RQLITE_URL"
+          gcloud run services update rqlite-$ENV \
+            --region=$REGION \
+            --update-env-vars=HTTP_ADV_ADDR=$RQLITE_URL
+
+          echo "✅ Deploying mailpit-ui"
+          gcloud run deploy mailpit-ui-$ENV \
+            --image=axllent/mailpit:latest \
+            --port=8025 \
+            --region=$REGION \
+            --platform=managed \
+            --allow-unauthenticated \
+            --ingress=all \
+            --network=default \
+            --subnet=default \
+            --vpc-egress=all-traffic \
+            --args="--database=https://$RQLITE_URL"
+
+          CLUSTER_NAME="sandbox-cluster-$ENV"
+          echo "🌐 Getting GKE credentials"
+          gcloud container clusters get-credentials $CLUSTER_NAME --region=$REGION
+
+          echo "📦 Rendering and deploying mailpit-smtp to GKE"
+          export ENV RQLITE_URL
+          envsubst < mailpit-smtp.yaml.tpl > mailpit-smtp.yaml
+          envsubst < mailpit-smtp-service.yaml.tpl > mailpit-smtp-service.yaml
+
+          kubectl apply -f mailpit-smtp.yaml
+          kubectl apply -f mailpit-smtp-service.yaml
+
+          NEG_NAME="mailpit-smtp-neg-$ENV"
+          BACKEND_NAME="mailpit-smtp-backend-$ENV"
+
+          echo "🔌 Checking NEG existence"
+          if ! gcloud compute network-endpoint-groups describe $NEG_NAME --region="$REGION" >/dev/null 2>&1; then
+            gcloud compute network-endpoint-groups create $NEG_NAME \
+              --region="$REGION" \
+              --network-endpoint-type=serverless \
+              --cloud-run-service=mailpit-smtp-$ENV \
+              --project="$PROJECT"
+          fi
+
+          echo "🔁 Checking backend service"
+          if ! gcloud compute backend-services describe $BACKEND_NAME --region="$REGION" >/dev/null 2>&1; then
+            gcloud compute backend-services create $BACKEND_NAME \
+              --region="$REGION" \
+              --load-balancing-scheme=internal \
+              --protocol=tcp
+          fi
+
+          echo "🔗 Checking backend attachment"
+          BACKEND_EXISTS=$(gcloud compute backend-services describe $BACKEND_NAME --region="$REGION" \
+            --format="value(backends[].group)" | grep $NEG_NAME || true)
+
+          if [ -z "$BACKEND_EXISTS" ]; then
+            gcloud compute backend-services add-backend $BACKEND_NAME \
+              --region="$REGION" \
+              --network-endpoint-group=$NEG_NAME \
+              --network-endpoint-group-region="$REGION"
+          fi
+
+          echo "✅ Deployment complete"
