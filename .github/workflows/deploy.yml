@@ -68,10 +68,11 @@ jobs:
             --format='value(status.url)' | sed 's|^https://||')
 
           echo "🔁 Updating rqlite HTTP_ADV_ADDR=$RQLITE_URL"
+          echo "Resolved advertised address: $RQLITE_URL:443"
           gcloud run services update rqlite-$ENV \
             --region=$REGION \
-            --project=$PROJECT \
-            --update-env-vars=HTTP_ADV_ADDR=$RQLITE_URL
+            --update-env-vars=HTTP_ADV_ADDR=$RQLITE_URL:443 \
+            --args="--http-addr=0.0.0.0:4001"
 
           echo "✅ Deploying mailpit-ui"
           gcloud run deploy mailpit-ui-$ENV \
