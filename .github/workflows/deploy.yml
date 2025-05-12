@@ -70,8 +70,8 @@ jobs:
           echo "🔁 Updating rqlite HTTP_ADV_ADDR=$RQLITE_URL"
           gcloud run services update rqlite-$ENV \
             --region=$REGION \
+            --project=$PROJECT \
             --update-env-vars=HTTP_ADV_ADDR=$RQLITE_URL
-            --args="--http-addr=0.0.0.0:4001"
 
           echo "✅ Deploying mailpit-ui"
           gcloud run deploy mailpit-ui-$ENV \
