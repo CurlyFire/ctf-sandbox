@@ -1,4 +1,4 @@
-name: Commit stage CI
+name: Commit stage
 
 on:
   push:
