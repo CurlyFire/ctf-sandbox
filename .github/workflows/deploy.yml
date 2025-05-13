@@ -39,22 +39,12 @@ jobs:
           PROJECT="${{ secrets.GCP_PROJECT_ID }}"
           ENV="${{ inputs.environment }}"
 
-          echo "✅ Deploying .NET 9 MVC App"
-          gcloud run deploy mvc-app-$ENV \
-            --image=us-central1-docker.pkg.dev/$PROJECT/ctf-sandbox-repo/ctf-sandbox:$VERSION \
-            --region=$REGION \
-            --platform=managed \
-            --allow-unauthenticated \
-            --network=default \
-            --subnet=default \
-            --vpc-egress=all-traffic
-
+          
           echo "✅ Deploying rqlite (initial)"
           gcloud run deploy rqlite-$ENV \
             --image=rqlite/rqlite \
             --port=4001 \
             --region=$REGION \
-            --platform=managed \
             --ingress=internal \
             --min-instances=1 \
             --max-instances=1 \
@@ -77,13 +67,22 @@ jobs:
             --image=axllent/mailpit:latest \
             --port=8025 \
             --region=$REGION \
-            --platform=managed \
             --allow-unauthenticated \
             --ingress=all \
             --network=default \
             --subnet=default \
             --vpc-egress=all-traffic \
             --args="--database=https://$RQLITE_URL"
+
+          echo "🔐 Granting mailpit-ui-$ENV access to rqlite-$ENV"
+          MAILPIT_SA=$(gcloud run services describe mailpit-ui-$ENV \
+            --region=$REGION \
+            --format='value(spec.template.spec.serviceAccountName)')
+
+          gcloud run services add-iam-policy-binding rqlite-$ENV \
+            --region=$REGION \
+            --member=serviceAccount:$MAILPIT_SA \
+            --role=roles/run.invoker
 
           CLUSTER_NAME="sandbox-cluster-$ENV"
           echo "🌐 Getting GKE credentials"
@@ -127,5 +126,29 @@ jobs:
               --network-endpoint-group=$NEG_NAME \
               --network-endpoint-group-region="$REGION"
           fi
+
+          MAILPIT_URL="mailpit-ui-$ENV-${PROJECT_NUMBER}.$REGION.run.app"
+          TIMEOUT=300
+          INTERVAL=5
+          ELAPSED=0
+          until SMTP_IP=$(kubectl get svc mailpit-smtp-$ENV -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null); do
+            echo "Waiting for LoadBalancer IP for mailpit-smtp-$ENV... ($ELAPSED / $TIMEOUT seconds)"
+            sleep $INTERVAL
+            ELAPSED=$((ELAPSED + INTERVAL))
+            if [ $ELAPSED -ge $TIMEOUT ]; then
+              echo "❌ Timed out waiting for LoadBalancer IP for mailpit-smtp-$ENV"
+              exit 1
+            fi
+          done
+          echo "✅ Deploying .NET 9 MVC App"
+          gcloud run deploy mvc-app-$ENV \
+            --image=us-central1-docker.pkg.dev/$PROJECT/ctf-sandbox-repo/ctf-sandbox:$VERSION \
+            --region=$REGION \
+            --ingress=all \
+            --allow-unauthenticated \
+            --network=default \
+            --subnet=default \
+            --vpc-egress=all-traffic \
+            --set-env-vars=EmailSettings__SmtpServer=$SMTP_IP,AdminAccount__Password=${{ secrets.ADMIN_PASSWORD }},EmailSettings__MailpitUrl=https://$MAILPIT_URL
 
           echo "✅ Deployment complete"
