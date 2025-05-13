@@ -62,10 +62,8 @@ jobs:
             --args="--http-addr=0.0.0.0:4001"
 
           echo "📡 Retrieving rqlite URL"
-          RQLITE_URL=$(gcloud run services describe rqlite-$ENV \
-            --region=$REGION \
-            --platform=managed \
-            --format='value(status.url)' | sed 's|^https://||')
+          PROJECT_NUMBER=$(gcloud projects describe $PROJECT --format='value(projectNumber)')
+          RQLITE_URL="rqlite-$ENV-${PROJECT_NUMBER}.$REGION.run.app"
 
           echo "🔁 Updating rqlite HTTP_ADV_ADDR=$RQLITE_URL"
           echo "Resolved advertised address: $RQLITE_URL:443"
