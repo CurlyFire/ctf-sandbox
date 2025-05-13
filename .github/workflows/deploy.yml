@@ -74,17 +74,15 @@ jobs:
             --vpc-egress=all-traffic \
             --args="--database=https://$RQLITE_URL"
 
-          echo "🔐 Granting mailpit-ui-$ENV access to rqlite-$ENV"
-          MAILPIT_SA=$(gcloud run services describe mailpit-ui-$ENV \
-            --region=$REGION \
-            --format='value(spec.template.spec.serviceAccountName)')
-
-          gcloud run services add-iam-policy-binding rqlite-$ENV \
-            --region=$REGION \
-            --member=serviceAccount:$MAILPIT_SA \
-            --role=roles/run.invoker
-
           CLUSTER_NAME="sandbox-cluster-$ENV"
+          echo "📦 Ensuring GKE cluster exists"
+          if ! gcloud container clusters describe $CLUSTER_NAME --region=$REGION >/dev/null 2>&1; then
+            gcloud container clusters create $CLUSTER_NAME \
+              --region=$REGION \
+              --num-nodes=1 \
+              --quiet
+          fi
+
           echo "🌐 Getting GKE credentials"
           gcloud container clusters get-credentials $CLUSTER_NAME --region=$REGION
 
