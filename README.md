@@ -23,7 +23,7 @@ The big ball of mud was created with github copilot agent mode using Claude Sonn
 
 | Component       | Commit Stage Status |
 |-----------------|---------------------|
-| ctf-sandbox     | ![ctf-sandbox Status](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/commit-stage_CI.yml/badge.svg) |
+| ctf-sandbox     | ![ctf-sandbox Status](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/commit-stage.yml/badge.svg) |
 
 # System use cases
 - As a competitor or challenge creator, I want to sign up for future CTF competitions
