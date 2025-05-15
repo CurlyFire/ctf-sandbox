@@ -56,7 +56,7 @@ gcloud run services add-iam-policy-binding rqlite-$ENV \
 
 ### Ensure GKE cluster
 
-CLUSTER_NAME="sandbox-cluster-$ENV"
+CLUSTER_NAME="sandbox-cluster"
 echo "📦 Ensuring GKE cluster exists"
 if ! gcloud container clusters describe $CLUSTER_NAME --region=$REGION >/dev/null 2>&1; then
   gcloud container clusters create $CLUSTER_NAME \
@@ -79,9 +79,6 @@ envsubst < mailpit-smtp-service.yaml.tpl > mailpit-smtp-service.yaml
 
 kubectl apply -f mailpit-smtp.yaml
 kubectl apply -f mailpit-smtp-service.yaml
-
-NEG_NAME="mailpit-smtp-neg-$ENV"
-BACKEND_NAME="mailpit-smtp-backend-$ENV"
 
 MAILPIT_URL="mailpit-ui-$ENV-${PROJECT_NUMBER}.$REGION.run.app"
 TIMEOUT=300
