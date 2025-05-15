@@ -1,0 +1,43 @@
+name: Release stage
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Image SHA to deploy"
+        required: true
+        type: string
+      environment:
+        description: "Target environment name"
+        required: true
+        type: choice
+        options:
+          - uat
+          - production
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      - name: Set up gcloud CLI
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Run deploy.sh
+        run: |
+          chmod +x ./deploy/deploy.sh
+          cd deploy && ./deploy.sh \
+            "${{ inputs.version }}" \
+            "${{ secrets.GCP_REGION }}" \
+            "${{ secrets.GCP_PROJECT_ID }}" \
+            "${{ inputs.environment }}" \
+            "${{ secrets.ADMIN_PASSWORD }}"
