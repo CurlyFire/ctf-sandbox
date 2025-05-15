@@ -43,7 +43,7 @@ gcloud run deploy mailpit-ui-$ENV \
   --network=default \
   --subnet=default \
   --vpc-egress=all-traffic \
-  --args="--database=https://$RQLITE_URL"
+  --args="--database=https://$RQLITE_URL" \
   --set-env-vars=MP_UI_AUTH="admin:$ADMIN_PASSWORD"
 
 
