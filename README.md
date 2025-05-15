@@ -19,8 +19,6 @@ The main goals of this project are:
 ## Artificial intelligence
 The big ball of mud was created with github copilot agent mode using Claude Sonnet 3.5.  I just wanted to create something that worked without being clean.
 
-
-
 ## 🚦 Pipeline Dashboard
 
 ### Component stages
