@@ -118,8 +118,8 @@ https://github.com/users/CurlyFire/projects/4/views/1
 # Environments
 | Environment | Status | Link |
 |-------------|--------|------|
-| UAT         | [![UAT](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-uat.yaml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-uat.yaml) | https://mvc-app-uat-663949819005.us-central1.run.app
-| Production  | [![Production](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-production.yaml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-production.yaml) | https://mvc-app-production-663949819005.us-central1.run.app
+| UAT         | [![UAT](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-stage-uat.yaml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-stage-uat.yaml) | https://mvc-app-uat-663949819005.us-central1.run.app
+| Production  | [![Production](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-stage-production.yaml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-stage-production.yaml) | https://mvc-app-production-663949819005.us-central1.run.app
 
 The CTF competition UI has all the features mentionned in the Sytem use cases section.  Mailpit is used as a SMPT server for invitations and registrations, however, the emails all stay there and can be seen from the mailpit UI.  If you require access to it, ask me and I will create a user for you to view all emails.
 
