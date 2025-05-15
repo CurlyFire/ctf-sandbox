@@ -79,11 +79,3 @@ jobs:
 
       - name: Run smoke tests
         run: dotnet test -c Release --logger "trx;LogFilePath=smoke-test-results.trx" --filter "Category=Smoke" ./src
-
-      - name: Publish test results
-        uses: dorny/test-reporter@v1
-        if: always()
-        with:
-          name: .NET Tests
-          path: '**/TestResults/*.trx'
-          reporter: dotnet-trx
