@@ -19,11 +19,19 @@ The main goals of this project are:
 ## Artificial intelligence
 The big ball of mud was created with github copilot agent mode using Claude Sonnet 3.5.  I just wanted to create something that worked without being clean.
 
+
+
 ## 🚦 Pipeline Dashboard
 
+### Component stages
 | Component       | Commit Stage Status |
 |-----------------|---------------------|
 | ctf-sandbox     | ![ctf-sandbox Status](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/commit-stage.yml/badge.svg) |
+
+### System stages
+|     | UAT Stage |Production Stage
+|-----------------|---------------------|
+|System| [![Release to UAT](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-stage-uat.yaml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-stage-uat.yaml) | [![Release to Production](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-stage-production.yaml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-stage-production.yaml)
 
 # System use cases
 - As a competitor or challenge creator, I want to sign up for future CTF competitions
@@ -111,9 +119,6 @@ https://github.com/users/CurlyFire/projects/4/views/1
 
 # Environments
 The CTF competition UI has all the features mentionned in the Sytem use cases section.  Mailpit is used as a SMPT server for invitations and registrations, however, the emails all stay there and can be seen from the mailpit UI.  If you require access to it, ask me and I will create a user for you to view all emails.
-## Acceptance
-- CTF competition : https://mvc-app-663949819005.us-central1.run.app
-- Mailpit : https://mailpit-ui-663949819005.us-central1.run.app
 
 # Deployment
 CI/CD is enabled for the main branch and will deploy to the Acceptance environement automatically.
