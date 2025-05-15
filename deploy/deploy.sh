@@ -44,6 +44,8 @@ gcloud run deploy mailpit-ui-$ENV \
   --subnet=default \
   --vpc-egress=all-traffic \
   --args="--database=https://$RQLITE_URL"
+  --set-env-vars=MP_UI_AUTH="admin:$ADMIN_PASSWORD"
+
 
 MAILPIT_SA=$(gcloud run services describe mailpit-ui-$ENV \
   --region=$REGION \
@@ -105,6 +107,6 @@ gcloud run deploy mvc-app-$ENV \
   --network=default \
   --subnet=default \
   --vpc-egress=all-traffic \
-  --set-env-vars=EmailSettings__SmtpServer=$SMTP_IP,AdminAccount__Password=$ADMIN_PASSWORD,EmailSettings__MailpitUrl=https://$MAILPIT_URL
+  --set-env-vars=EmailSettings__SmtpServer="$SMTP_IP",AdminAccount__Password="$ADMIN_PASSWORD",EmailSettings__MailpitUrl="https://$MAILPIT_URL"
 
 echo "✅ Deployment complete"
