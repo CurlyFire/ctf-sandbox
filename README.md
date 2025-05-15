@@ -21,9 +21,15 @@ The big ball of mud was created with github copilot agent mode using Claude Sonn
 
 ## 🚦 Pipeline Dashboard
 
+### Component stages
 | Component       | Commit Stage Status |
 |-----------------|---------------------|
-| ctf-sandbox     | ![ctf-sandbox Status](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/commit-stage.yml/badge.svg) |
+| ctf-sandbox     | [![Commit stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/commit-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/commit-stage.yml) |
+
+### System stages
+|        | UAT Stage | Production Stage |
+|--------|-----------|------------------|
+| System | [![UAT Stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-stage-uat.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-stage-uat.yml) | [![Production Stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-stage-production.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-stage-production.yml) |
 
 # System use cases
 - As a competitor or challenge creator, I want to sign up for future CTF competitions
@@ -110,10 +116,12 @@ Google Cloud Artifact Registry
 https://github.com/users/CurlyFire/projects/4/views/1
 
 # Environments
+| Environment | Status | Link |
+|-------------|--------|------|
+| UAT         | [![UAT](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-uat.yaml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-uat.yaml) | https://mvc-app-uat-663949819005.us-central1.run.app
+| Production  | [![Production](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-production.yaml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-production.yaml) | https://mvc-app-production-663949819005.us-central1.run.app
+
 The CTF competition UI has all the features mentionned in the Sytem use cases section.  Mailpit is used as a SMPT server for invitations and registrations, however, the emails all stay there and can be seen from the mailpit UI.  If you require access to it, ask me and I will create a user for you to view all emails.
-## Acceptance
-- CTF competition : https://mvc-app-663949819005.us-central1.run.app
-- Mailpit : https://mailpit-ui-663949819005.us-central1.run.app
 
 # Deployment
 CI/CD is enabled for the main branch and will deploy to the Acceptance environement automatically.

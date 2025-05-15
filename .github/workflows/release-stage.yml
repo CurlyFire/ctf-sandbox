@@ -1,22 +1,44 @@
 name: Release stage
 
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
-      version:
-        description: "Image SHA to deploy"
+      environment:
         required: true
         type: string
-      environment:
-        description: "Target environment name"
+      version:
         required: true
-        type: choice
-        options:
-          - uat
-          - production
+        type: string
+
 jobs:
-  deploy:
+  resolve-url:
     runs-on: ubuntu-latest
+    outputs:
+      mvc_url: ${{ steps.set-url.outputs.mvc_url }}
+
+    steps:
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      - name: Set up gcloud CLI
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Set MVC App URL
+        run: |
+          PROJECT_NUMBER=$(gcloud projects describe ${{ secrets.GCP_PROJECT_ID }} --format='value(projectNumber)')
+          echo "mvc_url=https://mvc-app-${{ github.event.inputs.environment }}-${PROJECT_NUMBER}.us-central1.run.app" >> $GITHUB_OUTPUT
+
+
+  deploy:
+    needs: resolve-url
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.environment }}
+      url: ${{ needs.resolve-url.outputs.mvc_url }}
 
     steps:
       - name: Checkout code
@@ -29,7 +51,7 @@ jobs:
           curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
           sudo apt-get update
           sudo apt-get install -y google-cloud-sdk-gke-gcloud-auth-plugin
-          
+
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
@@ -49,3 +71,14 @@ jobs:
             "${{ secrets.GCP_PROJECT_ID }}" \
             "${{ inputs.environment }}" \
             "${{ secrets.ADMIN_PASSWORD }}"
+
+      - name: Run smoke tests
+        run: dotnet test -c Release --logger "trx;LogFilePath=smoke-test-results.trx" --filter "Category=Smoke" ./src
+
+      - name: Publish test results
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: .NET Tests
+          path: '**/TestResults/*.trx'
+          reporter: dotnet-trx

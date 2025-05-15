@@ -1,0 +1,19 @@
+# This workflow split is required to have badges available for the production environment
+name: Release stage / Deploy to Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Image SHA to deploy"
+        required: true
+        type: string
+
+jobs:
+  call-release:
+    uses: ./.github/workflows/release-stage.yml
+    secrets: 
+        inherit
+    with:
+      environment: production
+      version: ${{ inputs.version }}
