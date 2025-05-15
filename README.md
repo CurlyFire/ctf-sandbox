@@ -100,6 +100,12 @@ Feature Branching
 # Deployment Model
 Google cloud platform
 
+# Pipeline Tool
+Github Actions
+
+# Docker Registry
+Google Cloud Artifact Registry
+
 # Project Board
 https://github.com/users/CurlyFire/projects/4/views/1
 
