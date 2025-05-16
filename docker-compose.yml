@@ -1,4 +1,3 @@
-version: "3.8"
 services:
   dev:
     build:
@@ -19,3 +18,8 @@ services:
     ports:
       - "8025:8025"   # Web UI
       - "1025:1025"   # SMTP
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8025"]
+      interval: 5s
+      timeout: 3s
+      retries: 5

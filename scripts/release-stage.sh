@@ -76,8 +76,8 @@ gcloud container clusters get-credentials $CLUSTER_NAME --region=$REGION
 
 echo "📦 Rendering and deploying mailpit-smtp to GKE"
 export ENV RQLITE_URL
-envsubst < mailpit-smtp.yaml.tpl > mailpit-smtp.yaml
-envsubst < mailpit-smtp-service.yaml.tpl > mailpit-smtp-service.yaml
+envsubst < ./templates/release-stage/mailpit-smtp.yaml.tpl > mailpit-smtp.yaml
+envsubst < ./templates/release-stage/mailpit-smtp-service.yaml.tpl > mailpit-smtp-service.yaml
 
 kubectl apply -f mailpit-smtp.yaml
 kubectl apply -f mailpit-smtp-service.yaml
