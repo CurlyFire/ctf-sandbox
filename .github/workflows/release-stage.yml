@@ -67,10 +67,10 @@ jobs:
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
 
-      - name: Run release stage script
+      - name: Run release script
         run: |
-          chmod +x ./scripts/release-stage.sh
-          ./scripts/release-stage.sh
+          chmod +x ./scripts/release.sh
+          ./scripts/release.sh
             "${{ inputs.version }}" \
             "${{ secrets.GCP_REGION }}" \
             "${{ secrets.GCP_PROJECT_ID }}" \

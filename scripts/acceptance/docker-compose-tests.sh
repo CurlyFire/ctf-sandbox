@@ -1,31 +1,6 @@
 #!/bin/bash
 set -euo pipefail
-
-REGION="$1"
-PROJECT="$2"
-
-IMAGE_PATH="us-central1-docker.pkg.dev/$PROJECT/ctf-sandbox-repo/ctf-sandbox"
-BUCKET_NAME="ctf-sandbox"
-OBJECT_PATH="acceptance/latest_sha.txt"
-TMP_FILE="/tmp/previous_sha.txt"
-
-echo "Fetching latest image $IMAGE_PATH SHA..."
-LATEST_SHA=$(gcloud artifacts docker images list "$IMAGE_PATH" --format="value(version)" --sort-by="~CREATE_TIME" | head -n 1)
-echo "Latest SHA: $LATEST_SHA"
-
-if gsutil cp "gs://$BUCKET_NAME/$OBJECT_PATH" "$TMP_FILE" 2>/dev/null; then
-    PREVIOUS_SHA=$(cat "$TMP_FILE")
-    echo "Previous SHA: $PREVIOUS_SHA"
-else
-    echo "No previous SHA found"
-    PREVIOUS_SHA=""
-fi
-
-if [[ "$LATEST_SHA" == "$PREVIOUS_SHA" ]]; then
-    echo "No new image to test."
-    exit 0
-fi
-
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 EXIT_CODE=0
 {
   # Start Docker Compose environment
@@ -62,17 +37,11 @@ EXIT_CODE=0
     echo "Finished waiting for $service."
   done
 
-  # Run tests inside dev container
+  # Run acceptance tests inside dev container
   echo "Running acceptance tests in dev container..."
-  docker compose exec dev /workspace/scripts/acceptance-stage-tests.sh || EXIT_CODE=1
+  docker compose exec -T dev $SCRIPT_DIR/tests.sh || EXIT_CODE=1
 } || EXIT_CODE=$?
 
 echo "Cleaning up Docker Compose environment..."
 docker compose down
-
-echo "$LATEST_SHA" > "$TMP_FILE"
-gsutil cp "$TMP_FILE" "gs://$BUCKET_NAME/$OBJECT_PATH"
-if [ $EXIT_CODE -ne 0 ]; then
-  echo "An error occurred during Docker Compose section."
-  exit $EXIT_CODE
-fi
+exit $EXIT_CODE

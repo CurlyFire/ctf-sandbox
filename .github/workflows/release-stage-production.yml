@@ -15,5 +15,5 @@ jobs:
     secrets: 
         inherit
     with:
-      environment: production
+      environment: prod
       version: ${{ inputs.version }}
