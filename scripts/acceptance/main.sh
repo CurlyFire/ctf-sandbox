@@ -8,15 +8,17 @@ ADMIN_PASSWORD="$4"
 
 IMAGE_PATH="us-central1-docker.pkg.dev/$PROJECT/ctf-sandbox-repo/ctf-sandbox"
 BUCKET_NAME="ctf-sandbox"
-OBJECT_PATH="acceptance/latest_sha.txt"
-TMP_FILE="/tmp/previous_sha.txt"
+LATEST_SHA_PATH="acceptance/latest_sha.txt"
+LATEST_EXIT_CODE_PATH="acceptance/latest_exit_code.txt"
+TMP_FILE="/tmp/tmp.txt"
 
 echo "Fetching latest image $IMAGE_PATH SHA..."
 LATEST_SHA=$(gcloud artifacts docker images list "$IMAGE_PATH" --format="value(version)" --sort-by="~CREATE_TIME" | head -n 1)
 echo "Latest SHA: $LATEST_SHA"
 
-if gsutil cp "gs://$BUCKET_NAME/$OBJECT_PATH" "$TMP_FILE" 2>/dev/null; then
+if gsutil cp "gs://$BUCKET_NAME/$LATEST_SHA_PATH" "$TMP_FILE" 2>/dev/null; then
     PREVIOUS_SHA=$(cat "$TMP_FILE")
+    rm -f "$TMP_FILE"
     echo "Previous SHA: $PREVIOUS_SHA"
 else
     echo "No previous SHA found"
@@ -24,8 +26,15 @@ else
 fi
 
 if [[ "$LATEST_SHA" == "$PREVIOUS_SHA" ]]; then
-    echo "No new image to test."
-    exit 0
+    if gsutil cp "gs://$BUCKET_NAME/$LATEST_EXIT_CODE_PATH" "$TMP_FILE" 2>/dev/null; then
+        PREVIOUS_EXIT_CODE=$(cat "$TMP_FILE")
+        rm -f "$TMP_FILE"
+        echo "Previous Exit code: $PREVIOUS_EXIT_CODE"
+        exit "$PREVIOUS_EXIT_CODE"
+    else
+        echo "No previous Exit code found"
+        exit 0
+    fi
 fi
 
 # Temp files for capturing stdout and stderr
@@ -86,7 +95,10 @@ rm -f "$TMP_E2E_TESTS"
 TOTAL_EXIT=$(( EXIT_DOCKER_COMPOSE_TESTS ))
 
 echo "$LATEST_SHA" > "$TMP_FILE"
-gsutil cp "$TMP_FILE" "gs://$BUCKET_NAME/$OBJECT_PATH"
+gsutil cp "$TMP_FILE" "gs://$BUCKET_NAME/$LATEST_SHA_PATH"
+echo "$TOTAL_EXIT" > "$TMP_FILE"
+gsutil cp "$TMP_FILE" "gs://$BUCKET_NAME/$LATEST_EXIT_CODE_PATH"
+rm -f "$TMP_FILE"
 if [ $TOTAL_EXIT -ne 0 ]; then
   echo "One or more scripts failed."
   exit $TOTAL_EXIT
