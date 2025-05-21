@@ -27,9 +27,9 @@ The big ball of mud was created with github copilot agent mode using Claude Sonn
 | ctf-sandbox     | [![Commit stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/commit-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/commit-stage.yml) |
 
 ### System stages
-|        | UAT Stage | Production Stage |
-|--------|-----------|------------------|
-| System | [![UAT Stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-stage-uat.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-stage-uat.yml) | [![Production Stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-stage-production.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-stage-production.yml) |
+|        | Acceptance Stage | UAT Stage | Production Stage |
+|--------|------------------|-----------|------------------|
+| System | [![Acceptance Stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/acceptance-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/acceptance-stage.yml)  |[![UAT Stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-stage-uat.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-stage-uat.yml) | [![Production Stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-stage-production.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-stage-production.yml) |
 
 # System use cases
 - As a competitor or challenge creator, I want to sign up for future CTF competitions

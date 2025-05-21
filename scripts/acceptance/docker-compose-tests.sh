@@ -38,7 +38,7 @@ EXIT_CODE=0
 
   # Run acceptance tests inside dev container
   echo "Running acceptance tests in dev container..."
-  docker compose exec -T dev /workspace/scripts/acceptance/tests.sh || EXIT_CODE=1
+  docker compose exec -T dev /workspace/scripts/acceptance/tests.sh Smoke Acceptance || EXIT_CODE=1
 } || EXIT_CODE=$?
 
 echo "Cleaning up Docker Compose environment..."
