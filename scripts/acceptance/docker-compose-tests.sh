@@ -1,6 +1,5 @@
 #!/bin/bash
 set -euo pipefail
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 EXIT_CODE=0
 {
   # Start Docker Compose environment
@@ -39,7 +38,7 @@ EXIT_CODE=0
 
   # Run acceptance tests inside dev container
   echo "Running acceptance tests in dev container..."
-  docker compose exec -T dev $SCRIPT_DIR/tests.sh || EXIT_CODE=1
+  docker compose exec -T dev /workspace/scripts/acceptance/tests.sh || EXIT_CODE=1
 } || EXIT_CODE=$?
 
 echo "Cleaning up Docker Compose environment..."
