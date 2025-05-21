@@ -1,5 +1,10 @@
 #!/bin/bash
 set -euo pipefail
+
+indent() {
+  sed 's/^/    /'
+}
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 VERSION="$1"
 REGION="$2"
@@ -105,7 +110,3 @@ if [ $TOTAL_EXIT -ne 0 ]; then
 else
   echo "✅ All scripts completed successfully."
 fi
-
-indent() {
-  sed 's/^/    /'
-}
