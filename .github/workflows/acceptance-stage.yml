@@ -23,10 +23,5 @@ jobs:
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
 
-      - name: Install Docker Compose
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y docker-compose-plugin
-
       - name: Run acceptance-stage script
         run: ./scripts/acceptance/main.sh ${{ secrets.GCP_REGION }} ${{ secrets.GCP_PROJECT_ID }}
