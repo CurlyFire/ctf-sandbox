@@ -67,10 +67,10 @@ jobs:
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
 
-      - name: Run deploy.sh
+      - name: Run release script
         run: |
-          chmod +x ./deploy/deploy.sh
-          cd deploy && ./deploy.sh \
+          chmod +x ./scripts/release.sh
+          ./scripts/release.sh
             "${{ inputs.version }}" \
             "${{ secrets.GCP_REGION }}" \
             "${{ secrets.GCP_PROJECT_ID }}" \

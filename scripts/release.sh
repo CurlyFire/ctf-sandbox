@@ -6,7 +6,7 @@ REGION="$2"
 PROJECT="$3"
 ENV="$4"
 ADMIN_PASSWORD="$5"
-
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 echo "📡 Retrieving project number"
 PROJECT_NUMBER=$(gcloud projects describe $PROJECT --format='value(projectNumber)')
 
@@ -76,11 +76,15 @@ gcloud container clusters get-credentials $CLUSTER_NAME --region=$REGION
 
 echo "📦 Rendering and deploying mailpit-smtp to GKE"
 export ENV RQLITE_URL
-envsubst < mailpit-smtp.yaml.tpl > mailpit-smtp.yaml
-envsubst < mailpit-smtp-service.yaml.tpl > mailpit-smtp-service.yaml
+envsubst < $SCRIPT_DIR/templates/release-stage/mailpit-smtp.yaml.tpl > mailpit-smtp.yaml
+envsubst < $SCRIPT_DIR/templates/release-stage/mailpit-smtp-service.yaml.tpl > mailpit-smtp-service.yaml
 
 kubectl apply -f mailpit-smtp.yaml
 kubectl apply -f mailpit-smtp-service.yaml
+
+# Cleanup
+rm mailpit-smtp.yaml
+rm mailpit-smtp-service.yaml
 
 MAILPIT_URL="mailpit-ui-$ENV-${PROJECT_NUMBER}.$REGION.run.app"
 TIMEOUT=300

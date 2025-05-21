@@ -10,7 +10,9 @@
 	  "workspaceFolder": "/workspace",
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	"forwardPorts": [5191],
-
+	"features": {
+	"ghcr.io/devcontainers/features/docker-in-docker:2": {}
+	},
 
 	// Use 'postCreateCommand' to run commands after the container is created.
 	"postCreateCommand": "git config --global --add safe.directory /workspace && dotnet tool install --global dotnet-ef",
