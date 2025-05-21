@@ -17,7 +17,7 @@ EXIT_CODE=0
   # Run acceptance tests
   echo "Running acceptance tests on acceptance environment..."
   # TODO : Pass parameters to point to acceptance environment
-  $SCRIPT_DIR/tests.sh
+  $SCRIPT_DIR/tests.sh Smoke Acceptance
 
 } || EXIT_CODE=$?
 echo "Cleaning up acceptance environment..."

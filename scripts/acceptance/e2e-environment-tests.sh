@@ -17,7 +17,7 @@ EXIT_CODE=0
   # Run e2e tests
   echo "Running acceptance tests on e2e environment..."
   # TODO : Pass parameters to point to e2e environment
-  $SCRIPT_DIR/tests.sh
+  $SCRIPT_DIR/tests.sh Smoke Acceptance ExternalSystemContract E2E
 
 } || EXIT_CODE=$?
 echo "Cleaning up e2e environment..."
