@@ -23,5 +23,10 @@ jobs:
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
 
+      - name: Fetch latest main branch SHA
+        run: |
+          git fetch origin main
+          echo "MAIN_SHA=$(git rev-parse origin/main)" >> $GITHUB_ENV
+
       - name: Run acceptance-stage script
-        run: ./scripts/acceptance/main.sh ${{ secrets.GCP_REGION }} ${{ secrets.GCP_PROJECT_ID }}
+        run: ./scripts/acceptance/main.sh ${{ env.MAIN_SHA }} ${{ secrets.GCP_REGION }} ${{ secrets.GCP_PROJECT_ID }} ${{ secrets.ADMIN_PASSWORD }}
