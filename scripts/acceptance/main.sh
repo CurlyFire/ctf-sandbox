@@ -70,21 +70,21 @@ if [ $EXIT_DOCKER_COMPOSE_TESTS -ne 0 ]; then
 else
   echo -e "\n✅ Script docker-compose-tests.sh succeeded:"
 fi
-cat "$TMP_DOCKER_COMPOSE_TESTS"
+cat "$TMP_DOCKER_COMPOSE_TESTS" | indent
 
 if [ $EXIT_ACCEPTANCE_TESTS -ne 0 ]; then
   echo -e "\n❌ Script acceptance-environment-tests.sh failed (exit $EXIT_ACCEPTANCE_TESTS):"
 else
   echo -e "\n✅ Script acceptance-environment-tests.sh succeeded:"
 fi
-cat "$TMP_ACCEPTANCE_TESTS"
+cat "$TMP_ACCEPTANCE_TESTS" | indent
 
 if [ $EXIT_E2E_TESTS -ne 0 ]; then
   echo -e "\n❌ Script e2e-environment-tests.sh failed (exit $EXIT_E2E_TESTS):"
 else
   echo -e "\n✅ Script e2e-environment-tests.sh succeeded:"
 fi
-cat "$TMP_E2E_TESTS"
+cat "$TMP_E2E_TESTS" | indent
 
 # Clean up
 rm -f "$TMP_DOCKER_COMPOSE_TESTS"
@@ -105,3 +105,7 @@ if [ $TOTAL_EXIT -ne 0 ]; then
 else
   echo "✅ All scripts completed successfully."
 fi
+
+indent() {
+  sed 's/^/    /'
+}
