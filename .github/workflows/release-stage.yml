@@ -70,7 +70,7 @@ jobs:
       - name: Run release script
         run: |
           chmod +x ./scripts/release.sh
-          ./scripts/release.sh
+          ./scripts/release.sh \
             "${{ inputs.version }}" \
             "${{ secrets.GCP_REGION }}" \
             "${{ secrets.GCP_PROJECT_ID }}" \
