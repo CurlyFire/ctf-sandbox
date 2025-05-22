@@ -45,6 +45,30 @@ The big ball of mud was created with github copilot agent mode using Claude Sonn
 - Email using [mailpit](https://mailpit.axllent.org/)
 - System clock
 
+Each environment has it's own external system instances.  The test environments (acceptance, E2E, docker-compose) also have their own external test instances, however they are ephemeral and last only for the duration of the tests, so no links are provided here.
+## Links to external systems
+| Environment | External system | Link |
+|-------------|-----------------|------|
+| UAT         | Mailpit | https://mailpit-ui-uat-663949819005.us-central1.run.app/
+| Production  | Mailpit | https://mailpit-ui-prod-663949819005.us-central1.run.app/
+
+## Configuring external system connections
+To configure which external system is used by the mvc-app, override the following configurations using either appsettings.json or environment variables as explained in this article https://learn.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-9.0
+
+example with appsettings.json
+
+```json
+{
+  "EmailSettings": {
+    # Change these values to connect to different mailpit instances
+    "SmtpServer": "mailpit",
+    "SmtpPort": 1025,
+    "MailpitUrl": "http://localhost:8025"
+  }
+}
+
+```
+
 # System architecture style
 MVC monolith
 
@@ -119,7 +143,7 @@ https://github.com/users/CurlyFire/projects/4/views/1
 | Environment | Status | Link |
 |-------------|--------|------|
 | UAT         | [![UAT](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-stage-uat.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-stage-uat.yml) | https://mvc-app-uat-663949819005.us-central1.run.app
-| Production  | [![Production](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-stage-production.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-stage-production.yml) | https://mvc-app-production-663949819005.us-central1.run.app
+| Production  | [![Production](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-stage-production.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-stage-production.yml) | https://mvc-app-prod-663949819005.us-central1.run.app
 
 The CTF competition UI has all the features mentionned in the Sytem use cases section.  Mailpit is used as a SMPT server for invitations and registrations, however, the emails all stay there and can be seen from the mailpit UI.  If you require access to it, ask me and I will create a user for you to view all emails.
 
