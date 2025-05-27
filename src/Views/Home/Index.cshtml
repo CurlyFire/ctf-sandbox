@@ -4,7 +4,7 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
+<div class="text-center" role="banner">
     <h1 class="display-4">Welcome to CTF Arena</h1>
 </div>
 
@@ -12,22 +12,22 @@
 {
     if (Model.ParticipatingCompetitions.Any())
     {
-        <div class="my-4">
-            <h2>Your Active Competitions</h2>
+        <div class="my-4" role="region" aria-labelledby="activeCompetitionsTitle">
+            <h2 id="activeCompetitionsTitle">Your Active Competitions</h2>
             <div class="row">
                 @foreach (var competition in Model.ParticipatingCompetitions)
                 {
                     <div class="col-md-6 col-lg-4 mb-4">
-                        <div class="card h-100">
+                        <div class="card h-100" role="article" aria-label="Competition: @competition.Name">
                             <div class="card-body">
                                 <h5 class="card-title">@competition.Name</h5>
                                 <p class="card-text">@competition.Description</p>
                                 <p class="card-text">
-                                    <small class="competition-time">
+                                    <small class="competition-time" role="timer" aria-label="Time remaining">
                                         Ends in: @((competition.EndDate - DateTime.UtcNow).ToString(@"d\d\ hh\h\ mm\m"))
                                     </small>
                                 </p>
-                                <a asp-action="Competition" asp-route-id="@competition.Id" class="btn btn-primary">Enter Competition</a>
+                                <a asp-action="Competition" asp-route-id="@competition.Id" class="btn btn-primary" role="button">Enter Competition</a>
                             </div>
                         </div>
                     </div>
@@ -38,22 +38,22 @@
 
     if (Model.OtherCompetitions.Any())
     {
-        <div class="my-4">
-            <h2>Other Active Competitions</h2>
+        <div class="my-4" role="region" aria-labelledby="otherCompetitionsTitle">
+            <h2 id="otherCompetitionsTitle">Other Active Competitions</h2>
             <div class="row">
                 @foreach (var competition in Model.OtherCompetitions)
                 {
                     <div class="col-md-6 col-lg-4 mb-4">
-                        <div class="card h-100">
+                        <div class="card h-100" role="article" aria-label="Competition: @competition.Name">
                             <div class="card-body">
                                 <h5 class="card-title">@competition.Name</h5>
                                 <p class="card-text">@competition.Description</p>
                                 <p class="card-text">
-                                    <small class="competition-time">
+                                    <small class="competition-time" role="status">
                                         Teams: @competition.Teams.Count()
                                     </small>
                                 </p>
-                                <p class="text-muted">Your team is not participating in this competition</p>
+                                <p class="text-muted" role="note">Your team is not participating in this competition</p>
                             </div>
                         </div>
                     </div>
@@ -64,7 +64,7 @@
 
     if (!Model.ParticipatingCompetitions.Any() && !Model.OtherCompetitions.Any())
     {
-        <div class="text-center my-4">
+        <div class="text-center my-4" role="alert">
             <h3>No Active Competitions</h3>
             <p>There are currently no active competitions. Check back later!</p>
         </div>
@@ -72,11 +72,13 @@
 }
 else
 {
-    <div class="text-center my-4">
-        <h3>Welcome to CTF Arena</h3>
+    <div class="text-center my-4" role="region" aria-labelledby="welcomeTitle">
+        <h3 id="welcomeTitle">Welcome to CTF Arena</h3>
         <p>Please log in to view and participate in competitions.</p>
-        <a class="btn btn-primary" asp-area="Identity" asp-page="/Account/Login">Login</a>
-        <a class="btn btn-secondary" asp-area="Identity" asp-page="/Account/Register">Register</a>
+        <div role="group" aria-label="Authentication options">
+            <a class="btn btn-primary" asp-area="Identity" asp-page="/Account/Login" role="button">Login</a>
+            <a class="btn btn-secondary" asp-area="Identity" asp-page="/Account/Register" role="button">Register</a>
+        </div>
     </div>
 }
 
