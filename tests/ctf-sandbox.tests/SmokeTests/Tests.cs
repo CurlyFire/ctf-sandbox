@@ -1,3 +1,4 @@
+using ctf_sandbox.tests.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Playwright;
 
@@ -49,8 +50,8 @@ public class Tests : CTFSandboxPageTest
             .AddJsonFile("appsettings.dev.json", optional: true)
             .AddEnvironmentVariables();
         var config = configBuilder.Build();
-        var username = config.GetValue<string>("AdminAccount:Email");
-        var password = config.GetValue<string>("AdminAccount:Password");
+        var username = config.GetRequiredValue<string>("AdminAccount:Email");
+        var password = config.GetRequiredValue<string>("AdminAccount:Password");
         // Navigate to login page
         await Page.GotoAsync("/Identity/Account/Login");
         // Fill in the login form
