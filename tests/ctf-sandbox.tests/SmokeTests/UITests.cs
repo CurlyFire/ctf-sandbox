@@ -4,9 +4,13 @@ using Microsoft.Playwright;
 
 namespace ctf_sandbox.tests.SmokeTests;
 
-public class Tests : CTFSandboxPageTest
+public class UITests : WebServerPageTest
 {
-    [Trait("Category", "Smoke")]
+    public UITests(WebServer webServer) : base(webServer)
+    {
+    }
+
+    [Trait("Category", "Smoke_UI")]
     [Fact]
     public async Task ShouldLoadMainPage()
     {
@@ -40,7 +44,7 @@ public class Tests : CTFSandboxPageTest
         await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "CTF Arena" })).ToBeVisibleAsync();
     }
 
-    [Trait("Category", "Smoke")]
+    [Trait("Category", "Smoke_UI")]
     [Fact]
     public async Task ShouldLoginWithValidCredentials()
     {

@@ -1,8 +1,11 @@
 using ctf_sandbox.Data;
 using ctf_sandbox.Services;
+using ctf_sandbox.Health;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
 namespace ctf_sandbox;
 
@@ -45,6 +48,10 @@ public class Startup
         });
 
         services.AddControllersWithViews();
+        services.AddHealthChecks()
+        .AddCheck("self", () => HealthCheckResult.Healthy())
+        .AddCheck<SqliteHealthCheck>("database")
+        .AddCheck<SmtpHealthCheck>("smtp");
     }
 
     public void Configure(IApplicationBuilder app, IHostEnvironment env)
@@ -97,6 +104,17 @@ public class Startup
                 pattern: "{controller=Home}/{action=Index}/{id?}");
 
             endpoints.MapRazorPages();
+
+            // Map health check endpoints
+            endpoints.MapHealthChecks("/health");
+            endpoints.MapHealthChecks("/health/ready", new HealthCheckOptions
+            {
+                Predicate = check => check.Tags.Contains("ready")
+            });
+            endpoints.MapHealthChecks("/health/live", new HealthCheckOptions
+            {
+                Predicate = _ => false
+            });
         });
     }
 }
