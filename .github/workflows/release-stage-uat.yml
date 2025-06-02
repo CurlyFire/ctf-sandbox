@@ -1,5 +1,5 @@
 # This workflow split is required to have badges available for the uat environment
-name: Release stage / Deploy to UAT
+name: Deploy to UAT
 
 on:
   workflow_dispatch:
