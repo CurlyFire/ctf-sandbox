@@ -1,4 +1,4 @@
-namespace ctf_sandbox.tests.ExternalSystemContractTest;
+namespace ctf_sandbox.tests.ExternalSystemContractTests;
 
 public class PlaceHolderTests
 {
