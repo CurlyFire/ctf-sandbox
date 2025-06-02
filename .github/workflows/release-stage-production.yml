@@ -1,5 +1,5 @@
 # This workflow split is required to have badges available for the production environment
-name: Release stage / Deploy to Production
+name: Deploy to Production
 
 on:
   workflow_dispatch:
