@@ -1,5 +1,5 @@
-# This workflow split is required to have badges available for the production environment
-name: Deploy to Production
+# This workflow split is required to have badges available for the uat environment
+name: UAT Stage
 
 on:
   workflow_dispatch:
@@ -15,5 +15,5 @@ jobs:
     secrets: 
         inherit
     with:
-      environment: prod
+      environment: uat
       version: ${{ inputs.version }}
