@@ -32,6 +32,7 @@ runs:
         sudo apt-get install -y google-cloud-sdk-gke-gcloud-auth-plugin
       
     - name: Configure Docker to use gcloud credentials
+      shell: bash
       run: gcloud auth configure-docker us-central1-docker.pkg.dev
 
     - name: Setup .NET
