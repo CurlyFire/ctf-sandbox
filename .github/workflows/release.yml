@@ -1,4 +1,4 @@
-name: Release stage
+name: Release
 
 on:
   workflow_call:

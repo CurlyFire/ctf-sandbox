@@ -13,64 +13,34 @@ permissions:
   
 jobs:
   build-and-test:
-    name: CI / Build and Test
+    name: Build and Test
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+    - name: Setup Google Cloud SDK, GKE Auth Plugin and dotnet SDK
+      uses: ./.github/actions/setup
       with:
-        dotnet-version: '9.0.x'
+        gcp_project_id: ${{ secrets.GCP_PROJECT_ID }}
+        gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
 
-    - name: Build
-      run: dotnet build -c Release ./src
-
-    - name: Run unit tests
-      run: dotnet test --no-build -c Release --logger "trx;LogFilePath=unit-test-results.trx" --filter "Category=Unit" ./src
-
-    - name: Run narrow integration tests
-      run: dotnet test --no-build -c Release --logger "trx;LogFilePath=narrow-integration-test-results.trx" --filter "Category=NarrowIntegration" ./src
-
-    - name: Run component tests
-      run: dotnet test --no-build -c Release --logger "trx;LogFilePath=component-test-results.trx" --filter "Category=Component" ./src
-
-    - name: Run contract verification tests
-      run: dotnet test --no-build -c Release --logger "trx;LogFilePath=contract-verification-test-results.trx" --filter "Category=ContractVerification" ./src
+    - name: Build, Test and Publish
+      shell: pwsh
+      run: ./scripts/commit-stage/build-test-publish.ps1
 
     - name: Publish test results
       uses: dorny/test-reporter@v1
       if: always()
       with:
         name: .NET Tests
-        path: '**/TestResults/*.trx'
+        path: '**/*.trx'
         reporter: dotnet-trx
 
-    - name: Publish UI
-      run: dotnet publish --no-build -c Release -o ./publish ./src/ctf-sandbox.csproj
-
     - name: Build Docker image
-      run: |
-        IMAGE="us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ctf-sandbox-repo/ctf-sandbox:${{ github.sha }}"
-        docker build -t $IMAGE .
-
-    - name: Login to Google Cloud
-      uses: google-github-actions/auth@v2
-      if: github.event_name == 'push'
-      with:
-        credentials_json: '${{ secrets.GCP_SA_KEY }}'
-
-    - name: Setup gcloud CLI
-      uses: google-github-actions/setup-gcloud@v2
-      if: github.event_name == 'push'
-      with:
-        project_id: ${{ secrets.GCP_PROJECT_ID }}
-        
-    - name: Configure Docker to use gcloud credentials
-      if: github.event_name == 'push'
-      run: gcloud auth configure-docker us-central1-docker.pkg.dev
+      shell: pwsh
+      run: ./scripts/commit-stage/build-docker.ps1 -ProjectId "${{ secrets.GCP_PROJECT_ID }}" -ImageTag "${{ github.sha }}"
     
     - name: Push Docker image
       if: github.event_name == 'push'

@@ -1,13 +1,13 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/dotnet
 {
-	"name": "C# (.NET)",
+	"name": "CTF Sandbox",
 
 	"dockerComposeFile": [
 		"../docker-compose.yml"
 	  ],
 	  "service": "dev",
-	  "workspaceFolder": "/workspace",
+	  "workspaceFolder": "/workspaces/ctf-sandbox",
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	"forwardPorts": [5191],
 	"features": {
@@ -15,14 +15,15 @@
 	},
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "git config --global --add safe.directory /workspace && dotnet tool install --global dotnet-ef && find . -type f -name '*.sh' -exec chmod +x {} +",
+	"postCreateCommand": "pwsh /workspaces/ctf-sandbox/.devcontainer/postCreateCommand.ps1",
 
     // Configure tool-specific properties.
     "customizations": {
         "vscode": {
             "extensions": [
                 "ms-dotnettools.csdevkit", // C# Dev Kit
-				"github.vscode-github-actions" // GitHub Actions
+				"github.vscode-github-actions", // GitHub Actions
+				"ms-vscode.powershell" // PowerShell
             ]
         }
     }
