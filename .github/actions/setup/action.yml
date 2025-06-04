@@ -15,12 +15,12 @@ runs:
     - name: Authenticate to Google Cloud
       uses: google-github-actions/auth@v2
       with:
-        credentials_json: '${{ gcp_sa_key }}'
+        credentials_json: '${{ inputs.gcp_sa_key }}'
 
     - name: Set up gcloud CLI
       uses: google-github-actions/setup-gcloud@v2
       with:
-        project_id: ${{ gcp_project_id }}
+        project_id: ${{ inputs.gcp_project_id }}
 
     - name: Install gke-gcloud-auth-plugin
       shell: bash
