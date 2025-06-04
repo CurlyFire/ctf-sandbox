@@ -1,0 +1,40 @@
+name: Setup
+description: Setup Google Cloud SDK, GKE Auth Plugin and dotnet SDK
+
+inputs:
+  gcp_project_id:
+    required: true
+    type: string
+  gcp_sa_key:
+    required: true
+    type: string
+
+runs:
+  using: "composite"
+  steps:
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: '${{ gcp_sa_key }}'
+
+    - name: Set up gcloud CLI
+      uses: google-github-actions/setup-gcloud@v2
+      with:
+        project_id: ${{ gcp_project_id }}
+
+    - name: Install gke-gcloud-auth-plugin
+      shell: bash
+      run: |
+        echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee /etc/apt/sources.list.d/google-cloud-sdk.list
+        sudo apt-get install -y apt-transport-https ca-certificates gnupg
+        curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+        sudo apt-get update
+        sudo apt-get install -y google-cloud-sdk-gke-gcloud-auth-plugin
+      
+    - name: Configure Docker to use gcloud credentials
+      run: gcloud auth configure-docker us-central1-docker.pkg.dev
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
