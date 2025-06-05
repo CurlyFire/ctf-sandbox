@@ -14,7 +14,7 @@ env:
   IMAGE_TAG: ${{ github.sha }}
 
 jobs:
-  build-and-test:
+  build-test-publish:
     name: Build and Test
     runs-on: ubuntu-latest
 
@@ -37,8 +37,8 @@ jobs:
       env:
         GCP_REGISTRY: ${{ secrets.GCP_REGISTRY }}
         GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-        GCP_REPOSITORY: ${{ secrets.GCP_REPOSITORY }}
-        IMAGE_NAME: ${{ secrets.IMAGE_NAME }}
+        GCP_REPOSITORY: ${{ vars.GCP_REPOSITORY }}
+        IMAGE_NAME: ${{ vars.IMAGE_NAME }}
       run: |
         $fullImageName = "$env:GCP_REGISTRY/$env:GCP_PROJECT_ID/$env:GCP_REPOSITORY/$env:IMAGE_NAME"
         "FULL_IMAGE_NAME=$fullImageName" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
