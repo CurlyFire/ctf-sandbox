@@ -20,11 +20,15 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Setup Google Cloud SDK, GKE Auth Plugin and dotnet SDK
-      uses: ./.github/actions/setup
+    - name: Setup requirements to build and test
+      uses: ./.github/actions/build-setup
+
+    - name: Setup requirements to deploy
+      uses: ./.github/actions/deploy-setup
       with:
         gcp_project_id: ${{ secrets.GCP_PROJECT_ID }}
         gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
+      if: github.event_name == 'push'
 
     - name: Build, Test and Publish
       shell: pwsh
@@ -37,13 +41,3 @@ jobs:
         name: .NET Tests
         path: '**/*.trx'
         reporter: dotnet-trx
-
-    - name: Build Docker image
-      shell: pwsh
-      run: ./scripts/commit-stage/build-docker.ps1 -ProjectId "${{ secrets.GCP_PROJECT_ID }}" -ImageTag "${{ github.sha }}"
-    
-    - name: Push Docker image
-      if: github.event_name == 'push'
-      run: |
-        IMAGE="us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ctf-sandbox-repo/ctf-sandbox:${{ github.sha }}"
-        docker push $IMAGE
