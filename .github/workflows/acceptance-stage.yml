@@ -1,6 +1,8 @@
 name: Acceptance Stage
 
 on:
+  schedule:
+    - cron: '0 * * * *'  # Every hour
   workflow_dispatch:
 
 jobs:
