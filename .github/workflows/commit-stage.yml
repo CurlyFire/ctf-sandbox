@@ -10,9 +10,6 @@ on:
 permissions:
   checks: write
   contents: read
-env:
-  IMAGE_TAG: ${{ github.sha }}
-
 jobs:
   build-and-test:
     name: CI / Build and Test
@@ -34,13 +31,8 @@ jobs:
 
     - name: Set Image Name
       shell: pwsh
-      env:
-        GCP_REGISTRY: ${{ secrets.GCP_REGISTRY }}
-        GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-        GCP_REPOSITORY: ${{ vars.GCP_REPOSITORY }}
-        IMAGE_NAME: ${{ vars.IMAGE_NAME }}
       run: |
-        $fullImageName = "$env:GCP_REGISTRY/$env:GCP_PROJECT_ID/$env:GCP_REPOSITORY/$env:IMAGE_NAME"
+        $fullImageName = "${{ secrets.GCP_REGISTRY }}/${{ secrets.GCP_PROJECT_ID }}/${{ vars.GCP_REPOSITORY }}/${{ vars.IMAGE_NAME }}:${{ github.sha }}"
         "FULL_IMAGE_NAME=$fullImageName" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
         Write-Host "✅ FULL_IMAGE_NAME set to: $fullImageName"      
 
