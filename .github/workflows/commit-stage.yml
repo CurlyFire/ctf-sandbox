@@ -32,7 +32,7 @@ jobs:
     - name: Set Image Name
       shell: pwsh
       run: |
-        $fullImageName = "${{ secrets.GCP_REGISTRY }}/${{ secrets.GCP_PROJECT_ID }}/${{ vars.GCP_REPOSITORY }}/${{ vars.IMAGE_NAME }}:${{ github.sha }}"
+        $fullImageName = "${{ secrets.GCP_REGISTRY }}/${{ secrets.GCP_PROJECT_ID }}/${{ vars.GCP_REPOSITORY }}/${{ vars.IMAGE_NAME }}"
         "FULL_IMAGE_NAME=$fullImageName" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
         Write-Host "✅ FULL_IMAGE_NAME set to: $fullImageName"      
 
@@ -41,7 +41,7 @@ jobs:
       run: |
         ./scripts/commit-stage/build-test-publish.ps1 `
           -ImageName "$env:FULL_IMAGE_NAME" `
-          -ImageTag "$env:IMAGE_TAG"
+          -ImageTag "${{ github.sha }}"
 
     - name: Build, Test and Push (Only on Push)
       if: github.event_name == 'push'
