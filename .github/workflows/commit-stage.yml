@@ -10,7 +10,9 @@ on:
 permissions:
   checks: write
   contents: read
-  
+env:
+  IMAGE_TAG: ${{ github.sha }}
+
 jobs:
   build-and-test:
     name: Build and Test
@@ -30,9 +32,33 @@ jobs:
         gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
       if: github.event_name == 'push'
 
-    - name: Build, Test and Publish
+    - name: Set Image Name
       shell: pwsh
-      run: ./scripts/commit-stage/build-test-publish.ps1
+      env:
+        GCP_REGISTRY: ${{ secrets.GCP_REGISTRY }}
+        GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+        GCP_REPOSITORY: ${{ secrets.GCP_REPOSITORY }}
+        IMAGE_NAME: ${{ secrets.IMAGE_NAME }}
+      run: |
+        $fullImageName = "$env:GCP_REGISTRY/$env:GCP_PROJECT_ID/$env:GCP_REPOSITORY/$env:IMAGE_NAME"
+        "FULL_IMAGE_NAME=$fullImageName" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+        Write-Host "✅ FULL_IMAGE_NAME set to: $fullImageName"      
+
+    - name: Build, Test and Publish (All runs)
+      shell: pwsh
+      run: |
+        ./scripts/commit-stage/build-test-publish.ps1 `
+          -ImageName "$env:FULL_IMAGE_NAME" `
+          -ImageTag "$env:IMAGE_TAG"
+
+    - name: Build, Test and Push (Only on Push)
+      if: github.event_name == 'push'
+      shell: pwsh
+      run: |
+        ./scripts/commit-stage/build-test-publish.ps1 `
+          -ImageName "$env:FULL_IMAGE_NAME" `
+          -ImageTag "$env:IMAGE_TAG" `
+          -PushImage
 
     - name: Publish test results
       uses: dorny/test-reporter@v1
