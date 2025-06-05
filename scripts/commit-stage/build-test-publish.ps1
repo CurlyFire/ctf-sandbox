@@ -1,12 +1,12 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)]
-    [string]$Name,
+    [string]$ImageName,
 
     [Parameter(Mandatory = $true)]
-    [string]$Tag,
+    [string]$ImageTag,
 
-    [switch]$Push
+    [switch]$PushImage
 )
 
 if (-not $env:WORKSPACE_ROOT) {
@@ -52,12 +52,12 @@ $publishPath = Join-Path $workspaceRoot "publish"
 
 dotnet publish --no-build -c Release -o $publishPath $projectPath
 
-$fullImage = "${Name}:${Tag}"
+$fullImage = "${ImageName}:${ImageTag}"
 
 Write-Host "🐳 Building Docker image: $fullImage"
 docker build -t $fullImage $workspaceRoot
 
-if ($Push) {
+if ($PushImage) {
     Write-Host "📤 Pushing Docker image to registry..."
     docker push $fullImage
 } else {
