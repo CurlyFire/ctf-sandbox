@@ -29,7 +29,7 @@ The big ball of mud was created with github copilot agent mode using Claude Sonn
 ### System stages
 |        | Acceptance Stage | UAT Stage | Production Stage |
 |--------|------------------|-----------|------------------|
-| System | [![Acceptance Stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/acceptance-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/acceptance-stage.yml)  |[![UAT Stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-stage-uat.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-stage-uat.yml) | [![Production Stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-stage-production.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-stage-production.yml) |
+| System | [![Acceptance Stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/acceptance-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/acceptance-stage.yml)  |[![UAT Stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/uat-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/uat-stage.yml) | [![Production Stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/production-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/production-stage.yml) |
 
 # System use cases
 - As a competitor or challenge creator, I want to sign up for future CTF competitions
@@ -142,8 +142,8 @@ https://github.com/users/CurlyFire/projects/4/views/1
 # Environments
 | Environment | Status | Link |
 |-------------|--------|------|
-| UAT         | [![UAT](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-stage-uat.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-stage-uat.yml) | https://mvc-app-uat-663949819005.us-central1.run.app
-| Production  | [![Production](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-stage-production.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/release-stage-production.yml) | https://mvc-app-prod-663949819005.us-central1.run.app
+| UAT         | [![UAT](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/uat-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/uat-stage.yml) | https://mvc-app-uat-663949819005.us-central1.run.app
+| Production  | [![Production](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/production-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/production-stage.yml) | https://mvc-app-prod-663949819005.us-central1.run.app
 
 The CTF competition UI has all the features mentionned in the Sytem use cases section.  Mailpit is used as a SMPT server for invitations and registrations, however, the emails all stay there and can be seen from the mailpit UI.  If you require access to it, ask me and I will create a user for you to view all emails.
 
