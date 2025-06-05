@@ -14,8 +14,8 @@ env:
   IMAGE_TAG: ${{ github.sha }}
 
 jobs:
-  build-test-publish:
-    name: Build and Test
+  build-and-test:
+    name: CI / Build and Test
     runs-on: ubuntu-latest
 
     steps:
