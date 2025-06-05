@@ -1,3 +1,20 @@
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory = $true)]
+    [string]$Name,
+
+    [Parameter(Mandatory = $true)]
+    [string]$Tag,
+
+    [switch]$Push
+)
+
+if (-not $env:WORKSPACE_ROOT) {
+    Write-Error "❌ WORKSPACE_ROOT environment variable is not set. Aborting..."
+    exit 1
+}
+$workspaceRoot = $env:WORKSPACE_ROOT
+
 # Define test categories
 $testCategories = @(
     @{
@@ -18,7 +35,7 @@ $testCategories = @(
     }
 )
 
-$sourceRoot = Join-Path (Get-RepoRoot) "src"
+$sourceRoot = Join-Path $workspaceRoot "src"
 
 Write-Host "Building solution..."
 dotnet build -c Release $sourceRoot
@@ -31,5 +48,18 @@ foreach ($category in $testCategories) {
 
 Write-Host "Publishing UI..."
 $projectPath = Join-Path $sourceRoot "ctf-sandbox.csproj"
+$publishPath = Join-Path $workspaceRoot "publish"
 
-dotnet publish --no-build -c Release -o ./publish $projectPath
+dotnet publish --no-build -c Release -o $publishPath $projectPath
+
+$fullImage = "${Name}:${Tag}"
+
+Write-Host "🐳 Building Docker image: $fullImage"
+docker build -t $fullImage $workspaceRoot
+
+if ($Push) {
+    Write-Host "📤 Pushing Docker image to registry..."
+    docker push $fullImage
+} else {
+    Write-Host "🛑 Push skipped (use -Push to enable)"
+}

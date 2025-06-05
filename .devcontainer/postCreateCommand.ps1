@@ -1,4 +1,13 @@
-git config --global --add safe.directory /workspaces/ctf-sandbox
+if (-not $env:WORKSPACE_ROOT) {
+    Write-Error "❌ WORKSPACE_ROOT environment variable is not set. Aborting setup."
+    exit 1
+}
+$workspaceRoot = $env:WORKSPACE_ROOT
+
+Write-Host "🔐 Marking workspace as safe for Git..."
+git config --global --add safe.directory $workspaceRoot
+
+Write-Host "🔧 Installing dotnet-ef tool..."
 dotnet tool install --global dotnet-ef
-mkdir -p ~/.config/powershell
-cp /workspaces/ctf-sandbox/.devcontainer/pwsh-profile.ps1  ~/.config/powershell/Microsoft.PowerShell_profile.ps1
+
+Write-Host "✅ postCreateCommand script complete."

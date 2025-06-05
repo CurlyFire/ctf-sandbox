@@ -13,6 +13,9 @@
 	"features": {
 	"ghcr.io/devcontainers/features/docker-in-docker:2": {}
 	},
+	"containerEnv": {
+	  "WORKSPACE_ROOT": "${containerWorkspaceFolder}" // Set the workspace root for powershell scripts
+	},
 
 	// Use 'postCreateCommand' to run commands after the container is created.
 	"postCreateCommand": "pwsh /workspaces/ctf-sandbox/.devcontainer/postCreateCommand.ps1",

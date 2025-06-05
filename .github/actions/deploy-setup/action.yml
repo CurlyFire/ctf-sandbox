@@ -1,4 +1,4 @@
-name: Setup
+name: Deploy Setup
 description: Setup Google Cloud SDK, GKE Auth Plugin and dotnet SDK
 
 inputs:
@@ -12,6 +12,9 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Set WORKSPACE_ROOT
+      uses: ./.github/actions/setup-workspace-root
+
     - name: Authenticate to Google Cloud
       uses: google-github-actions/auth@v2
       with:
@@ -34,8 +37,3 @@ runs:
     - name: Configure Docker to use gcloud credentials
       shell: bash
       run: gcloud auth configure-docker us-central1-docker.pkg.dev
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '9.0.x'
