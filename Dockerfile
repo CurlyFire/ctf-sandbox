@@ -5,7 +5,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:9.0
 WORKDIR /app
 
 # Copy only the published output
-COPY ./publish .
+COPY ./.artifacts/publish .
 
 # Expose the port Cloud Run expects
 EXPOSE 8080

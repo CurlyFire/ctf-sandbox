@@ -11,7 +11,7 @@ on:
 
 jobs:
   call-release:
-    uses: ./.github/workflows/release-stage.yml
+    uses: ./.github/workflows/release.yml
     secrets: 
         inherit
     with:
