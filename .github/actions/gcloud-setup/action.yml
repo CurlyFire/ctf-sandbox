@@ -1,4 +1,4 @@
-name: Deploy Setup
+name: GCloud Setup
 description: Setup Google Cloud SDK, GKE Auth Plugin and dotnet SDK
 
 inputs:

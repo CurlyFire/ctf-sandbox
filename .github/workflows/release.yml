@@ -17,20 +17,19 @@ jobs:
       mvc_url: ${{ steps.set-url.outputs.mvc_url }}
 
     steps:
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
+      - name: Setup requirements to interact with Google Cloud
+        uses: ./.github/actions/gcloud-setup
         with:
-          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+          gcp_project_id: ${{ secrets.GCP_PROJECT_ID }}
+          gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
 
-      - name: Set up gcloud CLI
-        uses: google-github-actions/setup-gcloud@v2
-        with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-
-      - name: Set MVC App URL
+      - name: Extract and set MVC App URL
+        id: set-url
+        shell: pwsh
         run: |
-          PROJECT_NUMBER=$(gcloud projects describe ${{ secrets.GCP_PROJECT_ID }} --format='value(projectNumber)')
-          echo "mvc_url=https://mvc-app-${{ github.event.inputs.environment }}-${PROJECT_NUMBER}.us-central1.run.app" >> $GITHUB_OUTPUT
+          $projectNumber = & gcloud projects describe "${{ secrets.GCP_PROJECT_ID }}" --format='value(projectNumber)'
+          $mvcUrl = "https://mvc-app-${{ github.event.inputs.environment }}-$projectNumber.${{ secrets.GCP_REGION }}.run.app"
+          "mvc_url=$mvcUrl" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
 
 
   deploy:
@@ -44,38 +43,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - name: Setup requirements to deploy
+        uses: ./.github/actions/gcloud-setup
         with:
-          dotnet-version: '9.0.x'
-          
-      - name: Install gke-gcloud-auth-plugin
-        run: |
-          echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee /etc/apt/sources.list.d/google-cloud-sdk.list
-          sudo apt-get install -y apt-transport-https ca-certificates gnupg
-          curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
-          sudo apt-get update
-          sudo apt-get install -y google-cloud-sdk-gke-gcloud-auth-plugin
-
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
-        with:
-          credentials_json: '${{ secrets.GCP_SA_KEY }}'
-
-      - name: Set up gcloud CLI
-        uses: google-github-actions/setup-gcloud@v2
-        with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          gcp_project_id: ${{ secrets.GCP_PROJECT_ID }}
+          gcp_sa_key: ${{ secrets.GCP_SA_KEY }}        
 
       - name: Run release script
+        shell: pwsh
         run: |
-          chmod +x ./scripts/release.sh
-          ./scripts/release.sh \
-            "${{ inputs.version }}" \
-            "${{ secrets.GCP_REGION }}" \
-            "${{ secrets.GCP_PROJECT_ID }}" \
-            "${{ inputs.environment }}" \
-            "${{ secrets.ADMIN_PASSWORD }}"
+          ./scripts/release-gcloud.ps1 `
+            -Version "${{ inputs.version }}" `
+            -Region "${{ secrets.GCP_REGION }}" `
+            -Project "${{ secrets.GCP_PROJECT_ID }}" `
+            -Env "${{ inputs.environment }}" `
+            -AdminPassword "${{ secrets.ADMIN_PASSWORD }}"
 
       - name: Run smoke tests
         run: dotnet test -c Release --logger "trx;LogFilePath=smoke-test-results.trx" --filter "Category=Smoke" ./src

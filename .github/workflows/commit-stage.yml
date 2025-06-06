@@ -23,7 +23,7 @@ jobs:
       uses: ./.github/actions/build-setup
 
     - name: Setup requirements to deploy
-      uses: ./.github/actions/deploy-setup
+      uses: ./.github/actions/gcloud-setup
       with:
         gcp_project_id: ${{ secrets.GCP_PROJECT_ID }}
         gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
