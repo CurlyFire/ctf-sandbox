@@ -31,7 +31,7 @@ jobs:
         gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
       if: github.event_name == 'push'
 
-    - name: Run commit-stage.ps1
+    - name: Run commit stage script
       shell: pwsh
       env:
         WORKSPACE_ROOT: ${{ github.workspace }}
@@ -41,7 +41,7 @@ jobs:
         if ("${{ github.event_name }}" -eq "push") {
           $args += " -PushImage"
         }
-        pwsh ./scripts/stages/commit-stage.ps1 $args
+        pwsh ./scripts/stages/commit.ps1 $args
 
     - name: Publish test results
       uses: dorny/test-reporter@v1
