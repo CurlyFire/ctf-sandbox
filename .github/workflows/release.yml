@@ -11,6 +11,8 @@ on:
         type: string
 
 jobs:
+  # This job resolves the URL of the MVC app based on the environment and project number
+  # It outputs the URL to be used in the deploy job
   resolve-url:
     runs-on: ubuntu-latest
     outputs:
@@ -19,7 +21,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Setup requirements to interact with Google Cloud
         uses: ./.github/actions/gcloud-setup
         with:
@@ -38,6 +40,9 @@ jobs:
   deploy:
     needs: resolve-url
     runs-on: ubuntu-latest
+    # Set the environment url from the output of the resolve-url job
+    # This allows the environment to be linked to the deployment
+    # It is the only way to set a dynamic environment URL in GitHub Actions
     environment:
       name: ${{ inputs.environment }}
       url: ${{ needs.resolve-url.outputs.mvc_url }}
