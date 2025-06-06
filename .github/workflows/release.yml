@@ -17,6 +17,9 @@ jobs:
       mvc_url: ${{ steps.set-url.outputs.mvc_url }}
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
       - name: Setup requirements to interact with Google Cloud
         uses: ./.github/actions/gcloud-setup
         with:
