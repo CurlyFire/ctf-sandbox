@@ -37,11 +37,11 @@ jobs:
         WORKSPACE_ROOT: ${{ github.workspace }}
       run: |
         $version = "${{ github.sha }}"
-        $args = "-Version $version"
+        $psArgs = @("-Version", $version)
         if ("${{ github.event_name }}" -eq "push") {
-          $args += " -PushImage"
+          $psArgs += "-PushImage"
         }
-        pwsh ./scripts/stages/commit.ps1 $args
+        & pwsh ./scripts/stages/commit-stage.ps1 @psArgs
 
     - name: Publish test results
       uses: dorny/test-reporter@v1
