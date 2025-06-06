@@ -22,7 +22,7 @@ function Invoke-Tests {
 
     foreach ($category in $Categories) {
         Write-Log "Running tests for category: $category"
-        dotnet test $SolutionPath --no-build -c Release --filter "Category=$category"
+        dotnet test $SolutionPath --no-build -c Release --filter "Category=$category" --logger "trx;LogFilePath=$category.trx"
     }
 }
 
