@@ -17,24 +17,21 @@ $workspaceRoot = $env:WORKSPACE_ROOT
 Write-Log "🚀 Starting commit stage"
 
 # 1. Build the solution
-Build-DotNetSolution -SolutionPath (Join-Path $workspaceRoot $Config.DotnetSolution)
+Build-DotNetSolution
 
 # 2. Run tests for commit stage categories
-Invoke-Tests -Categories $Config.TestCategoriesPerStage.Commit -SolutionPath (Join-Path $workspaceRoot $Config.DotnetSolution)
+Invoke-Tests -Stage "commit"
 
 # 3. Publish .NET app
-$projectPath = Join-Path $WorkspaceRoot $config.DotnetProject
-$publishDir  = Join-Path $WorkspaceRoot $config.PublishDir
-Publish-DotNetApp -ProjectPath $projectPath -OutputPath $publishDir
+Publish-DotNetApp
 
-# 4. Build Docker image
-$versionedTag = "$($config.DockerImageName):$Version"
 
-Build-DockerImage -Tag $versionedTag -ContextPath $workspaceRoot
+
+Build-DockerImage -Version $Version
 
 # 5. Optionally push Docker image
 if ($PushImage.IsPresent) {
-    Push-DockerImage -Tag $versionedTag
+    Push-DockerImage -Version $Version
 }
 
 Write-Log "✅ Commit stage completed successfully"
