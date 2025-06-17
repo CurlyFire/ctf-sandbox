@@ -64,7 +64,5 @@ jobs:
         run: |
           ./scripts/stages/release.ps1 `
             -Version "${{ inputs.version }}" `
-            -Region "${{ secrets.GCP_REGION }}" `
-            -Project "${{ secrets.GCP_PROJECT_ID }}" `
             -Env "${{ inputs.environment }}" `
             -AdminPassword "${{ secrets.ADMIN_PASSWORD }}"
