@@ -127,7 +127,7 @@ class DockerEnvironment : Environment {
     [void] Deploy() {
         Write-Log "🐳 Deploying Docker environment $($this.Name) with version $($this.Version)"
         $dockerComposePath = $this.Config.GetDockerComposePath()
-        docker-compose -f $dockerComposePath up -d
+        docker compose -f $dockerComposePath up -d
         
         # Wait for containers to be healthy
         $this.WaitForHealthyContainers($dockerComposePath, 300)
@@ -136,7 +136,7 @@ class DockerEnvironment : Environment {
     [void] Teardown() {
         Write-Log "🧹 Tearing down Docker environment $($this.Name)"
         $dockerComposePath = $this.Config.GetDockerComposePath()
-        docker-compose -f $dockerComposePath down
+        docker compose -f $dockerComposePath down
     }
 }
 
