@@ -21,6 +21,7 @@ Invoke-Tests -Stage "commit"
 # 3. Publish .NET app
 Publish-DotNetApp
 
+# 4. Build Docker image
 Build-DockerImage -Version $Version
 
 # 5. Optionally push Docker image

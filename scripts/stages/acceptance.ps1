@@ -17,7 +17,7 @@ if (Test-IsShaAlreadyProcessed -Version $Version) {
 }
 
 $environments = @(
-    #New-GCloudEnvironment -Name "acceptance" -Version $Version -AdminPassword New-RandomPassword
+    New-GCloudEnvironment -Name "acceptance" -Version $Version -AdminPassword New-RandomPassword
     New-DockerEnvironment -Name "docker" -Version $Version -AdminPassword New-RandomPassword
 )
 

@@ -19,3 +19,9 @@ jobs:
         gcp_project_id: ${{ secrets.GCP_PROJECT_ID }}
         gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
 
+    - name: Run acceptance stage script
+      shell: pwsh
+      env:
+        WORKSPACE_ROOT: ${{ github.workspace }}
+      run: |
+        ./scripts/stages/acceptance.ps1 -Version "${{ github.sha }}"
