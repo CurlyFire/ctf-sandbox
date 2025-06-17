@@ -13,7 +13,7 @@ Write-Log "🚀 Starting acceptance stage for version $Version"
 
 if (Test-IsShaAlreadyProcessed -Version $Version) {
     Write-Log "⚠️ SHA $Version already tested. Skipping."
-    #return
+    return
 }
 
 $environments = @(
