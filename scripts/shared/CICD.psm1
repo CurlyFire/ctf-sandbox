@@ -72,14 +72,16 @@ class Environment {
     [string]$Name
     [string]$Version
     [string]$AdminPassword
+    [CICDConfig]$Config
 
-    Environment([string]$name, [string]$version, [string]$adminPassword) {
+    Environment([string]$name, [string]$version, [string]$adminPassword, [CICDConfig]$config) {
         if ($this.GetType() -eq [Environment]) {
             throw "Cannot instantiate abstract class Environment"
         }
         $this.Name = $name
         $this.Version = $version
         $this.AdminPassword = $adminPassword
+        $this.Config = $config
     }
 
     # Abstract methods that must be implemented by derived classes
@@ -93,8 +95,8 @@ class Environment {
 }
 
 class DockerEnvironment : Environment {
-    DockerEnvironment([string]$name, [string]$version, [string]$adminPassword) 
-        : base($name, $version, $adminPassword) 
+    DockerEnvironment([string]$name, [string]$version, [string]$adminPassword, [CICDConfig]$config) 
+        : base($name, $version, $adminPassword, $config) 
         { 
 
         }
@@ -134,19 +136,15 @@ class DockerEnvironment : Environment {
     [void] Teardown() {
         Write-Log "🧹 Tearing down Docker environment $($this.Name)"
         $dockerComposePath = $this.Config.GetDockerComposePath()
-        docker-compose -f $dockerComposePath down -d
+        docker-compose -f $dockerComposePath down
     }
 }
 
-class GCloudEnvironment : DockerEnvironment {
-    [string]$ProjectId
-    [string]$Region
+class GCloudEnvironment : Environment {
 
-    GCloudEnvironment([string]$name, [string]$version, [string]$adminPassword, [string]$projectId, [string]$region) 
-        : base($name, $version, $adminPassword) 
+    GCloudEnvironment([string]$name, [string]$version, [string]$adminPassword,[CICDConfig]$config) 
+        : base($name, $version, $adminPassword, $config) 
         {
-            $this.ProjectId = $projectId
-            $this.Region = $region
         }
 
     [void] Deploy() {
@@ -154,25 +152,25 @@ class GCloudEnvironment : DockerEnvironment {
 
         $workspaceRoot = $env:WORKSPACE_ROOT
         Write-Host "📡 Retrieving project number"
-        $projectNumber = (gcloud projects describe $this.ProjectId --format='value(projectNumber)')
+        $projectNumber = (gcloud projects describe $this.Config.ProjectId --format='value(projectNumber)')
         ### Deploy rqlite
 
         Write-Host "✅ Deploying rqlite (initial)"
         gcloud run deploy "rqlite-$($this.Name)" `
             --image=rqlite/rqlite `
             --port=4001 `
-            --region=$($this.Region) `
+            --region=$($this.Config.Region) `
             --ingress=internal `
             --min-instances=1 `
             --max-instances=1 `
             --allow-unauthenticated `
             --args="--http-addr=0.0.0.0:4001"
 
-        $rqliteUrl = "rqlite-$($this.Name)-$projectNumber.$($this.Region).run.app"
+        $rqliteUrl = "rqlite-$($this.Name)-$projectNumber.$($this.Config.Region).run.app"
         Write-Host "🔁 Updating rqlite HTTP_ADV_ADDR=$rqliteUrl"
         Write-Host "Resolved advertised address: $rqliteUrl`:443"
         gcloud run services update "rqlite-$($this.Name)" `
-            --region=$($this.Region) `
+            --region=$($this.Config.Region) `
             --update-env-vars=HTTP_ADV_ADDR="$rqliteUrl`:443" `
             --args="--http-addr=0.0.0.0:4001"
 
@@ -182,7 +180,7 @@ class GCloudEnvironment : DockerEnvironment {
         gcloud run deploy "mailpit-ui-$($this.Name)" `
             --image=axllent/mailpit:latest `
             --port=8025 `
-            --region=$($this.Region) `
+            --region=$($this.Config.Region) `
             --allow-unauthenticated `
             --ingress=all `
             --network=default `
@@ -192,11 +190,11 @@ class GCloudEnvironment : DockerEnvironment {
             --set-env-vars="MP_UI_AUTH=admin:$($this.AdminPassword)"
 
         $mailpitSa = (gcloud run services describe "mailpit-ui-$($this.Name)" `
-            --region=$($this.Region) `
+            --region=$($this.Config.Region) `
             --format='value(spec.template.spec.serviceAccountName)')
 
         gcloud run services add-iam-policy-binding "rqlite-$($this.Name)" `
-            --region=$($this.Region) `
+            --region=$($this.Config.Region) `
             --member="serviceAccount:$MailpitSA" `
             --role=roles/run.invoker
 
@@ -205,7 +203,7 @@ class GCloudEnvironment : DockerEnvironment {
         $clusterName = "sandbox-cluster"
         Write-Host "📦 Ensuring GKE cluster exists"
         $clusterExists = $null
-        $null = & gcloud container clusters describe $clusterName --region=$($this.Region) 2>$null
+        $null = & gcloud container clusters describe $clusterName --region=$($this.Config.Region) 2>$null
         if ($LASTEXITCODE -eq 0) {
             $ClusterExists = $true
             Write-Log "✅ Cluster exists"
@@ -216,7 +214,7 @@ class GCloudEnvironment : DockerEnvironment {
 
         if (-not $ClusterExists) {
             gcloud container clusters create $ClusterName `
-                --region=$($this.Region) `
+                --region=$($this.Config.Region) `
                 --num-nodes=1 `
                 --disk-type=pd-standard `
                 --disk-size=30GB `
@@ -224,7 +222,7 @@ class GCloudEnvironment : DockerEnvironment {
         }
 
         Write-Host "🌐 Getting GKE credentials"
-        gcloud container clusters get-credentials $ClusterName --region=$($this.Region)
+        gcloud container clusters get-credentials $ClusterName --region=$($this.Config.Region)
 
         ### Deploy mailpit-smtp to GKE
 
@@ -252,7 +250,7 @@ class GCloudEnvironment : DockerEnvironment {
         Remove-Item -Path mailpit-smtp.yaml
         Remove-Item -Path mailpit-smtp-service.yaml
 
-        $mailpitUrl = "mailpit-ui-$($this.Name)-${projectNumber}.$($this.Region).run.app"
+        $mailpitUrl = "mailpit-ui-$($this.Name)-${projectNumber}.$($this.Config.Region).run.app"
         $timeout = 300
         $interval = 5
         $elapsed = 0
@@ -279,8 +277,8 @@ class GCloudEnvironment : DockerEnvironment {
 
         Write-Host "✅ Deploying .NET 9 MVC App"
         gcloud run deploy "mvc-app-$($this.Name)" `
-            --image="us-central1-docker.pkg.dev/$($this.ProjectId)/ctf-sandbox-repo/ctf-sandbox:$($this.Version)" `
-            --region=$($this.Region) `
+            --image="us-central1-docker.pkg.dev/$($this.Config.ProjectId)/ctf-sandbox-repo/ctf-sandbox:$($this.Version)" `
+            --region=$($this.Config.Region) `
             --ingress=all `
             --allow-unauthenticated `
             --network=default `
@@ -297,25 +295,25 @@ class GCloudEnvironment : DockerEnvironment {
             $clusterName = "sandbox-cluster"
 
             Write-Log "🧹 Deleting Cloud Run service: mvc-app-$($this.Name)"
-            & gcloud run services delete "mvc-app-$($this.Name)" --region=$($this.Region) --quiet
+            & gcloud run services delete "mvc-app-$($this.Name)" --region=$($this.Config.Region) --quiet
             if ($LASTEXITCODE -ne 0) {
                 Write-Log "⚠️ MVC app deletion failed or didn't exist"
             }
 
             Write-Log "🧹 Deleting Cloud Run service: mailpit-ui-$($this.Name)"
-            & gcloud run services delete "mailpit-ui-$($this.Name)" --region=$($this.Region) --quiet
+            & gcloud run services delete "mailpit-ui-$($this.Name)" --region=$($this.Config.Region) --quiet
             if ($LASTEXITCODE -ne 0) {
                 Write-Log "⚠️ Mailpit UI deletion failed or didn't exist"
             }
 
             Write-Log "🧹 Deleting Cloud Run service: rqlite-$($this.Name)"
-            & gcloud run services delete "rqlite-$($this.Name)" --region=$($this.Region) --quiet
+            & gcloud run services delete "rqlite-$($this.Name)" --region=$($this.Config.Region) --quiet
             if ($LASTEXITCODE -ne 0) {
                 Write-Log "⚠️ rqlite deletion failed or didn't exist"
             }
 
             Write-Log "🌐 Getting GKE credentials"
-            & gcloud container clusters get-credentials $clusterName --region=$($this.Region)
+            & gcloud container clusters get-credentials $clusterName --region=$($this.Config.Region)
             if ($LASTEXITCODE -ne 0) {
                 Write-Log "⚠️ Failed to get credentials for GKE cluster '$clusterName'"
                 return
@@ -469,7 +467,7 @@ function New-GCloudEnvironment {
         [string]$AdminPassword
     )
     $config = Get-CICDConfig
-    return [GCloudEnvironment]::new($Name, $Version, $AdminPassword, $config.ProjectId, $config.Region)
+    return [GCloudEnvironment]::new($Name, $Version, $AdminPassword, $config)
 }
 
 function New-DockerEnvironment {
@@ -483,8 +481,8 @@ function New-DockerEnvironment {
         [Parameter(Mandatory = $true)]
         [string]$AdminPassword
     )
-
-    return [DockerEnvironment]::new($Name, $Version, $AdminPassword)
+    $config = Get-CICDConfig
+    return [DockerEnvironment]::new($Name, $Version, $AdminPassword, $config)
 }
 
 function ConvertTo-FileFromTemplate {

@@ -19,8 +19,8 @@
             e2e        = @("Smoke", "Acceptance", "ExternalSystemContract", "E2E")
         }
         release = @{
-            Default = @("Smoke")
+            uat        = @("Smoke")
+            production = @("Smoke")
         }
     }
-
 }

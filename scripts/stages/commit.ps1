@@ -10,10 +10,6 @@ $ErrorActionPreference = "Stop"
 # Import shared module
 Import-Module (Join-Path $env:WORKSPACE_ROOT "scripts/shared/CICD.psm1") -Force
 
-# Get config
-$config = Get-CICDConfig
-$workspaceRoot = $env:WORKSPACE_ROOT
-
 Write-Log "🚀 Starting commit stage"
 
 # 1. Build the solution
@@ -24,8 +20,6 @@ Invoke-Tests -Stage "commit"
 
 # 3. Publish .NET app
 Publish-DotNetApp
-
-
 
 Build-DockerImage -Version $Version
 
