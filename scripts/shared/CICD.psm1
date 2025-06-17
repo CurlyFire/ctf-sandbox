@@ -107,7 +107,7 @@ class DockerEnvironment : Environment {
         $timeout = $startTime.AddSeconds($timeoutSeconds)
 
         while ($true) {
-            $containers = docker-compose -f $composeFile ps --format json | ConvertFrom-Json
+            $containers = docker compose -f $composeFile ps --format json | ConvertFrom-Json
             $unhealthyContainers = $containers | Where-Object { $_.Health -and $_.Health -ne "healthy" }
             
             if (-not $unhealthyContainers) {
