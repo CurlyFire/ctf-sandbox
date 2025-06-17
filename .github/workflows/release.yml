@@ -1,0 +1,70 @@
+name: Release
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+      version:
+        required: true
+        type: string
+
+jobs:
+  # This job resolves the URL of the MVC app based on the environment and project number
+  # It outputs the URL to be used in the deploy job
+  resolve-url:
+    runs-on: ubuntu-latest
+    outputs:
+      mvc_url: ${{ steps.set-url.outputs.mvc_url }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup requirements to interact with Google Cloud
+        uses: ./.github/actions/gcloud-setup
+        with:
+          gcp_project_id: ${{ secrets.GCP_PROJECT_ID }}
+          gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Extract and set MVC App URL
+        id: set-url
+        shell: pwsh
+        run: |
+          $projectNumber = & gcloud projects describe "${{ secrets.GCP_PROJECT_ID }}" --format='value(projectNumber)'
+          $mvcUrl = "https://mvc-app-${{ github.event.inputs.environment }}-$projectNumber.${{ secrets.GCP_REGION }}.run.app"
+          "mvc_url=$mvcUrl" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+
+  deploy:
+    needs: resolve-url
+    runs-on: ubuntu-latest
+    # Set the environment url from the output of the resolve-url job
+    # This allows the environment to be linked to the deployment
+    # It is the only way to set a dynamic environment URL in GitHub Actions
+    environment:
+      name: ${{ inputs.environment }}
+      url: ${{ needs.resolve-url.outputs.mvc_url }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup requirements to deploy
+        uses: ./.github/actions/gcloud-setup
+        with:
+          gcp_project_id: ${{ secrets.GCP_PROJECT_ID }}
+          gcp_sa_key: ${{ secrets.GCP_SA_KEY }}        
+
+      - name: Run release stage script
+        shell: pwsh
+        env:
+          WORKSPACE_ROOT: ${{ github.workspace }}
+        run: |
+          ./scripts/stages/release.ps1 `
+            -Version "${{ inputs.version }}" `
+            -Region "${{ secrets.GCP_REGION }}" `
+            -Project "${{ secrets.GCP_PROJECT_ID }}" `
+            -Env "${{ inputs.environment }}" `
+            -AdminPassword "${{ secrets.ADMIN_PASSWORD }}"

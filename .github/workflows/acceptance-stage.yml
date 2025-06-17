@@ -1,6 +1,8 @@
 name: Acceptance Stage
 
 on:
+  schedule:
+    - cron: '0 * * * *'  # Every hour
   workflow_dispatch:
 
 jobs:
@@ -8,31 +10,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - name: Setup requirements to build and test
+      uses: ./.github/actions/build-setup
 
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
-        with:
-          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+    - name: Setup requirements to deploy
+      uses: ./.github/actions/gcloud-setup
+      with:
+        gcp_project_id: ${{ secrets.GCP_PROJECT_ID }}
+        gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
 
-      - name: Set up gcloud CLI
-        uses: google-github-actions/setup-gcloud@v2
-        with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-
-      - name: Install gke-gcloud-auth-plugin
-        run: |
-          echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee /etc/apt/sources.list.d/google-cloud-sdk.list
-          sudo apt-get install -y apt-transport-https ca-certificates gnupg
-          curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
-          sudo apt-get update
-          sudo apt-get install -y google-cloud-sdk-gke-gcloud-auth-plugin
-
-      - name: Fetch latest main branch SHA
-        run: |
-          git fetch origin main
-          echo "MAIN_SHA=$(git rev-parse origin/main)" >> $GITHUB_ENV
-
-      - name: Run acceptance-stage script
-        run: ./scripts/acceptance/main.sh ${{ env.MAIN_SHA }} ${{ secrets.GCP_REGION }} ${{ secrets.GCP_PROJECT_ID }} ${{ secrets.ADMIN_PASSWORD }}
+    - name: Run acceptance stage script
+      shell: pwsh
+      env:
+        WORKSPACE_ROOT: ${{ github.workspace }}
+      run: |
+        ./scripts/stages/acceptance.ps1 -Version "${{ github.sha }}"
