@@ -10,6 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
     - name: Setup requirements to build and test
       uses: ./.github/actions/build-setup
 
@@ -21,7 +24,5 @@ jobs:
 
     - name: Run acceptance stage script
       shell: pwsh
-      env:
-        WORKSPACE_ROOT: ${{ github.workspace }}
       run: |
         ./scripts/stages/acceptance.ps1 -Version "${{ github.sha }}"
