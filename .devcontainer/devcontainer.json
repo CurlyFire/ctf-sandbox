@@ -14,7 +14,13 @@
 	"ghcr.io/devcontainers/features/docker-in-docker:2": {}
 	},
 	"containerEnv": {
-	  "WORKSPACE_ROOT": "${containerWorkspaceFolder}" // Set the workspace root for powershell scripts
+	    "WORKSPACE_ROOT": "${containerWorkspaceFolder}", // Set the workspace root for powershell scripts
+	  	// Temporary fix for playwright tests in dev containers.  It's reading the BROWSER environment variable if
+		// this is not set and throwing.
+		// Issue created here: https://github.com/microsoft/playwright-dotnet/issues/3174
+		"CODESPACES": "true",
+		// This is needed to run the browser tests in the dev container in headed mode.
+		"DISPLAY": "host.docker.internal:0.0"
 	},
 
 	// Use 'postCreateCommand' to run commands after the container is created.
@@ -29,16 +35,7 @@
 				"ms-vscode.powershell" // PowerShell
             ]
         }
-    },
-	"containerEnv": {
-		// Temporary fix for playwright tests in dev containers.  It's reading the BROWSER environment variable if
-		// this is not set and throwing.
-		// Issue created here: https://github.com/microsoft/playwright-dotnet/issues/3174
-		"CODESPACES": "true",
-		// This is needed to run the browser tests in the dev container in headed mode.
-		"DISPLAY": "host.docker.internal:0.0"
-	}
-
+    }
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
 	// "remoteUser": "root"
 }
