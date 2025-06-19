@@ -50,7 +50,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
+        
+      - name: Setup requirements to build and test
+        uses: ./.github/actions/build-setup
+        
       - name: Setup requirements to deploy
         uses: ./.github/actions/gcloud-setup
         with:
