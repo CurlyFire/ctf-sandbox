@@ -236,7 +236,7 @@ class GCloudEnvironment : Environment {
 
         if (-not $ClusterExists) {
             gcloud container clusters create $ClusterName `
-                --region=$($this.Config.Region) `
+                --zone=$($this.Config.Region)-a `
                 --num-nodes=1 `
                 --disk-type=pd-standard `
                 --disk-size=30GB `
@@ -298,13 +298,25 @@ class GCloudEnvironment : Environment {
         ### Deploy MVC app
 
         Write-Host "✅ Deploying .NET 9 MVC App"
+
+        gcloud compute networks vpc-access connectors create run-connector `
+        --region=us-central1 `
+        --network=default `
+        --range=10.8.0.0/28
+
+        gcloud compute routers nats create nat-config `
+        --router=nat-router `
+        --region=us-central1 `
+        --nat-all-subnet-ip-ranges `
+        --auto-allocate-nat-external-ips
+
+
         gcloud run deploy "mvc-app-$($this.Name)" `
             --image="us-central1-docker.pkg.dev/$($this.Config.ProjectId)/ctf-sandbox-repo/ctf-sandbox:$($this.Version)" `
             --region=$($this.Config.Region) `
             --ingress=all `
             --allow-unauthenticated `
-            --network=default `
-            --subnet=default `
+            --vpc-connector=run-connector `
             --vpc-egress=all-traffic `
             --set-env-vars="EmailSettings__SmtpServer=$smtpIp,AdminAccount__Password=$($this.AdminPassword),EmailSettings__MailpitUrl=https://$mailpitUrl,IPInfo__Token=$($this.IpInfoToken)"
 
