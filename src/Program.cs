@@ -35,7 +35,8 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => {
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
-builder.Services.AddHttpClient();
+builder.Services.Configure<IpInfoService.IpInfoOptions>(builder.Configuration.GetSection("IPInfo"));
+builder.Services.AddHttpClient<IIpInfoService, IpInfoService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 builder.Services.AddScoped<IIpInfoService, IpInfoService>();
