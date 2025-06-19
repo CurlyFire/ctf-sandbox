@@ -5,7 +5,10 @@ using ctf_sandbox.Services;
 using Microsoft.AspNetCore.Identity.UI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Configuration.Sources.Clear();
+builder.Configuration.AddJsonFile("appsettings.web.json")
+    .AddJsonFile("appsettings.web.dev.json", optional: true)
+    .AddEnvironmentVariables();
 // Add this line to listen on the correct port:
 var port = Environment.GetEnvironmentVariable("PORT");
 if (port != null)
@@ -32,6 +35,7 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => {
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
+builder.Services.AddHttpClient();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 builder.Services.AddScoped<IIpInfoService, IpInfoService>();
