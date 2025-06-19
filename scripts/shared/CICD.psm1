@@ -72,9 +72,10 @@ class Environment {
     [string]$Name
     [string]$Version
     [string]$AdminPassword
+    [string]$IpInfoToken
     [CICDConfig]$Config
 
-    Environment([string]$name, [string]$version, [string]$adminPassword, [CICDConfig]$config) {
+    Environment([string]$name, [string]$version, [string]$adminPassword, [string]$ipInfoToken, [CICDConfig]$config) {
         if ($this.GetType() -eq [Environment]) {
             throw "Cannot instantiate abstract class Environment"
         }
@@ -82,6 +83,7 @@ class Environment {
         $this.Version = $version
         $this.AdminPassword = $adminPassword
         $this.Config = $config
+        $this.IpInfoToken = $ipInfoToken
     }
 
     # Abstract methods that must be implemented by derived classes
@@ -95,10 +97,9 @@ class Environment {
 }
 
 class DockerEnvironment : Environment {
-    DockerEnvironment([string]$name, [string]$version, [string]$adminPassword, [CICDConfig]$config) 
-        : base($name, $version, $adminPassword, $config) 
+    DockerEnvironment([string]$name, [string]$version, [string]$adminPassword, [string]$ipInfoToken, [CICDConfig]$config) 
+        : base($name, $version, $adminPassword, $ipInfoToken, $config) 
         { 
-
         }
 
     hidden [void] WaitForHealthyContainers([string]$composeFile, [int]$timeoutSeconds = 300) {
@@ -142,8 +143,8 @@ class DockerEnvironment : Environment {
 
 class GCloudEnvironment : Environment {
 
-    GCloudEnvironment([string]$name, [string]$version, [string]$adminPassword,[CICDConfig]$config) 
-        : base($name, $version, $adminPassword, $config) 
+    GCloudEnvironment([string]$name, [string]$version, [string]$adminPassword, [string]$ipInfoToken, [CICDConfig]$config) 
+        : base($name, $version, $adminPassword, $IpInfoToken, $config) 
         {
         }
 
@@ -284,7 +285,7 @@ class GCloudEnvironment : Environment {
             --network=default `
             --subnet=default `
             --vpc-egress=all-traffic `
-            --set-env-vars="EmailSettings__SmtpServer=$smtpIp,AdminAccount__Password=$($this.AdminPassword),EmailSettings__MailpitUrl=https://$mailpitUrl"
+            --set-env-vars="EmailSettings__SmtpServer=$smtpIp,AdminAccount__Password=$($this.AdminPassword),EmailSettings__MailpitUrl=https://$mailpitUrl, "
 
         Write-Host "✅ Deployment complete"
     }
@@ -464,10 +465,13 @@ function New-GCloudEnvironment {
         [string]$Version,
         
         [Parameter(Mandatory = $true)]
-        [string]$AdminPassword
+        [string]$AdminPassword,
+
+        [Parameter(Mandatory = $false)]
+        [string]$IpInfoToken
     )
     $config = Get-CICDConfig
-    return [GCloudEnvironment]::new($Name, $Version, $AdminPassword, $config)
+    return [GCloudEnvironment]::new($Name, $Version, $AdminPassword, $IpInfoToken, $config)
 }
 
 function New-DockerEnvironment {
@@ -479,10 +483,13 @@ function New-DockerEnvironment {
         [string]$Version,
         
         [Parameter(Mandatory = $true)]
-        [string]$AdminPassword
+        [string]$AdminPassword,
+
+        [Parameter(Mandatory = $false)]
+        [string]$IpInfoToken
     )
     $config = Get-CICDConfig
-    return [DockerEnvironment]::new($Name, $Version, $AdminPassword, $config)
+    return [DockerEnvironment]::new($Name, $Version, $AdminPassword, $IpInfoToken, $config)
 }
 
 function ConvertTo-FileFromTemplate {

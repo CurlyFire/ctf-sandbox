@@ -8,14 +8,17 @@ param (
     [string]$Env,
     
     [Parameter(Mandatory = $true)]
-    [string]$AdminPassword
+    [string]$AdminPassword,
+
+    [Parameter(Mandatory = $true)]
+    [string]$IpInfoToken
 )
 
 $ErrorActionPreference = 'Stop'
 
 Import-Module (Join-Path $env:WORKSPACE_ROOT "scripts/shared/CICD.psm1") -Force
 
-$environment = New-GCloudEnvironment -Name $Env -Version $Version -AdminPassword $AdminPassword
+$environment = New-GCloudEnvironment -Name $Env -Version $Version -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
 $environment.Deploy()
 
 Invoke-Tests -Stage "release" -Env $Env
