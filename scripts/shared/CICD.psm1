@@ -225,7 +225,7 @@ class GCloudEnvironment : Environment {
         $clusterName = "sandbox-cluster"
         Write-Host "📦 Ensuring GKE cluster exists"
         $clusterExists = $null
-        $null = & gcloud container clusters describe $clusterName --region=$($this.Config.Region) 2>$null
+        $null = & gcloud container clusters describe $clusterName --zone=$($this.Config.Region)-a 2>$null
         if ($LASTEXITCODE -eq 0) {
             $ClusterExists = $true
             Write-Log "✅ Cluster exists"
@@ -244,7 +244,7 @@ class GCloudEnvironment : Environment {
         }
 
         Write-Host "🌐 Getting GKE credentials"
-        gcloud container clusters get-credentials $ClusterName --region=$($this.Config.Region)
+        gcloud container clusters get-credentials $ClusterName --zone=$($this.Config.Region)-a
 
         ### Deploy mailpit-smtp to GKE
 
