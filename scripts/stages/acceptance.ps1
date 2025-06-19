@@ -1,7 +1,13 @@
 #!/usr/bin/env pwsh
 param(
     [Parameter(Mandatory = $true)]
-    [string]$Version
+    [string]$Version,
+
+    [Parameter(Mandatory = $true)]
+    [string]$AdminPassword,
+
+    [Parameter(Mandatory = $true)]
+    [string]$IpInfoToken
 )
 
 $ErrorActionPreference = "Stop"
@@ -17,8 +23,8 @@ if (Test-IsShaAlreadyProcessed -Version $Version) {
 }
 
 $environments = @(
-    New-GCloudEnvironment -Name "acceptance" -Version $Version -AdminPassword New-RandomPassword
-    New-DockerEnvironment -Name "docker" -Version $Version -AdminPassword New-RandomPassword
+    New-GCloudEnvironment -Name "acceptance" -Version $Version -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
+    New-DockerEnvironment -Name "docker" -Version $Version -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
 )
 
 Build-DotNetSolution

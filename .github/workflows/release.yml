@@ -63,4 +63,5 @@ jobs:
           ./scripts/stages/release.ps1 `
             -Version "${{ inputs.version }}" `
             -Env "${{ inputs.environment }}" `
-            -AdminPassword "${{ secrets.ADMIN_PASSWORD }}"
+            -AdminPassword "${{ secrets.ADMIN_PASSWORD }}" `
+            -IpInfoToken "${{ secrets.IPINFO_TOKEN }}"

@@ -8,6 +8,7 @@ class CICDConfig {
     [string]$DockerComposeFile
     [string]$Dockerfile
     [string]$PublishDir
+    [string]$DevAppSettingsFile
     [hashtable]$TestCategories
 
     CICDConfig([hashtable]$rawConfig) {
@@ -21,6 +22,7 @@ class CICDConfig {
         $this.PublishDir        = $rawConfig.PublishDir
         $this.TestCategories    = $rawConfig.TestCategories
         $this.Dockerfile        = $rawConfig.Dockerfile
+        $this.DevAppSettingsFile = $rawConfig.DevAppSettingsFile
     }
 
     [string[]] GetTestCategories([string]$stage, [string]$env = "Default") {
@@ -56,6 +58,10 @@ class CICDConfig {
         return $this.JoinToWorkspacePath($this.Dockerfile)
     }
 
+    [string] GetDevAppSettingsPath() {
+        return $this.JoinToWorkspacePath($this.DevAppSettingsFile)
+    }
+
     hidden [string] JoinToWorkspacePath([string]$relativePath) {
         $root = $env:WORKSPACE_ROOT
         if (-not $root) {
@@ -72,9 +78,10 @@ class Environment {
     [string]$Name
     [string]$Version
     [string]$AdminPassword
+    [string]$IpInfoToken
     [CICDConfig]$Config
 
-    Environment([string]$name, [string]$version, [string]$adminPassword, [CICDConfig]$config) {
+    Environment([string]$name, [string]$version, [string]$adminPassword, [string]$ipInfoToken, [CICDConfig]$config) {
         if ($this.GetType() -eq [Environment]) {
             throw "Cannot instantiate abstract class Environment"
         }
@@ -82,6 +89,7 @@ class Environment {
         $this.Version = $version
         $this.AdminPassword = $adminPassword
         $this.Config = $config
+        $this.IpInfoToken = $ipInfoToken
     }
 
     # Abstract methods that must be implemented by derived classes
@@ -95,10 +103,9 @@ class Environment {
 }
 
 class DockerEnvironment : Environment {
-    DockerEnvironment([string]$name, [string]$version, [string]$adminPassword, [CICDConfig]$config) 
-        : base($name, $version, $adminPassword, $config) 
+    DockerEnvironment([string]$name, [string]$version, [string]$adminPassword, [string]$ipInfoToken, [CICDConfig]$config) 
+        : base($name, $version, $adminPassword, $ipInfoToken, $config) 
         { 
-
         }
 
     hidden [void] WaitForHealthyContainers([string]$composeFile, [int]$timeoutSeconds = 300) {
@@ -127,6 +134,21 @@ class DockerEnvironment : Environment {
     [void] Deploy() {
         Write-Log "🐳 Deploying Docker environment $($this.Name) with version $($this.Version)"
         $dockerComposePath = $this.Config.GetDockerComposePath()
+
+        # Generate appsettings.web.dev.json
+        $appSettings = @{
+            AdminAccount = @{
+                Password = $this.AdminPassword
+            }
+            IPInfo = @{
+                Token = $this.IpInfoToken
+            }
+        }
+        $appSettingsJson = $appSettings | ConvertTo-Json
+        $appSettingsPath = $this.Config.GetDevAppSettingsPath()
+        Set-Content -Path $appSettingsPath -Value $appSettingsJson -Force
+        Write-Log "📝 Generated $appSettingsPath"
+
         docker compose -f $dockerComposePath up -d
         
         # Wait for containers to be healthy
@@ -142,8 +164,8 @@ class DockerEnvironment : Environment {
 
 class GCloudEnvironment : Environment {
 
-    GCloudEnvironment([string]$name, [string]$version, [string]$adminPassword,[CICDConfig]$config) 
-        : base($name, $version, $adminPassword, $config) 
+    GCloudEnvironment([string]$name, [string]$version, [string]$adminPassword, [string]$ipInfoToken, [CICDConfig]$config) 
+        : base($name, $version, $adminPassword, $IpInfoToken, $config) 
         {
         }
 
@@ -284,7 +306,7 @@ class GCloudEnvironment : Environment {
             --network=default `
             --subnet=default `
             --vpc-egress=all-traffic `
-            --set-env-vars="EmailSettings__SmtpServer=$smtpIp,AdminAccount__Password=$($this.AdminPassword),EmailSettings__MailpitUrl=https://$mailpitUrl"
+            --set-env-vars="EmailSettings__SmtpServer=$smtpIp,AdminAccount__Password=$($this.AdminPassword),EmailSettings__MailpitUrl=https://$mailpitUrl,IPInfo__Token=$($this.IpInfoToken)"
 
         Write-Host "✅ Deployment complete"
     }
@@ -362,7 +384,7 @@ function Invoke-Tests {
 
     foreach ($category in $Categories) {
         Write-Log "Running tests for category: $category"
-        dotnet test $config.GetSolutionPath() --no-build -c Release --filter "Category=$category" --logger "trx;LogFilePath=$category.trx"
+        dotnet test $config.GetSolutionPath() -c Release --filter "Category=$category" --logger "trx;LogFilePath=$category.trx"
     }
 }
 
@@ -444,17 +466,6 @@ function Get-TestedShaGcsPath {
     return "gs://$($config.BucketName)/tested-shas/$Version"
 }
 
-
-function New-RandomPassword {
-    param (
-        [int]$Length = 16
-    )
-
-    $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+[]{}'
-    $password = -join (1..$Length | ForEach-Object { $chars[(Get-Random -Max $chars.Length)] })
-    return $password
-}
-
 function New-GCloudEnvironment {
     param (
         [Parameter(Mandatory = $true)]
@@ -464,10 +475,13 @@ function New-GCloudEnvironment {
         [string]$Version,
         
         [Parameter(Mandatory = $true)]
-        [string]$AdminPassword
+        [string]$AdminPassword,
+
+        [Parameter(Mandatory = $false)]
+        [string]$IpInfoToken
     )
     $config = Get-CICDConfig
-    return [GCloudEnvironment]::new($Name, $Version, $AdminPassword, $config)
+    return [GCloudEnvironment]::new($Name, $Version, $AdminPassword, $IpInfoToken, $config)
 }
 
 function New-DockerEnvironment {
@@ -479,10 +493,13 @@ function New-DockerEnvironment {
         [string]$Version,
         
         [Parameter(Mandatory = $true)]
-        [string]$AdminPassword
+        [string]$AdminPassword,
+
+        [Parameter(Mandatory = $false)]
+        [string]$IpInfoToken
     )
     $config = Get-CICDConfig
-    return [DockerEnvironment]::new($Name, $Version, $AdminPassword, $config)
+    return [DockerEnvironment]::new($Name, $Version, $AdminPassword, $IpInfoToken, $config)
 }
 
 function ConvertTo-FileFromTemplate {
