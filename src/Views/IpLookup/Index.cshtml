@@ -1,0 +1,76 @@
+@{
+    ViewData["Title"] = "IP Lookup";
+}
+
+<div class="container mt-4">
+    <h2>IP Address Lookup</h2>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="ipAddress">IP Address:</label>
+                <input type="text" class="form-control" id="ipAddress" placeholder="Enter IP address (e.g., 8.8.8.8)">
+            </div>
+            <button class="btn btn-primary mt-2" onclick="lookupIp()">Lookup</button>
+        </div>
+    </div>
+    <div class="row mt-4">
+        <div class="col-md-8">
+            <div id="results" class="d-none">
+                <h3>Results</h3>
+                <table class="table table-bordered">
+                    <tbody>
+                        <tr><td>IP</td><td id="ip"></td></tr>
+                        <tr><td>Hostname</td><td id="hostname"></td></tr>
+                        <tr><td>City</td><td id="city"></td></tr>
+                        <tr><td>Region</td><td id="region"></td></tr>
+                        <tr><td>Country</td><td id="country"></td></tr>
+                        <tr><td>Location</td><td id="location"></td></tr>
+                        <tr><td>Organization</td><td id="org"></td></tr>
+                        <tr><td>Postal Code</td><td id="postal"></td></tr>
+                        <tr><td>Timezone</td><td id="timezone"></td></tr>
+                        <tr><td>Anycast</td><td id="anycast"></td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="error" class="alert alert-danger d-none"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function lookupIp() {
+            const ipAddress = document.getElementById('ipAddress').value;
+            const resultsDiv = document.getElementById('results');
+            const errorDiv = document.getElementById('error');
+            
+            resultsDiv.classList.add('d-none');
+            errorDiv.classList.add('d-none');
+
+            fetch(`/IpLookup/Lookup?ip=${encodeURIComponent(ipAddress)}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(response.status === 400 ? 'Invalid IP address' : 'Failed to retrieve IP information');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    resultsDiv.classList.remove('d-none');
+                    document.getElementById('ip').textContent = data.ip || '';
+                    document.getElementById('hostname').textContent = data.hostname || '';
+                    document.getElementById('city').textContent = data.city || '';
+                    document.getElementById('region').textContent = data.region || '';
+                    document.getElementById('country').textContent = data.country || '';
+                    document.getElementById('location').textContent = data.loc || '';
+                    document.getElementById('org').textContent = data.org || '';
+                    document.getElementById('postal').textContent = data.postal || '';
+                    document.getElementById('timezone').textContent = data.timezone || '';
+                    document.getElementById('anycast').textContent = data.anycast ? 'Yes' : 'No';
+                })
+                .catch(error => {
+                    errorDiv.textContent = error.message;
+                    errorDiv.classList.remove('d-none');
+                });
+        }
+    </script>
+}

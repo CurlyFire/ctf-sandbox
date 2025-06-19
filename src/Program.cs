@@ -34,6 +34,7 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => {
 
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddTransient<IEmailSender, EmailSender>();
+builder.Services.AddScoped<IIpInfoService, IpInfoService>();
 
 builder.Services.AddAuthorization(options =>
 {
