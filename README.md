@@ -43,6 +43,7 @@ The big ball of mud was created with github copilot agent mode using Claude Sonn
 
 # External systems
 - Email using [mailpit](https://mailpit.axllent.org/)
+- Ipinfo ip lookup [ipinfo](https://ipinfo.io/)
 - System clock
 
 Each environment has it's own external system instances.  The test environments (acceptance, E2E, docker-compose) also have their own external test instances, however they are ephemeral and last only for the duration of the tests, so no links are provided here.
@@ -53,18 +54,25 @@ Each environment has it's own external system instances.  The test environments 
 | Production  | Mailpit | https://mailpit-ui-prod-663949819005.us-central1.run.app/
 
 ## Configuring external system connections
-To configure which external system is used by the mvc-app, override the following configurations using either appsettings.json or environment variables as explained in this article https://learn.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-9.0
+To configure which external system is used by the mvc-app, override the following configurations using either appsettings.web.json or environment variables as explained in this article https://learn.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-9.0
+It is suggested to override through the appsettings.web.dev.json, as this file is git ignored, but is optionaly read by the application, and has a higher
+priority than appsettings.web.json
 
 example with appsettings.json
 
 ```json
 {
   "EmailSettings": {
-    # Change these values to connect to different mailpit instances
+    # Change these values to connect to a different mailpit instance
     "SmtpServer": "mailpit",
     "SmtpPort": 1025,
     "MailpitUrl": "http://localhost:8025"
-  }
+  },
+  "IPInfo": {
+    # Change these values to connect to a different ipinfo instance
+    "Token": "MySecretToken",
+    "BaseUrl": "https://ipinfo.io"
+  },  
 }
 
 ```
@@ -77,17 +85,21 @@ MVC monolith
 ## System context diagram
 ```mermaid
 C4Context
+    UpdateLayoutConfig($c4ShapeInRow="2", $c4BoundaryInRow="1")
     Person(user, "Competitor", "Creates or participates in CTF competitions")
-
     Enterprise_Boundary(b0, "CTF") {
         System(systemctf, "CTF Sandbox", "Manage challenges, teams, and competitions")
         System_Ext(systememail, "E-mail system", "SMTP testing tool for development")
+        System_Ext(systemipinfo, "Ip Lookup system", "Ip information lookup")
 
         Rel(user, systemctf, "Registers, creates teams, participates")
         UpdateRelStyle(user, systemctf, $offsetX="-230", $offsetY="-45")
 
         Rel(systemctf, systememail, "Sends email")
         UpdateRelStyle(systemctf, systememail, $offsetX="-40", $offsetY="-10")
+
+        Rel(systemctf, systemipinfo, "Lookup ip")
+        UpdateRelStyle(systemctf, systemipinfo, $offsetX="10", $offsetY="-10")
     }
 ```
 
@@ -101,7 +113,8 @@ C4Container
     System_Boundary(ctf, "CTF Sandbox") {
         Container(webapp, "Web Application (ASP.NET MVC)", "C#", "Handles UI, business logic, and data access")
         Container_Ext(mailpit, "E-mail System", "SMTP / Dev Tool", "Receives email notifications from the app")
-        ContainerDb(sqlite, "SQLite Database", "SQLite", "Stores users, teams, challenges, competitions")
+        ContainerDb(sqlite, "SQLite Database", "SQL", "Stores users, teams, challenges, competitions")
+        Container_Ext(systemipinfo, "Ip Lookup system", "HTTP REST", "Resolves ip information")
 
         Rel(user, webapp, "Uses")
         UpdateRelStyle(user, webapp,  $offsetX="-50", $offsetY="-20")
@@ -111,6 +124,10 @@ C4Container
 
         Rel(webapp, mailpit, "Sends email via SMTP")
         UpdateRelStyle(webapp, mailpit, $offsetX="-50", $offsetY="-30")
+
+        Rel(webapp, systemipinfo, "Lookups ip information")
+        UpdateRelStyle(webapp, mailpit, $offsetX="-50", $offsetY="-30")
+
     }
 ```
 
