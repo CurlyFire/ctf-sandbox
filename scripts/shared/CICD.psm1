@@ -299,17 +299,43 @@ class GCloudEnvironment : Environment {
 
         Write-Host "✅ Deploying .NET 9 MVC App"
 
-        gcloud compute networks vpc-access connectors create run-connector `
-        --region=us-central1 `
-        --network=default `
-        --range=10.8.0.0/28
+        # Check if the VPC connector already exists
+        if (-not (& gcloud compute networks vpc-access connectors describe run-connector --region=$($this.Config.Region) 2>$null)) {
+            Write-Host "🛠 Creating VPC connector..."
+            gcloud compute networks vpc-access connectors create run-connector `
+                --region=$($this.Config.Region) `
+                --network=default `
+                --range=10.8.0.0/28 `
+                --max-instances=1 `
+                --min-instances=1
+        }
+        else {
+            Write-Host "✅ VPC connector 'run-connector' already exists."
+        }
 
-        gcloud compute routers nats create nat-config `
-        --router=nat-router `
-        --region=us-central1 `
-        --nat-all-subnet-ip-ranges `
-        --auto-allocate-nat-external-ips
+        # Check if the Cloud Router exists
+        if (-not (& gcloud compute routers describe nat-router --region=$($this.Config.Region) 2>$null)) {
+            Write-Host "🛠 Creating Cloud Router..."
+            gcloud compute routers create nat-router `
+                --region=$($this.Config.Region) `
+                --network=default
+        }
+        else {
+            Write-Host "✅ Cloud Router 'nat-router' already exists."
+        }
 
+        # Check if the Cloud NAT config exists
+        if (-not (& gcloud compute routers nats describe nat-config --router=nat-router --region=$($this.Config.Region) 2>$null)) {
+            Write-Host "🛠 Creating Cloud NAT configuration..."
+            gcloud compute routers nats create nat-config `
+                --router=nat-router `
+                --region=$($this.Config.Region) `
+                --nat-all-subnet-ip-ranges `
+                --auto-allocate-nat-external-ips
+        }
+        else {
+            Write-Host "✅ Cloud NAT 'nat-config' already exists."
+        }
 
         gcloud run deploy "mvc-app-$($this.Name)" `
             --image="us-central1-docker.pkg.dev/$($this.Config.ProjectId)/ctf-sandbox-repo/ctf-sandbox:$($this.Version)" `
