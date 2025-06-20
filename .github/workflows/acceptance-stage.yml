@@ -26,6 +26,6 @@ jobs:
       shell: pwsh
       run: |
         ./scripts/stages/acceptance.ps1 `
-          -Version "${{ inputs.version }}" `
+          -Version "${{ github.sha }}" `
           -AdminPassword "${{ secrets.ADMIN_PASSWORD }}" `
           -IpInfoToken "${{ secrets.IPINFO_TOKEN }}"
