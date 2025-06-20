@@ -25,4 +25,7 @@ jobs:
     - name: Run acceptance stage script
       shell: pwsh
       run: |
-        ./scripts/stages/acceptance.ps1 -Version "${{ github.sha }} -IpInfoToken ${{ secrets.IPINFO_TOKEN }}"
+        ./scripts/stages/acceptance.ps1 `
+          -Version "${{ inputs.version }}" `
+          -AdminPassword "${{ secrets.ADMIN_PASSWORD }}" `
+          -IpInfoToken "${{ secrets.IPINFO_TOKEN }}"
