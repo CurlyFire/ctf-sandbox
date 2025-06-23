@@ -2,9 +2,9 @@ services:
   dev:
     build:
       context: .
-      dockerfile: .devcontainer/Dockerfile
+      dockerfile: Dockerfile
     volumes:
-      - .:/workspaces/ctf-sandbox
+      - ../:/workspaces/ctf-sandbox
     command: sleep infinity
     depends_on:
       - mailpit

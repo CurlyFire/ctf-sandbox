@@ -5,7 +5,7 @@ VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ctf-sandbox", "ctf-sandbox.csproj", "{9A617005-5ADC-C312-8E67-8EE81F081A9A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ctf-sandbox.tests", "..\tests\ctf-sandbox.tests\ctf-sandbox.tests.csproj", "{367E72C0-0785-4811-BFBC-5E0D519FDB93}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ctf-sandbox.tests", "..\..\tests\ctf-sandbox.tests\ctf-sandbox.tests.csproj", "{367E72C0-0785-4811-BFBC-5E0D519FDB93}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

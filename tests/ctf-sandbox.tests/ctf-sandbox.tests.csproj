@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../src/ctf-sandbox.csproj" />
+    <ProjectReference Include="../../src/ctf-sandbox/ctf-sandbox.csproj" />
   </ItemGroup>
 
   <ItemGroup>
