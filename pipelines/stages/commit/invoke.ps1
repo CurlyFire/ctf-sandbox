@@ -8,7 +8,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 # Import shared module
-Import-Module (Join-Path $env:WORKSPACE_ROOT "scripts/shared/CICD.psm1") -Force
+Import-Module (Join-Path $env:WORKSPACE_ROOT "pipelines/shared/CICD.psm1") -Force
 
 Write-Log "🚀 Starting commit stage"
 

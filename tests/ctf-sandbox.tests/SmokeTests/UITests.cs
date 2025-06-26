@@ -50,8 +50,8 @@ public class UITests : WebServerPageTest
     {
         var configBuilder = new ConfigurationBuilder();
         configBuilder.Sources.Clear();
-        configBuilder.AddJsonFile("appsettings.json", optional: false)
-            .AddJsonFile("appsettings.dev.json", optional: true)
+        configBuilder.AddJsonFile("appsettings.web.json", optional: false)
+            .AddJsonFile("appsettings.web.dev.json", optional: true)
             .AddEnvironmentVariables();
         var config = configBuilder.Build();
         var username = config.GetRequiredValue<string>("AdminAccount:Email");

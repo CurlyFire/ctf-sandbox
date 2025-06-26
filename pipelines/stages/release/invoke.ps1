@@ -16,7 +16,7 @@ param (
 
 $ErrorActionPreference = 'Stop'
 
-Import-Module (Join-Path $env:WORKSPACE_ROOT "scripts/shared/CICD.psm1") -Force
+Import-Module (Join-Path $env:WORKSPACE_ROOT "pipelines/shared/CICD.psm1") -Force
 
 $environment = New-GCloudEnvironment -Name $Env -Version $Version -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
 $environment.Deploy()

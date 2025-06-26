@@ -13,21 +13,22 @@ param(
 $ErrorActionPreference = "Stop"
 
 $workspace = $env:WORKSPACE_ROOT
-Import-Module (Join-Path $workspace "scripts/shared/CICD.psm1") -Force
+Import-Module (Join-Path $workspace "pipelines/shared/CICD.psm1") -Force
 
 Write-Log "🚀 Starting acceptance stage for version $Version"
 
 if (Test-IsShaAlreadyProcessed -Version $Version) {
     Write-Log "⚠️ SHA $Version already tested. Skipping."
-    return
+    #return
 }
+Build-DotNetSolution
 
 $environments = @(
-    New-GCloudEnvironment -Name "acceptance" -Version $Version -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
     New-DockerEnvironment -Name "docker" -Version $Version -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
+    #New-GCloudEnvironment -Name "acceptance" -Version $Version -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
+    #New-GCloudEnvironment -Name "e2e" -Version $Version -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
 )
 
-Build-DotNetSolution
 try {
     foreach ($env in $environments) {
         $env.Deploy()

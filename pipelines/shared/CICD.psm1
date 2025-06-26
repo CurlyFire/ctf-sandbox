@@ -6,23 +6,25 @@ class CICDConfig {
     [string]$DotnetSolution
     [string]$DotnetProject
     [string]$DockerComposeFile
+    [string]$DockerComposeOverrideFile
     [string]$Dockerfile
     [string]$PublishDir
     [string]$DevAppSettingsFile
     [hashtable]$TestCategories
 
     CICDConfig([hashtable]$rawConfig) {
-        $this.ProjectId         = $rawConfig.ProjectId
-        $this.Region            = $rawConfig.Region
-        $this.BucketName        = $rawConfig.BucketName
-        $this.DockerImageName   = $rawConfig.DockerImageName
-        $this.DotnetSolution    = $rawConfig.DotnetSolution
-        $this.DotnetProject     = $rawConfig.DotnetProject
-        $this.DockerComposeFile = $rawConfig.DockerComposeFile
-        $this.PublishDir        = $rawConfig.PublishDir
-        $this.TestCategories    = $rawConfig.TestCategories
-        $this.Dockerfile        = $rawConfig.Dockerfile
-        $this.DevAppSettingsFile = $rawConfig.DevAppSettingsFile
+        $this.ProjectId                      = $rawConfig.ProjectId
+        $this.Region                         = $rawConfig.Region
+        $this.BucketName                     = $rawConfig.BucketName
+        $this.DockerImageName                = $rawConfig.DockerImageName
+        $this.DotnetSolution                 = $rawConfig.DotnetSolution
+        $this.DotnetProject                  = $rawConfig.DotnetProject
+        $this.DockerComposeFile              = $rawConfig.DockerComposeFile
+        $this.DockerComposeOverrideFile      = $rawConfig.DockerComposeOverrideFile
+        $this.PublishDir                     = $rawConfig.PublishDir
+        $this.TestCategories                 = $rawConfig.TestCategories
+        $this.Dockerfile                     = $rawConfig.Dockerfile
+        $this.DevAppSettingsFile             = $rawConfig.DevAppSettingsFile
     }
 
     [string[]] GetTestCategories([string]$stage, [string]$env = "Default") {
@@ -54,6 +56,10 @@ class CICDConfig {
         return $this.JoinToWorkspacePath($this.DockerComposeFile)
     }
 
+    [string] GetDockerComposeOverridePath() {
+        return $this.JoinToWorkspacePath($this.DockerComposeOverrideFile)
+    }
+
     [string] GetDockerfilePath() {
         return $this.JoinToWorkspacePath($this.Dockerfile)
     }
@@ -71,7 +77,13 @@ class CICDConfig {
     }
 }
 
-
+class DeploymentConfiguration {
+    [string]$WebServerUrl
+    [string]$MailpitUrl
+    [string]$MailpitSmtpServer
+    [int]$MailpitSmtpPort
+    [string]$IpInfoUrl
+}
 
 # Abstract base class for deployment environments
 class Environment {
@@ -93,7 +105,7 @@ class Environment {
     }
 
     # Abstract methods that must be implemented by derived classes
-    [void] Deploy() {
+    [DeploymentConfiguration] Deploy() {
         throw "Deploy method must be implemented by derived class"
     }
 
@@ -114,7 +126,7 @@ class DockerEnvironment : Environment {
         $timeout = $startTime.AddSeconds($timeoutSeconds)
 
         while ($true) {
-            $containers = docker compose -f $composeFile ps --format json | ConvertFrom-Json
+            $containers = Invoke-NativeCommand docker compose -f $composeFile ps --format json | ConvertFrom-Json
             $unhealthyContainers = $containers | Where-Object { $_.Health -and $_.Health -ne "healthy" }
             
             if (-not $unhealthyContainers) {
@@ -131,9 +143,10 @@ class DockerEnvironment : Environment {
         }
     }
 
-    [void] Deploy() {
+    [DeploymentConfiguration] Deploy() {
         Write-Log "🐳 Deploying Docker environment $($this.Name) with version $($this.Version)"
         $dockerComposePath = $this.Config.GetDockerComposePath()
+        $dockerComposeOverridePath = $this.Config.GetDockerComposeOverridePath()
 
         # Generate appsettings.web.dev.json
         $appSettings = @{
@@ -149,16 +162,31 @@ class DockerEnvironment : Environment {
         Set-Content -Path $appSettingsPath -Value $appSettingsJson -Force
         Write-Log "📝 Generated $appSettingsPath"
 
-        docker compose -f $dockerComposePath up -d
+        Invoke-NativeCommand docker compose -f $dockerComposePath -f $dockerComposeOverridePath up -d
         
         # Wait for containers to be healthy
         $this.WaitForHealthyContainers($dockerComposePath, 300)
+
+
+
+        $config = [DeploymentConfiguration]::new()
+        # Get web application container port
+        $webPorts = Get-ExposedPortsFromImage -ImageName "devcontainer-dev"
+        $config.WebServerUrl = "http://localhost:$($webPorts[0])"
+        # Get mailpit container port
+        $webPorts = Get-ExposedPortsFromImage -ImageName "axllent/mailpit"
+
+        $config.MailpitUrl = "http://localhost:$($webPorts[0])"
+        $config.MailpitSmtpServer = "mailpit"
+        $config.MailpitSmtpPort = $webPorts[1]
+        $config.IpInfoUrl = "https://ipinfo.io"
+        return $config
     }
 
     [void] Teardown() {
         Write-Log "🧹 Tearing down Docker environment $($this.Name)"
         $dockerComposePath = $this.Config.GetDockerComposePath()
-        docker compose -f $dockerComposePath down
+        Invoke-NativeCommand docker compose -f $dockerComposePath down
     }
 }
 
@@ -169,7 +197,7 @@ class GCloudEnvironment : Environment {
         {
         }
 
-    [void] Deploy() {
+    [DeploymentConfiguration] Deploy() {
         Write-Log "🚀 Deploying GCloud environment $($this.Name) with version $($this.Version)"
 
         $workspaceRoot = $env:WORKSPACE_ROOT
@@ -178,7 +206,7 @@ class GCloudEnvironment : Environment {
         ### Deploy rqlite
 
         Write-Host "✅ Deploying rqlite (initial)"
-        gcloud run deploy "rqlite-$($this.Name)" `
+        Invoke-NativeCommand gcloud run deploy "rqlite-$($this.Name)" `
             --image=rqlite/rqlite `
             --port=4001 `
             --region=$($this.Config.Region) `
@@ -191,7 +219,7 @@ class GCloudEnvironment : Environment {
         $rqliteUrl = "rqlite-$($this.Name)-$projectNumber.$($this.Config.Region).run.app"
         Write-Host "🔁 Updating rqlite HTTP_ADV_ADDR=$rqliteUrl"
         Write-Host "Resolved advertised address: $rqliteUrl`:443"
-        gcloud run services update "rqlite-$($this.Name)" `
+        Invoke-NativeCommand gcloud run services update "rqlite-$($this.Name)" `
             --region=$($this.Config.Region) `
             --update-env-vars=HTTP_ADV_ADDR="$rqliteUrl`:443" `
             --args="--http-addr=0.0.0.0:4001"
@@ -199,7 +227,7 @@ class GCloudEnvironment : Environment {
         ### Deploy mailpit-ui
 
         Write-Host "✅ Deploying mailpit-ui"
-        gcloud run deploy "mailpit-ui-$($this.Name)" `
+        Invoke-NativeCommand gcloud run deploy "mailpit-ui-$($this.Name)" `
             --image=axllent/mailpit:latest `
             --port=8025 `
             --region=$($this.Config.Region) `
@@ -215,7 +243,7 @@ class GCloudEnvironment : Environment {
             --region=$($this.Config.Region) `
             --format='value(spec.template.spec.serviceAccountName)')
 
-        gcloud run services add-iam-policy-binding "rqlite-$($this.Name)" `
+        Invoke-NativeCommand gcloud run services add-iam-policy-binding "rqlite-$($this.Name)" `
             --region=$($this.Config.Region) `
             --member="serviceAccount:$MailpitSA" `
             --role=roles/run.invoker
@@ -225,7 +253,7 @@ class GCloudEnvironment : Environment {
         $clusterName = "sandbox-cluster"
         Write-Host "📦 Ensuring GKE cluster exists"
         $clusterExists = $null
-        $null = & gcloud container clusters describe $clusterName --zone=$($this.Config.Region)-a 2>$null
+        $null = Invoke-NativeCommand gcloud container clusters describe $clusterName --zone=$($this.Config.Region)-a 2>$null
         if ($LASTEXITCODE -eq 0) {
             $ClusterExists = $true
             Write-Log "✅ Cluster exists"
@@ -235,7 +263,7 @@ class GCloudEnvironment : Environment {
         }
 
         if (-not $ClusterExists) {
-            gcloud container clusters create $ClusterName `
+            Invoke-NativeCommand gcloud container clusters create $ClusterName `
                 --zone=$($this.Config.Region)-a `
                 --num-nodes=1 `
                 --disk-type=pd-standard `
@@ -244,7 +272,7 @@ class GCloudEnvironment : Environment {
         }
 
         Write-Host "🌐 Getting GKE credentials"
-        gcloud container clusters get-credentials $ClusterName --zone=$($this.Config.Region)-a
+        Invoke-NativeCommand gcloud container clusters get-credentials $ClusterName --zone=$($this.Config.Region)-a
 
         ### Deploy mailpit-smtp to GKE
 
@@ -256,17 +284,17 @@ class GCloudEnvironment : Environment {
         }
 
         ConvertTo-FileFromTemplate `
-            -TemplatePath "$workspaceRoot/scripts/templates/release-stage/mailpit-smtp.yaml.tpl" `
+            -TemplatePath "$workspaceRoot/pipelines/release/templates/mailpit-smtp.yaml.tpl" `
             -OutputPath "mailpit-smtp.yaml" `
             -Variables $vars    
 
         ConvertTo-FileFromTemplate `
-            -TemplatePath "$workspaceRoot/scripts/templates/release-stage/mailpit-smtp-service.yaml.tpl" `
+            -TemplatePath "$workspaceRoot/pipelines/release/templates/mailpit-smtp-service.yaml.tpl" `
             -OutputPath "mailpit-smtp-service.yaml" `
             -Variables $vars    
 
-        kubectl apply -f mailpit-smtp.yaml
-        kubectl apply -f mailpit-smtp-service.yaml
+        Invoke-NativeCommand kubectl apply -f mailpit-smtp.yaml
+        Invoke-NativeCommand kubectl apply -f mailpit-smtp-service.yaml
 
         # Cleanup
         Remove-Item -Path mailpit-smtp.yaml
@@ -302,7 +330,7 @@ class GCloudEnvironment : Environment {
         # Check if the VPC connector already exists
         if (-not (& gcloud compute networks vpc-access connectors describe run-connector --region=$($this.Config.Region) 2>$null)) {
             Write-Host "🛠 Creating VPC connector..."
-            gcloud compute networks vpc-access connectors create run-connector `
+            Invoke-NativeCommand gcloud compute networks vpc-access connectors create run-connector `
                 --region=$($this.Config.Region) `
                 --network=default `
                 --range=10.8.0.0/28 `
@@ -316,7 +344,7 @@ class GCloudEnvironment : Environment {
         # Check if the Cloud Router exists
         if (-not (& gcloud compute routers describe nat-router --region=$($this.Config.Region) 2>$null)) {
             Write-Host "🛠 Creating Cloud Router..."
-            gcloud compute routers create nat-router `
+            Invoke-NativeCommand gcloud compute routers create nat-router `
                 --region=$($this.Config.Region) `
                 --network=default
         }
@@ -327,7 +355,7 @@ class GCloudEnvironment : Environment {
         # Check if the Cloud NAT config exists
         if (-not (& gcloud compute routers nats describe nat-config --router=nat-router --region=$($this.Config.Region) 2>$null)) {
             Write-Host "🛠 Creating Cloud NAT configuration..."
-            gcloud compute routers nats create nat-config `
+            Invoke-NativeCommand gcloud compute routers nats create nat-config `
                 --router=nat-router `
                 --region=$($this.Config.Region) `
                 --nat-all-subnet-ip-ranges `
@@ -337,7 +365,7 @@ class GCloudEnvironment : Environment {
             Write-Host "✅ Cloud NAT 'nat-config' already exists."
         }
 
-        gcloud run deploy "mvc-app-$($this.Name)" `
+        Invoke-NativeCommand gcloud run deploy "mvc-app-$($this.Name)" `
             --image="us-central1-docker.pkg.dev/$($this.Config.ProjectId)/ctf-sandbox-repo/ctf-sandbox:$($this.Version)" `
             --region=$($this.Config.Region) `
             --ingress=all `
@@ -347,6 +375,18 @@ class GCloudEnvironment : Environment {
             --set-env-vars="EmailSettings__SmtpServer=$smtpIp,AdminAccount__Password=$($this.AdminPassword),EmailSettings__MailpitUrl=https://$mailpitUrl,IPInfo__Token=$($this.IpInfoToken)"
 
         Write-Host "✅ Deployment complete"
+
+        $projectNumber = (gcloud projects describe $this.Config.ProjectId --format='value(projectNumber)')
+        $mailpitUrl = "https://mailpit-ui-$($this.Name)-$projectNumber.$($this.Config.Region).run.app"
+        $webAppUrl = "https://mvc-app-$($this.Name)-$projectNumber.$($this.Config.Region).run.app"
+
+        $config = [DeploymentConfiguration]::new()
+        $config.WebServerUrl = $webAppUrl
+        $config.MailpitUrl = $mailpitUrl
+        $config.MailpitSmtpServer = "crap"  # This is set earlier in the Deploy method
+        $config.MailpitSmtpPort = 1025
+        $config.IpInfoUrl = "https://ipinfo.io"
+        return $config
     }
 
     [void] Teardown() {
@@ -409,7 +449,7 @@ function Write-Log {
 function Build-DotNetSolution {
     $config = Get-CICDConfig
     Write-Log "Building .NET solution at $($config.GetSolutionPath())"
-    dotnet build $config.GetSolutionPath() -c Release
+    Invoke-NativeCommand dotnet build $config.GetSolutionPath() -c Release
 }
 
 function Invoke-Tests {
@@ -422,7 +462,7 @@ function Invoke-Tests {
 
     foreach ($category in $Categories) {
         Write-Log "Running tests for category: $category"
-        dotnet test $config.GetSolutionPath() -c Release --filter "Category=$category" --logger "trx;LogFilePath=$category.trx"
+        Invoke-NativeCommand dotnet test $config.GetSolutionPath() -c Release --filter "Category=$category" --logger "trx;LogFilePath=$category.trx"
     }
 }
 
@@ -432,7 +472,7 @@ function Publish-DotNetApp {
     $ProjectPath = $config.GetProjectPath()
     $OutputPath = $config.GetPublishPath()
     Write-Log "Publishing .NET project $ProjectPath to $OutputPath"
-    dotnet publish $ProjectPath -c Release -o $OutputPath
+    Invoke-NativeCommand dotnet publish $ProjectPath -c Release -o $OutputPath
 }
 
 function Build-DockerImage {
@@ -444,7 +484,7 @@ function Build-DockerImage {
     $versionedTag = "$($config.DockerImageName):$Version"
     $dockerfilePath = $config.GetDockerfilePath()
     Write-Log "Building Docker image: $versionedTag from file $dockerfilePath"
-    docker build -t $versionedTag -f $dockerFilePath .
+    Invoke-NativeCommand docker build -t $versionedTag -f $dockerFilePath .
 }
 
 function Push-DockerImage {
@@ -455,11 +495,41 @@ function Push-DockerImage {
     $versionedTag = "$($config.DockerImageName):$Version"
 
     Write-Log "Pushing Docker image: $versionedTag"
-    docker push $versionedTag
+    Invoke-NativeCommand docker push $versionedTag
 }
 
+function Get-ExposedPortsFromImage {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$ImageName
+    )
+
+    $containerId = Invoke-NativeCommand docker ps --filter "ancestor=$ImageName" --format "{{.ID}}"
+
+    if (-not $containerId) {
+        Write-Warning "No running container found for image: $ImageName"
+        return @()
+    }
+
+    $inspect = Invoke-NativeCommand docker inspect $containerId | ConvertFrom-Json
+    $ports = $inspect[0].NetworkSettings.Ports
+
+    $hostPorts = @()
+
+    foreach ($portKey in $ports.PSObject.Properties.Name) {
+        $bindings = $ports.$portKey
+        foreach ($binding in $bindings) {
+            $hostPorts += [int]$binding.HostPort
+        }
+    }
+
+    return $hostPorts | Select-Object -Unique
+}
+
+
 function Get-CICDConfig {
-    $configPath = Join-Path $env:WORKSPACE_ROOT "scripts/shared/config.psd1"
+    $configPath = Join-Path $env:WORKSPACE_ROOT "pipelines/shared/config.psd1"
     $rawConfig = Import-PowerShellDataFile $configPath
     return [CICDConfig]::new($rawConfig)
 }
@@ -489,7 +559,7 @@ function Register-TestedSha {
 
     $tmpFile = New-TemporaryFile
     "Tested on $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')" | Set-Content $tmpFile
-    gsutil cp $tmpFile $bucketPath | Out-Null
+    Invoke-NativeCommand gsutil cp $tmpFile $bucketPath | Out-Null
     Remove-Item $tmpFile -Force
 }
 
@@ -565,6 +635,28 @@ function ConvertTo-FileFromTemplate {
     }
 
     Set-Content -Path $OutputPath -Value $content
+}
+
+function Invoke-NativeCommand() {
+    # A handy way to run a command, and automatically throw an error if the
+    # exit code is non-zero.
+
+    if ($args.Count -eq 0) {
+        throw "Must supply some arguments."
+    }
+
+    $command = $args[0]
+    $commandArgs = @()
+    if ($args.Count -gt 1) {
+        $commandArgs = $args[1..($args.Count - 1)]
+    }
+
+    & $command $commandArgs
+    $result = $LASTEXITCODE
+
+    if ($result -ne 0) {
+        throw "$command $commandArgs exited with code $result."
+    }
 }
 
 

@@ -63,7 +63,7 @@ jobs:
       - name: Run release stage script
         shell: pwsh
         run: |
-          ./scripts/stages/release.ps1 `
+          ./scripts/stages/release/invoke.ps1 `
             -Version "${{ inputs.version }}" `
             -Env "${{ inputs.environment }}" `
             -AdminPassword "${{ secrets.ADMIN_PASSWORD }}" `
