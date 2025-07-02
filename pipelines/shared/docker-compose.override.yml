@@ -1,6 +1,6 @@
 services:
   dev:
-    command: sleep infinity
+    command: dotnet run --project /workspaces/ctf-sandbox/src/ctf-sandbox/ctf-sandbox.csproj --configuration Release
     depends_on:
       - mailpit
     links:
@@ -9,3 +9,16 @@ services:
       - PORT=8080
     ports:
       - "8080:8080"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "--quiet", "http://localhost:8080/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  mailpit:
+    environment:
+      - MP_UI_AUTH=admin:${AdminPassword}
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://admin:${AdminPassword}@localhost:8025"]
+      interval: 5s
+      timeout: 3s
+      retries: 5      

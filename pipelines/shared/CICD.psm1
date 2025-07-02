@@ -11,6 +11,8 @@ class CICDConfig {
     [string]$PublishDir
     [string]$DevAppSettingsFile
     [hashtable]$TestCategories
+    [hashtable]$DockerMailpit
+    [string]$DockerDevContainerWebUrl
 
     CICDConfig([hashtable]$rawConfig) {
         $this.ProjectId                      = $rawConfig.ProjectId
@@ -25,6 +27,8 @@ class CICDConfig {
         $this.TestCategories                 = $rawConfig.TestCategories
         $this.Dockerfile                     = $rawConfig.Dockerfile
         $this.DevAppSettingsFile             = $rawConfig.DevAppSettingsFile
+        $this.DockerMailpit                  = $rawConfig.DockerMailpit
+        $this.DockerDevContainerWebUrl       = $rawConfig.DockerDevContainerWebUrl
     }
 
     [string[]] GetTestCategories([string]$stage, [string]$env = "Default") {
@@ -68,6 +72,10 @@ class CICDConfig {
         return $this.JoinToWorkspacePath($this.DevAppSettingsFile)
     }
 
+    [string] GetDatabaseFilePath() {
+        return $this.JoinToWorkspacePath($this.DatabaseFile)
+    }
+
     hidden [string] JoinToWorkspacePath([string]$relativePath) {
         $root = $env:WORKSPACE_ROOT
         if (-not $root) {
@@ -83,6 +91,7 @@ class DeploymentConfiguration {
     [string]$MailpitSmtpServer
     [int]$MailpitSmtpPort
     [string]$IpInfoUrl
+    [string]$IpInfoToken
 }
 
 # Abstract base class for deployment environments
@@ -145,6 +154,20 @@ class DockerEnvironment : Environment {
 
     [DeploymentConfiguration] Deploy() {
         Write-Log "🐳 Deploying Docker environment $($this.Name) with version $($this.Version)"
+
+        # Backup database file if it exists
+        try {
+        $dbFilePath = $this.Config.GetDatabaseFilePath()
+        if (Test-Path $dbFilePath) {
+            $backupPath = "$dbFilePath.bak"
+            Copy-Item -Path $dbFilePath -Destination $backupPath -Force
+            Remove-Item -Path $dbFilePath -Force
+            Write-Log "🔄 Backed up database file to $backupPath"
+        } else {
+            Write-Log "ℹ️ No database file found to backup."
+        }
+
+
         $dockerComposePath = $this.Config.GetDockerComposePath()
         $dockerComposeOverridePath = $this.Config.GetDockerComposeOverridePath()
 
@@ -161,8 +184,14 @@ class DockerEnvironment : Environment {
         $appSettingsPath = $this.Config.GetDevAppSettingsPath()
         Set-Content -Path $appSettingsPath -Value $appSettingsJson -Force
         Write-Log "📝 Generated $appSettingsPath"
-
-        Invoke-NativeCommand docker compose -f $dockerComposePath -f $dockerComposeOverridePath up -d
+        
+        try {
+            $env:AdminPassword = $this.AdminPassword
+            Invoke-NativeCommand docker compose -f $dockerComposePath -f $dockerComposeOverridePath up -d
+        }
+        finally {
+            Remove-Item env:AdminPassword -ErrorAction SilentlyContinue
+        }
         
         # Wait for containers to be healthy
         $this.WaitForHealthyContainers($dockerComposePath, 300)
@@ -170,17 +199,26 @@ class DockerEnvironment : Environment {
 
 
         $config = [DeploymentConfiguration]::new()
-        # Get web application container port
-        $webPorts = Get-ExposedPortsFromImage -ImageName "devcontainer-dev"
-        $config.WebServerUrl = "http://localhost:$($webPorts[0])"
-        # Get mailpit container port
-        $webPorts = Get-ExposedPortsFromImage -ImageName "axllent/mailpit"
-
-        $config.MailpitUrl = "http://localhost:$($webPorts[0])"
-        $config.MailpitSmtpServer = "mailpit"
-        $config.MailpitSmtpPort = $webPorts[1]
+        $config.WebServerUrl = $this.Config.DockerDevContainerWebUrl
+        $config.MailpitUrl = $this.Config.DockerMailpit.Url
+        $config.MailpitSmtpServer = $this.Config.DockerMailpit.Host
+        $config.MailpitSmtpPort = $this.Config.DockerMailpit.SmtpPort
         $config.IpInfoUrl = "https://ipinfo.io"
-        return $config
+        return $config            
+        }
+        finally {
+            #Restore the database file from backup if it exists
+            $dbFilePath = $this.Config.GetDatabaseFilePath()
+            $backupPath = "$dbFilePath.bak"
+            if (Test-Path $backupPath) {
+                Copy-Item -Path $backupPath -Destination $dbFilePath -Force
+                Remove-Item -Path $backupPath -Force
+                Write-Log "🔄 Restored database file from backup to $dbFilePath"
+            } else {
+                Write-Log "ℹ️ No backup found to restore database file."
+            }
+        }
+
     }
 
     [void] Teardown() {
@@ -284,12 +322,12 @@ class GCloudEnvironment : Environment {
         }
 
         ConvertTo-FileFromTemplate `
-            -TemplatePath "$workspaceRoot/pipelines/release/templates/mailpit-smtp.yaml.tpl" `
+            -TemplatePath "$workspaceRoot/pipelines/stages/release/templates/mailpit-smtp.yaml.tpl" `
             -OutputPath "mailpit-smtp.yaml" `
             -Variables $vars    
 
         ConvertTo-FileFromTemplate `
-            -TemplatePath "$workspaceRoot/pipelines/release/templates/mailpit-smtp-service.yaml.tpl" `
+            -TemplatePath "$workspaceRoot/pipelines/stages/release/templates/mailpit-smtp-service.yaml.tpl" `
             -OutputPath "mailpit-smtp-service.yaml" `
             -Variables $vars    
 
@@ -449,20 +487,56 @@ function Write-Log {
 function Build-DotNetSolution {
     $config = Get-CICDConfig
     Write-Log "Building .NET solution at $($config.GetSolutionPath())"
-    Invoke-NativeCommand dotnet build $config.GetSolutionPath() -c Release
+    Invoke-NativeCommand dotnet build $config.GetSolutionPath() -c Debug
 }
 
 function Invoke-Tests {
     param(
         [string]$Stage,
-        [string]$Env = "Default"
+        [string]$Env = "Default",
+        [string]$AdminPassword,
+        [string]$IpInfoToken,
+        [DeploymentConfiguration]$deploymentConfig = $null
     )
     $config = Get-CICDConfig
     $Categories = $config.GetTestCategories($Stage, $Env)
+    try 
+    {
+        # Set Admin password as environment variables
+        if ($null -ne $AdminPassword) {
+            Write-Log "Setting Admin password for tests"
+            $env:AdminPassword = $AdminPassword
+        } else {
+            Write-Log "No Admin password provided"
+        }
 
-    foreach ($category in $Categories) {
-        Write-Log "Running tests for category: $category"
-        Invoke-NativeCommand dotnet test $config.GetSolutionPath() -c Release --filter "Category=$category" --logger "trx;LogFilePath=$category.trx"
+
+        if ($null -ne $deploymentConfig) {
+            Write-Log "Setting environment variables for tests"
+            $env:WebServer__Url = $deploymentConfig.WebServerUrl
+            $env:Mailpit__Url = $deploymentConfig.MailpitUrl
+            $env:Mailpit__SmtpServer = $deploymentConfig.MailpitSmtpServer
+            $env:Mailpit__SmtpPort = $deploymentConfig.MailpitSmtpPort
+            $env:IpInfo__Url = $deploymentConfig.IpInfoUrl
+        } else {
+            Write-Log "No deployment configuration provided, using defaults"
+        }
+        foreach ($category in $Categories) {
+            Write-Log "Running tests for category: $category"
+            Invoke-NativeCommand dotnet test $config.GetSolutionPath() -c Debug --filter "Category=$category" --logger "trx;LogFilePath=$category.trx"
+        }
+    }
+    finally {
+        # Clean up environment variables
+        Write-Log "Cleaning up environment variables"
+        Remove-Item env:AdminPassword -ErrorAction SilentlyContinue
+        Remove-Item env:WebServer__Url -ErrorAction SilentlyContinue
+        Remove-Item env:Mailpit__Url -ErrorAction SilentlyContinue
+        Remove-Item env:Mailpit__SmtpServer -ErrorAction SilentlyContinue
+        Remove-Item env:Mailpit__SmtpPort -ErrorAction SilentlyContinue
+        Remove-Item env:IpInfo__Url -ErrorAction SilentlyContinue
+        Remove-Item env:IpInfo__Token -ErrorAction SilentlyContinue
+        Write-Log "Cleaned up environment variables"
     }
 }
 
@@ -472,7 +546,7 @@ function Publish-DotNetApp {
     $ProjectPath = $config.GetProjectPath()
     $OutputPath = $config.GetPublishPath()
     Write-Log "Publishing .NET project $ProjectPath to $OutputPath"
-    Invoke-NativeCommand dotnet publish $ProjectPath -c Release -o $OutputPath
+    Invoke-NativeCommand dotnet publish $ProjectPath -c Debug -o $OutputPath
 }
 
 function Build-DockerImage {
@@ -497,36 +571,6 @@ function Push-DockerImage {
     Write-Log "Pushing Docker image: $versionedTag"
     Invoke-NativeCommand docker push $versionedTag
 }
-
-function Get-ExposedPortsFromImage {
-    [CmdletBinding()]
-    param (
-        [Parameter(Mandatory = $true)]
-        [string]$ImageName
-    )
-
-    $containerId = Invoke-NativeCommand docker ps --filter "ancestor=$ImageName" --format "{{.ID}}"
-
-    if (-not $containerId) {
-        Write-Warning "No running container found for image: $ImageName"
-        return @()
-    }
-
-    $inspect = Invoke-NativeCommand docker inspect $containerId | ConvertFrom-Json
-    $ports = $inspect[0].NetworkSettings.Ports
-
-    $hostPorts = @()
-
-    foreach ($portKey in $ports.PSObject.Properties.Name) {
-        $bindings = $ports.$portKey
-        foreach ($binding in $bindings) {
-            $hostPorts += [int]$binding.HostPort
-        }
-    }
-
-    return $hostPorts | Select-Object -Unique
-}
-
 
 function Get-CICDConfig {
     $configPath = Join-Path $env:WORKSPACE_ROOT "pipelines/shared/config.psd1"

@@ -8,7 +8,7 @@
     DockerComposeFile         = ".devcontainer/docker-compose.yml"
     DockerComposeOverrideFile = "pipelines/shared/docker-compose.override.yml"
     DockerMailpit = @{
-        WebUi = "http://mailpit:8025"
+        Url = "http://mailpit:8025"
         SmtpPort = 1025
         Host = "mailpit"
     }
@@ -16,6 +16,7 @@
     Dockerfile                = "src/ctf-sandbox/Dockerfile"
     PublishDir                = ".artifacts/publish"
     DevAppSettingsFile        = "src/ctf-sandbox/appsettings.web.dev.json"
+    DatabaseFile              = "src/ctf-sandbox/app.db"
 
     TestCategories = @{
         commit = @{

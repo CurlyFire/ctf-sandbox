@@ -24,15 +24,15 @@ if (Test-IsShaAlreadyProcessed -Version $Version) {
 Build-DotNetSolution
 
 $environments = @(
-    New-DockerEnvironment -Name "docker" -Version $Version -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
-    #New-GCloudEnvironment -Name "acceptance" -Version $Version -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
+    #New-DockerEnvironment -Name "docker" -Version $Version -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
+    New-GCloudEnvironment -Name "acceptance" -Version $Version -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
     #New-GCloudEnvironment -Name "e2e" -Version $Version -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
 )
 
 try {
     foreach ($env in $environments) {
-        $env.Deploy()
-        Invoke-Tests -Stage "acceptance" -Env $env.Name
+        $deploymentConfig = $env.Deploy()
+        Invoke-Tests -Stage "acceptance" -Env $env.Name -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken -deploymentConfig $deploymentConfig
     }
 
     Write-Log "✅ Acceptance stage completed successfully"
@@ -40,7 +40,7 @@ try {
 finally {
     Write-Log "🧹 Tearing down environments..."
     foreach ($env in $environments) {
-        $env.Teardown()
+        #$env.Teardown()
     }
 
     try {

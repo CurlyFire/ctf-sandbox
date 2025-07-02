@@ -37,7 +37,7 @@ jobs:
         WORKSPACE_ROOT: ${{ github.workspace }}
       run: |
         $version = "${{ github.sha }}"
-        $psArgs = @("-Version", $version)
+        $psArgs = @("-Version", $version, "-AdminPassword", "${{ secrets.ADMIN_PASSWORD }}", "-IpInfoToken", "${{ secrets.IPINFO_TOKEN }}")
         if ("${{ github.event_name }}" -eq "push") {
           $psArgs += "-PushImage"
         }

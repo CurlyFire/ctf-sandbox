@@ -2,6 +2,13 @@
 param(
     [Parameter(Mandatory = $true)]
     [string]$Version,
+
+    [Parameter(Mandatory = $true)]
+    [string]$AdminPassword,
+
+    [Parameter(Mandatory = $true)]
+    [string]$IpInfoToken,
+
     [switch]$PushImage
 )
 
@@ -15,8 +22,11 @@ Write-Log "🚀 Starting commit stage"
 # 1. Build the solution
 Build-DotNetSolution
 
-# 2. Run tests for commit stage categories
-Invoke-Tests -Stage "commit"
+# Set secrets to the in process host environment
+$env:AdminAccount__Password = $AdminPassword
+$env:IpInfo__Token = $IpInfoToken
+# 2. Run tests with the host in process for commit stage categories
+Invoke-Tests -Stage "commit" -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
 
 # 3. Publish .NET app
 Publish-DotNetApp

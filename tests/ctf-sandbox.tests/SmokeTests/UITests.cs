@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using ctf_sandbox.tests.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Playwright;

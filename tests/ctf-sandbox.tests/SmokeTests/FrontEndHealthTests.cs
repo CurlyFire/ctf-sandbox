@@ -20,14 +20,14 @@ public class FrontEndHealthTests : IClassFixture<WebServer>
         
         // Check main health endpoint
         var response = await client.GetAsync($"/health");
-        Assert.True(response.IsSuccessStatusCode, $"Health check failed at {_webServer.Url}/health");
+        Assert.True(response.IsSuccessStatusCode, $"Health check failed at {_webServer.Url}/health - status code: {response.StatusCode}");
         
         // Check readiness probe
         response = await client.GetAsync($"/health/ready");
-        Assert.True(response.IsSuccessStatusCode, $"Readiness check failed at {_webServer.Url}/health/ready");
+        Assert.True(response.IsSuccessStatusCode, $"Readiness check failed at {_webServer.Url}/health/ready - status code: {response.StatusCode}");
         
         // Check liveness probe
         response = await client.GetAsync($"/health/live");
-        Assert.True(response.IsSuccessStatusCode, $"Liveness check failed at {_webServer.Url}/health/live");
+        Assert.True(response.IsSuccessStatusCode, $"Liveness check failed at {_webServer.Url}/health/live - status code: {response.StatusCode}");
     }
 }
