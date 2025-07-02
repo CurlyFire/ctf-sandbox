@@ -33,6 +33,7 @@ public class ExternalSystemsHealthTests
                 client.DefaultRequestHeaders.Authorization = 
                     new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
             }
+            Console.WriteLine($"Connecting to Mailpit at {url} at time {DateTime.Now}");
             response = await client.GetAsync(url);
         }
         // Check if the response is successful
