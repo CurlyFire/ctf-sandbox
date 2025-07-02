@@ -13,6 +13,7 @@ class CICDConfig {
     [hashtable]$TestCategories
     [hashtable]$DockerMailpit
     [string]$DockerDevContainerWebUrl
+    [string]$DatabaseFile
 
     CICDConfig([hashtable]$rawConfig) {
         $this.ProjectId                      = $rawConfig.ProjectId
@@ -29,6 +30,7 @@ class CICDConfig {
         $this.DevAppSettingsFile             = $rawConfig.DevAppSettingsFile
         $this.DockerMailpit                  = $rawConfig.DockerMailpit
         $this.DockerDevContainerWebUrl       = $rawConfig.DockerDevContainerWebUrl
+        $this.DatabaseFile                   = $rawConfig.DatabaseFile
     }
 
     [string[]] GetTestCategories([string]$stage, [string]$env = "Default") {
@@ -154,14 +156,16 @@ class DockerEnvironment : Environment {
 
     [DeploymentConfiguration] Deploy() {
         Write-Log "🐳 Deploying Docker environment $($this.Name) with version $($this.Version)"
-
+        $dbFilePath = $this.Config.GetDatabaseFilePath()
+        $backupPath = "$dbFilePath.bak"
         # Backup database file if it exists
         try {
-        $dbFilePath = $this.Config.GetDatabaseFilePath()
+        
         if (Test-Path $dbFilePath) {
-            $backupPath = "$dbFilePath.bak"
             Copy-Item -Path $dbFilePath -Destination $backupPath -Force
             Remove-Item -Path $dbFilePath -Force
+            # Initialize a new database file to circumvent issues with owner of file if initialized by docker (will be root)
+            New-Item -ItemType File -Path $dbFilePath
             Write-Log "🔄 Backed up database file to $backupPath"
         } else {
             Write-Log "ℹ️ No database file found to backup."
@@ -208,8 +212,6 @@ class DockerEnvironment : Environment {
         }
         finally {
             #Restore the database file from backup if it exists
-            $dbFilePath = $this.Config.GetDatabaseFilePath()
-            $backupPath = "$dbFilePath.bak"
             if (Test-Path $backupPath) {
                 Copy-Item -Path $backupPath -Destination $dbFilePath -Force
                 Remove-Item -Path $backupPath -Force
