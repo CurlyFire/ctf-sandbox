@@ -138,6 +138,10 @@ class DockerEnvironment : Environment {
 
         while ($true) {
             $containers = Invoke-NativeCommand docker compose -f $composeFile ps --format json | ConvertFrom-Json
+            Write-Log "🐳 Current container statuses:"
+            foreach ($container in $containers) {
+                Write-Log " - $($container.Name): $($container.State) (Health: $($container.Health))"
+            }            
             $unhealthyContainers = $containers | Where-Object { $_.Health -and $_.Health -ne "healthy" }
             
             if (-not $unhealthyContainers) {
