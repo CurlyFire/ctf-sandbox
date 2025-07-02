@@ -8,9 +8,9 @@
     DockerComposeFile         = ".devcontainer/docker-compose.yml"
     DockerComposeOverrideFile = "pipelines/shared/docker-compose.override.yml"
     DockerMailpit = @{
-        Url = "http://mailpit:8025"
+        Url = "http://localhost:8025"
         SmtpPort = 1025
-        Host = "mailpit"
+        Host = "localhost"
     }
     DockerDevContainerWebUrl  = "http://localhost:8080"
     Dockerfile                = "src/ctf-sandbox/Dockerfile"

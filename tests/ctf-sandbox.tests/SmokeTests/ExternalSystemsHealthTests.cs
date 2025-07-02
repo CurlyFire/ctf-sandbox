@@ -2,19 +2,11 @@ using System.Net.Http.Headers;
 using System.Text;
 using ctf_sandbox.tests.Extensions;
 using Microsoft.Extensions.Configuration;
-using Xunit.Abstractions;
 
 namespace ctf_sandbox.tests.SmokeTests;
 
 public class ExternalSystemsHealthTests
 {
-    private readonly ITestOutputHelper _output;
-
-    public ExternalSystemsHealthTests(ITestOutputHelper output)
-    {
-        _output = output;
-    }
-
     [Trait("Category", "Smoke_ExternalSystemsHealth")]
     [Fact]
     public async Task Mailpit_ShouldBeUpAndRunning()
@@ -40,7 +32,6 @@ public class ExternalSystemsHealthTests
                 client.DefaultRequestHeaders.Authorization = 
                     new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
             }
-            _output.WriteLine($"Connecting to Mailpit at {url} at time {DateTime.Now}");
             response = await client.GetAsync(url);
         }
         // Check if the response is successful
