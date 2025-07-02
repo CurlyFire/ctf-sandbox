@@ -1,0 +1,25 @@
+services:
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ../:/workspaces/ctf-sandbox
+    command: sleep infinity
+    depends_on:
+      - mailpit
+    links:
+      - mailpit
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+
+  mailpit:
+    image: axllent/mailpit
+    ports:
+      - "8025:8025"   # Web UI
+      - "1025:1025"   # SMTP
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8025"]
+      interval: 5s
+      timeout: 3s
+      retries: 5

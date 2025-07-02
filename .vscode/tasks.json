@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/src/ctf-sandbox.csproj",
+                "${workspaceFolder}/src/ctf-sandbox/ctf-sandbox.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -23,7 +23,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/src/ctf-sandbox.csproj",
+                "${workspaceFolder}/src/ctf-sandbox/ctf-sandbox.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -37,7 +37,7 @@
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/src/ctf-sandbox.csproj"
+                "${workspaceFolder}/src/ctf-sandbox/ctf-sandbox.csproj"
             ],
             "problemMatcher": "$msCompile"
         }
