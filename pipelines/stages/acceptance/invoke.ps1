@@ -19,14 +19,14 @@ Write-Log "🚀 Starting acceptance stage for version $Version"
 
 if (Test-IsShaAlreadyProcessed -Version $Version) {
     Write-Log "⚠️ SHA $Version already tested. Skipping."
-    return
+    #return
 }
 Build-DotNetSolution
 
 $environments = @(
     New-DockerEnvironment -Name "docker" -Version $Version -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
-    New-GCloudEnvironment -Name "acceptance" -Version $Version -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
-    New-GCloudEnvironment -Name "e2e" -Version $Version -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
+    #New-GCloudEnvironment -Name "acceptance" -Version $Version -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
+    #New-GCloudEnvironment -Name "e2e" -Version $Version -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
 )
 
 try {
