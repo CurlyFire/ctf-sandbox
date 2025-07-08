@@ -13,6 +13,18 @@ class GoogleCloudConfig {
     [string]$Region
     [string]$Zone
     [string]$Bucket
+
+    [string] GetTestedShaGcsPath([string]$version) {
+        if (-not $version) {
+            throw "Version must be specified to get the GCS path."
+        }
+        
+        if (-not $this.Bucket) {
+            throw "Google Cloud Bucket is not configured."
+        }
+
+    return "gs://$($this.Bucket)/tested-shas/$version"
+    }
 }
 
 class AppConfig : WorkspaceBoundConfig {
@@ -112,7 +124,7 @@ class CICDConfig {
         $compose.MailPit = $mailpit
 
         $webapp = [DockerAppConfig]::new()
-        $webapp.HttpPort = $rawConfig.DockerCompose.App.Port
+        $webapp.HttpPort = $rawConfig.DockerCompose.App.HttpPort
         $compose.App = $webapp
 
         $this.DockerCompose = $compose
@@ -541,27 +553,28 @@ function Write-Log {
 
 function Build-DotNetSolution {
     [CICDConfig]$config = Get-CICDConfig
-    Write-Log "Building .NET solution at $($config.GetSolutionPath())"
-    Invoke-NativeCommand dotnet build $config.GetSolutionPath() -c Debug
+    $solutionPath = $config.App.GetSolutionPath()
+    Write-Log "Building .NET solution at $solutionPath"
+    Invoke-NativeCommand dotnet build $solutionPath -c Debug
 }
 
 function Invoke-Tests {
     param(
         [string]$Stage,
         [string]$Env = "Default",
-        [EnvironmentConfiguration]$envConfig = $null
+        [EnvironmentConfiguration]$EnvConfig = $null
     )
     [CICDConfig]$config = Get-CICDConfig
     $Categories = $config.GetTestCategories($Stage, $Env)
     try 
     {
-        if ($null -ne $envConfig) {
+        if ($null -ne $EnvConfig) {
             Write-Log "Overriding test app settings with provided configuration using environment variables"
-            $env:AdminPassword = $envConfig.AdminPassword
-            $env:WebServer__Url = $envConfig.WebServerUrl
-            $env:Mailpit__Url = $envConfig.MailpitUrl
-            $env:IpInfo__Url = $envConfig.IpInfoUrl
-            $env:IpInfo__Token = $envConfig.IpInfoToken
+            $env:AdminPassword = $EnvConfig.AdminPassword
+            $env:WebServer__Url = $EnvConfig.WebServerUrl
+            $env:Mailpit__Url = $EnvConfig.MailpitUrl
+            $env:IpInfo__Url = $EnvConfig.IpInfoUrl
+            $env:IpInfo__Token = $EnvConfig.IpInfoToken
         } else {
             Write-Log "No deployment configuration provided, using app settings from config"
         }
@@ -624,8 +637,9 @@ function Test-IsShaAlreadyProcessed {
         [Parameter(Mandatory = $true)]
         [string]$Version
     )
+    [CICDConfig]$config = Get-CICDConfig
 
-    $objectPath = Get-TestedShaGcsPath -Version $Version
+    $objectPath = $config.GoogleCloud.GetTestedShaGcsPath($Version)
     Write-Log "🔍 Checking if SHA already tested: $Version"
     $result = & gsutil ls $objectPath 2>$null
 
@@ -638,25 +652,14 @@ function Register-TestedSha {
         [Parameter(Mandatory = $true)]
         [string]$Version
     )
-
-    $bucketPath = Get-TestedShaGcsPath -Version $Version
+    [CICDConfig]$config = Get-CICDConfig
+    $bucketPath = $config.GoogleCloud.GetTestedShaGcsPath($Version)
     Write-Log "📦 Registering SHA $Version as tested"
 
     $tmpFile = New-TemporaryFile
     "Tested on $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')" | Set-Content $tmpFile
     Invoke-NativeCommand gsutil cp $tmpFile $bucketPath | Out-Null
     Remove-Item $tmpFile -Force
-}
-
-
-function Get-TestedShaGcsPath {
-    param(
-        [Parameter(Mandatory = $true)]
-        [string]$Version
-    )
-
-    [CICDConfig]$config = Get-CICDConfig
-    return "gs://$($config.BucketName)/tested-shas/$Version"
 }
 
 function New-GCloudEnvironment {

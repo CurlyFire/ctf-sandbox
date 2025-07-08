@@ -15,8 +15,8 @@
         DockerImageName           = "us-central1-docker.pkg.dev/fifth-compiler-458221-c9/ctf-sandbox-repo/ctf-sandbox"
     }
     DockerCompose = @{
-        File                      = "docker-compose.yml"
-        OverrideFile              = "docker-compose.override.yml"
+        File                      = ".devcontainer/docker-compose.yml"
+        OverrideFile              = "pipelines/shared/docker-compose.override.yml"
         MailPit = @{
             HttpPort  = 8025
             SmtpPort = 1025
