@@ -1,23 +1,33 @@
 @{
-    ProjectId                 = "fifth-compiler-458221-c9"
-    Region                    = "us-central1"
-    BucketName                = "ctf-sandbox"
-    DockerImageName           = "us-central1-docker.pkg.dev/fifth-compiler-458221-c9/ctf-sandbox-repo/ctf-sandbox"
-    DotnetSolution            = "src/ctf-sandbox/ctf-sandbox.sln"
-    DotnetProject             = "src/ctf-sandbox/ctf-sandbox.csproj"
-    DockerComposeFile         = ".devcontainer/docker-compose.yml"
-    DockerComposeOverrideFile = "pipelines/shared/docker-compose.override.yml"
-    DockerMailpit = @{
-        Url = "http://localhost:8025"
-        SmtpPort = 1025
-        Host = "localhost"
+    GoogleCloud = @{
+        ProjectId = "fifth-compiler-458221-c9"
+        Region    = "us-central1"
+        Zone      = "us-central1-a"
+        Bucket    = "ctf-sandbox"
     }
-    DockerDevContainerWebUrl  = "http://localhost:8080"
-    Dockerfile                = "src/ctf-sandbox/Dockerfile"
-    PublishDir                = ".artifacts/publish"
-    DevAppSettingsFile        = "src/ctf-sandbox/appsettings.web.dev.json"
-    DatabaseFile              = "src/ctf-sandbox/app.db"
-
+    App = @{
+        DotnetSolution            = "src/ctf-sandbox/ctf-sandbox.sln"
+        DotnetProject             = "src/ctf-sandbox/ctf-sandbox.csproj"
+        Dockerfile                = "src/ctf-sandbox/Dockerfile"
+        DevAppSettingsFile        = "src/ctf-sandbox/appsettings.web.dev.json"
+        DatabaseFile              = "src/ctf-sandbox/app.db"
+        PublishDir                = ".artifacts/publish"
+        DockerImageName           = "us-central1-docker.pkg.dev/fifth-compiler-458221-c9/ctf-sandbox-repo/ctf-sandbox"
+    }
+    DockerCompose = @{
+        File                      = ".devcontainer/docker-compose.yml"
+        OverrideFile              = "pipelines/shared/docker-compose.override.yml"
+        MailPit = @{
+            HttpPort  = 8025
+            SmtpPort = 1025
+        }
+        App = @{
+            HttpPort = 8080
+        }
+    }
+    IpInfo = @{
+        Url   = "https://ipinfo.io"
+    }
     TestCategories = @{
         commit = @{
             Default = @("Unit", "NarrowIntegration", "Component", "ContractVerification")

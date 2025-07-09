@@ -19,7 +19,7 @@ Write-Log "🚀 Starting acceptance stage for version $Version"
 
 if (Test-IsShaAlreadyProcessed -Version $Version) {
     Write-Log "⚠️ SHA $Version already tested. Skipping."
-    return
+    #return
 }
 Build-DotNetSolution
 
@@ -31,8 +31,8 @@ $environments = @(
 
 try {
     foreach ($env in $environments) {
-        $deploymentConfig = $env.Deploy()
-        Invoke-Tests -Stage "acceptance" -Env $env.Name -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken -deploymentConfig $deploymentConfig
+        $envConfig = $env.Deploy()
+        Invoke-Tests -Stage "acceptance" -Env $env.Name -EnvConfig $envConfig
     }
 
     Write-Log "✅ Acceptance stage completed successfully"

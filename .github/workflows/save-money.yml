@@ -1,0 +1,25 @@
+name: Save money by tearing down GCP resources
+
+on:
+  schedule:
+    - cron: '0 */8 * * *'  # Every 8 hours
+  workflow_dispatch:
+
+jobs:
+  run-teardown:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup requirements to deploy
+      uses: ./.github/actions/gcloud-setup
+      with:
+        gcp_project_id: ${{ secrets.GCP_PROJECT_ID }}
+        gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
+
+    - name: Run teardown all gcloud script
+      shell: pwsh
+      run: |
+        ./pipelines/teardown-all-gcloud.ps1
