@@ -25,8 +25,8 @@ Build-DotNetSolution
 
 $environments = @(
     New-DockerEnvironment -Name "docker" -Version $Version -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
-    #New-GCloudEnvironment -Name "acceptance" -Version $Version -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
-    #New-GCloudEnvironment -Name "e2e" -Version $Version -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
+    New-GCloudEnvironment -Name "acceptance" -Version $Version -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
+    New-GCloudEnvironment -Name "e2e" -Version $Version -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
 )
 
 try {

@@ -18,7 +18,7 @@ services:
     environment:
       - MP_UI_AUTH=admin:${AdminPassword}
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://admin:${AdminPassword}@localhost:8025"]
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8025/readyz"]
       interval: 5s
       timeout: 3s
       retries: 5      

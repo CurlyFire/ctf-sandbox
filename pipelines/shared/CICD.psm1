@@ -342,7 +342,8 @@ class GCloudEnvironment : Environment {
             --subnet=default `
             --vpc-egress=all-traffic `
             --args="--database=https://$rqliteUrl" `
-            --set-env-vars="MP_UI_AUTH=admin:$($this.AdminPassword)"
+            --set-env-vars="MP_UI_AUTH=admin:$($this.AdminPassword)" `
+            --startup-probe=httpGet.path=/readyz
 
         $mailpitSa = (gcloud run services describe "mailpit-ui-$($this.Name)" `
             --region=$($this.Config.GoogleCloud.Region) `
@@ -477,7 +478,8 @@ class GCloudEnvironment : Environment {
             --allow-unauthenticated `
             --vpc-connector=run-connector `
             --vpc-egress=all-traffic `
-            --set-env-vars="EmailSettings__SmtpServer=$smtpIp,AdminAccount__Password=$($this.AdminPassword),EmailSettings__MailpitUrl=https://$mailpitUrl,IPInfo__Token=$($this.IpInfoToken)"
+            --set-env-vars="EmailSettings__SmtpServer=$smtpIp,AdminAccount__Password=$($this.AdminPassword),EmailSettings__MailpitUrl=https://$mailpitUrl,IPInfo__Token=$($this.IpInfoToken)" `
+            --startup-probe=httpGet.path=/health 
 
         Write-Host "✅ Deployment complete"
 
@@ -518,7 +520,7 @@ class GCloudEnvironment : Environment {
             }
 
             Write-Log "🌐 Getting GKE credentials"
-            & gcloud container clusters get-credentials $clusterName --region=$($this.Config.GoogleCloud.Region)
+            & gcloud container clusters get-credentials $clusterName --zone=$($this.Config.GoogleCloud.Zone)
             if ($LASTEXITCODE -ne 0) {
                 Write-Log "⚠️ Failed to get credentials for GKE cluster '$clusterName'"
                 return
@@ -743,7 +745,8 @@ function Invoke-NativeCommand() {
     $command = $args[0]
     $commandArgs = @()
     if ($args.Count -gt 1) {
-        $commandArgs = $args[1..($args.Count - 1)]
+        # Always force array, even if only one element
+        $commandArgs = @($args[1..($args.Count - 1)])
     }
 
     & $command $commandArgs

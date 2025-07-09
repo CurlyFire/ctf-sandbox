@@ -1,4 +1,4 @@
-name: Teardown All GCloud Resources
+name: Save money by tearing down GCP resources
 
 on:
   schedule:
