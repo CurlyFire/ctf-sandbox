@@ -180,16 +180,16 @@ function Invoke-Tests {
 
 function Invoke-LocalTests{
     param(
-        [string]$adminPassword,
-        [string]$ipInfoToken,
-        [string]$stage
+        [string]$AdminPassword,
+        [string]$IpInfoToken,
+        [string]$Stage
     )
     try {
     # Set secrets to the in process host environment
-    $env:AdminAccount__Password = $adminPassword
-    $env:IpInfo__Token = $ipInfoToken
+    $env:AdminAccount__Password = $AdminPassword
+    $env:IpInfo__Token = $IpInfoToken
     # 2. Run tests with the host in process for commit stage categories
-    Invoke-Tests -Stage $stage -AdminPassword $AdminPassword -IpInfoToken $ipInfoToken
+    Invoke-Tests -Stage $Stage -AdminPassword $AdminPassword -IpInfoToken $ipInfoToken
 }
 finally {
     # Clean up environment variables

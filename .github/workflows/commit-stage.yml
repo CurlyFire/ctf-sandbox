@@ -21,32 +21,39 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Setup requirements to build and test
-      uses: ./.github/actions/build-setup
-
-    - name: Setup requirements to deploy
-      uses: ./.github/actions/gcloud-setup
+    - name: Build and run dev container task
+      uses: devcontainers/ci@v0.3
       with:
-        gcp_project_id: ${{ secrets.GCP_PROJECT_ID }}
-        gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
-      if: github.event_name == 'push'
+        # Change this to be your CI task/script
+        runCmd: echo bonjour
 
-    - name: Run commit stage script
-      shell: pwsh
-      env:
-        WORKSPACE_ROOT: ${{ github.workspace }}
-      run: |
-        $version = "${{ github.sha }}"
-        $psArgs = @("-Version", $version, "-AdminPassword", "${{ secrets.ADMIN_PASSWORD }}", "-IpInfoToken", "${{ secrets.IPINFO_TOKEN }}")
-        if ("${{ github.event_name }}" -eq "push") {
-          $psArgs += "-PushImage"
-        }
-        & pwsh ./pipelines/stages/commit/invoke.ps1 @psArgs
 
-    - name: Publish test results
-      uses: dorny/test-reporter@v1
-      if: always()
-      with:
-        name: .NET Tests
-        path: '**/*.trx'
-        reporter: dotnet-trx
+    # - name: Setup requirements to build and test
+    #   uses: ./.github/actions/build-setup
+
+    # - name: Setup requirements to deploy
+    #   uses: ./.github/actions/gcloud-setup
+    #   with:
+    #     gcp_project_id: ${{ secrets.GCP_PROJECT_ID }}
+    #     gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
+    #   if: github.event_name == 'push'
+
+    # - name: Run commit stage script
+    #   shell: pwsh
+    #   env:
+    #     WORKSPACE_ROOT: ${{ github.workspace }}
+    #   run: |
+    #     $version = "${{ github.sha }}"
+    #     $psArgs = @("-Version", $version, "-AdminPassword", "${{ secrets.ADMIN_PASSWORD }}", "-IpInfoToken", "${{ secrets.IPINFO_TOKEN }}")
+    #     if ("${{ github.event_name }}" -eq "push") {
+    #       $psArgs += "-PushImage"
+    #     }
+    #     & pwsh ./pipelines/stages/commit/invoke.ps1 @psArgs
+
+    # - name: Publish test results
+    #   uses: dorny/test-reporter@v1
+    #   if: always()
+    #   with:
+    #     name: .NET Tests
+    #     path: '**/*.trx'
+    #     reporter: dotnet-trx
