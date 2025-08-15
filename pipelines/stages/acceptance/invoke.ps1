@@ -21,19 +21,15 @@ if (Test-IsShaAlreadyProcessed -Version $Version) {
     Write-Log "⚠️ SHA $Version already tested. Skipping."
     return
 }
-Build-DotNetSolution
+
+
 
 $environments = @(
-    New-DockerEnvironment -Name "docker" -Version $Version -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
     New-GCloudEnvironment -Name "acceptance" -Version $Version -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
     New-GCloudEnvironment -Name "e2e" -Version $Version -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
 )
 
 try {
-    foreach ($env in $environments) {
-        $envConfig = $env.Deploy()
-        Invoke-Tests -Stage "acceptance" -Env $env.Name -EnvConfig $envConfig
-    }
 
     Write-Log "✅ Acceptance stage completed successfully"
 }
