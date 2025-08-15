@@ -1,9 +1,10 @@
 @{
     GoogleCloud = @{
-        ProjectId = "fifth-compiler-458221-c9"
-        Region    = "us-central1"
-        Zone      = "us-central1-a"
-        Bucket    = "ctf-sandbox"
+        ProjectId     = "fifth-compiler-458221-c9"
+        ProjectNumber = "663949819005"
+        Region        = "us-central1"
+        Zone          = "us-central1-a"
+        Bucket        = "ctf-sandbox"
     }
     App = @{
         DotnetSolution            = "src/ctf-sandbox/ctf-sandbox.sln"
@@ -16,30 +17,20 @@
     }
     DockerCompose = @{
         File                      = ".devcontainer/docker-compose.yml"
-        OverrideFile              = "pipelines/shared/docker-compose.override.yml"
-        MailPit = @{
-            HttpPort  = 8025
-            SmtpPort = 1025
-        }
-        App = @{
-            HttpPort = 8080
-        }
     }
     IpInfo = @{
         Url   = "https://ipinfo.io"
     }
     TestCategories = @{
         commit = @{
-            Default = @("Unit", "NarrowIntegration", "Component", "ContractVerification")
+            Default    = @("Unit", "NarrowIntegration", "Component", "ContractVerification")
         }
         acceptance = @{
-            docker     = @("Smoke_ExternalSystemsHealth", "Smoke_FrontEndHealth", "Smoke_UI", "Acceptance")
-            acceptance = @("Smoke_ExternalSystemsHealth", "Smoke_FrontEndHealth", "Smoke_UI", "Acceptance")
+            Default    = @("Smoke_ExternalSystemsHealth", "Smoke_FrontEndHealth", "Smoke_UI", "Acceptance")
             e2e        = @("Smoke_ExternalSystemsHealth", "Smoke_FrontEndHealth", "Smoke_UI", "Acceptance", "ExternalSystemContract", "E2E")
         }
         release = @{
-            uat        = @("Smoke_ExternalSystemsHealth", "Smoke_FrontEndHealth", "Smoke_UI")
-            production = @("Smoke_ExternalSystemsHealth", "Smoke_FrontEndHealth", "Smoke_UI")
+            Default    = @("Smoke_ExternalSystemsHealth", "Smoke_FrontEndHealth", "Smoke_UI")
         }
     }
 }
