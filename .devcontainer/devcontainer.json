@@ -10,9 +10,6 @@
 	  "workspaceFolder": "/workspaces/ctf-sandbox",
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	"forwardPorts": [5191],
-	"features": {
-	"ghcr.io/devcontainers/features/docker-in-docker:2": {}
-	},
 	"containerEnv": {
 	    "WORKSPACE_ROOT": "${containerWorkspaceFolder}", // Set the workspace root for powershell scripts
 	  	// Temporary fix for playwright tests in dev containers.  It's reading the BROWSER environment variable if
