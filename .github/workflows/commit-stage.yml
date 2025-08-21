@@ -12,6 +12,7 @@ permissions:
   checks: write
   contents: read
 
+
 jobs:
   build-and-test:
     name: CI / Build and Test
@@ -24,6 +25,9 @@ jobs:
     - name: Build and run dev container task
       uses: devcontainers/ci@v0.3
       with:
+        imageName: ghcr.io/curlyfire/ctf-sandbox-devcontainer
+        cacheFrom: ghcr.io/curlyfire/ctf-sandbox-devcontainer
+        push: always
         # Change this to be your CI task/script
         runCmd: echo bonjour
 
