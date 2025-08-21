@@ -11,6 +11,7 @@ on:
 permissions:
   checks: write
   contents: read
+  packages: write
 
 
 jobs:
@@ -32,14 +33,14 @@ jobs:
     - name: Pre-build dev container
       uses: devcontainers/ci@v0.3
       with:
-        imageName: ghcr.io/curlyfire/ctf-sandbox-devcontainer
-        cacheFrom: ghcr.io/curlyfire/ctf-sandbox-devcontainer
+        imageName: ghcr.io/${{ github.repository_owner }}/ctf-sandbox-devcontainer
+        cacheFrom: ghcr.io/${{ github.repository_owner }}/ctf-sandbox-devcontainer
         push: always
 
     - name: Build and run dev container task
       uses: devcontainers/ci@v0.3
       with:
-        cacheFrom: ghcr.io/curlyfire/ctf-sandbox-devcontainer
+        cacheFrom: ghcr.io/${{ github.repository_owner }}/ctf-sandbox-devcontainer
         push: always
         # Change this to be your CI task/script
         runCmd: echo bonjour
