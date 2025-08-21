@@ -13,7 +13,6 @@ permissions:
   contents: read
   packages: write
 
-
 jobs:
   build-and-test:
     name: CI / Build and Test
@@ -33,17 +32,17 @@ jobs:
     - name: Pre-build dev container
       uses: devcontainers/ci@v0.3
       with:
-        imageName: ghcr.io/${{ github.repository_owner }}/ctf-sandbox-devcontainer
-        cacheFrom: ghcr.io/${{ github.repository_owner }}/ctf-sandbox-devcontainer
+        imageName: ghcr.io/${{ github.repository_owner }}/test
+        cacheFrom: ghcr.io/${{ github.repository_owner }}/test
         push: always
 
-    - name: Build and run dev container task
-      uses: devcontainers/ci@v0.3
-      with:
-        cacheFrom: ghcr.io/${{ github.repository_owner }}/ctf-sandbox-devcontainer
-        push: always
-        # Change this to be your CI task/script
-        runCmd: echo bonjour
+    # - name: Build and run dev container task
+    #   uses: devcontainers/ci@v0.3
+    #   with:
+    #     cacheFrom: ghcr.io/${{ github.repository_owner }}/test
+    #     push: always
+    #     # Change this to be your CI task/script
+    #     runCmd: echo bonjour
 
 
     # - name: Setup requirements to build and test
