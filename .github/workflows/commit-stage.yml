@@ -40,7 +40,7 @@ jobs:
       uses: devcontainers/ci@v0.3
       with:
         cacheFrom: ghcr.io/curlyfire/test
-        runCmd: echo bonjour
+        runCmd: echo $WORKSPACE_ROOT
 
 
     # - name: Setup requirements to build and test
