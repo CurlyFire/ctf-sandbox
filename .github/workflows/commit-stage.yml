@@ -62,6 +62,7 @@ jobs:
           # Configure Docker auth non-interactively
           gcloud auth configure-docker "${{ secrets.GCP_REGION }}-docker.pkg.dev" --quiet
           PS
+          Write-Host "Hello"
 
     # # - name: Setup requirements to build and test
     # #   uses: ./.github/actions/build-setup
