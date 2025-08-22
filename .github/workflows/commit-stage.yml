@@ -45,14 +45,18 @@ jobs:
           GCP_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }}
           GCP_SA_KEY=${{ secrets.GCP_SA_KEY }}
         runCmd: |
-          set -euo pipefail
+          pwsh -Command @'
+          $ErrorActionPreference = "Stop"
 
-          # Feed the JSON secret directly to gcloud via stdin
-          cat <<'EOF' | gcloud auth activate-service-account \
-            --key-file=- \
-            --project "${{ secrets.GCP_PROJECT_ID }}"
+          # Put the JSON service account key into a here-string
+          $jsonKey = @"
           ${{ secrets.GCP_SA_KEY }}
-          EOF
+          "@
+
+          # Pipe the here-string to gcloud
+          $jsonKey | gcloud auth activate-service-account `
+            --key-file=- `
+            --project "${{ secrets.GCP_PROJECT_ID }}"
 
           gcloud auth configure-docker ${{ secrets.GCP_REGION }}-docker.pkg.dev --quiet
 
