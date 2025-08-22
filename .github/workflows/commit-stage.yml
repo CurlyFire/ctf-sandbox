@@ -29,12 +29,12 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Pre-build dev container
-      uses: devcontainers/ci@v0.3
-      with:
-        imageName: ghcr.io/curlyfire/test
-        cacheFrom: ghcr.io/curlyfire/test
-        push: always
+    # - name: Pre-build dev container
+    #   uses: devcontainers/ci@v0.3
+    #   with:
+    #     imageName: ghcr.io/curlyfire/test
+    #     cacheFrom: ghcr.io/curlyfire/test
+    #     push: always
 
     - name: Build and run dev container task
       uses: devcontainers/ci@v0.3
