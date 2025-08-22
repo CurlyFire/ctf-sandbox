@@ -29,18 +29,33 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Pre-build dev container
-      uses: devcontainers/ci@v0.3
-      with:
-        imageName: ghcr.io/curlyfire/ctf-sandbox-devcontainer
-        cacheFrom: ghcr.io/curlyfire/ctf-sandbox-devcontainer
-        push: always
-
-    # - name: Build and run dev container task
+    # - name: Pre-build dev container
     #   uses: devcontainers/ci@v0.3
     #   with:
+    #     imageName: ghcr.io/curlyfire/ctf-sandbox-devcontainer
     #     cacheFrom: ghcr.io/curlyfire/ctf-sandbox-devcontainer
-    #     runCmd: echo $WORKSPACE_ROOT
+    #     push: always
+
+    - name: Build and run dev container task
+      uses: devcontainers/ci@v0.3
+      env:
+        GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+        GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+      with:
+        cacheFrom: ghcr.io/curlyfire/ctf-sandbox-devcontainer
+        runCmd: |
+          pwsh -Command @'
+            $ErrorActionPreference = 'Stop'
+
+            # Send the JSON key directly to gcloud via stdin
+            $env:GCP_SA_KEY | gcloud auth activate-service-account `
+              --key-file=- `
+              --project $env:GCP_PROJECT_ID
+
+            # Quick sanity check
+            gcloud auth list
+            gcloud config list project
+          '@
 
     # # - name: Setup requirements to build and test
     # #   uses: ./.github/actions/build-setup
