@@ -29,21 +29,18 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    # - name: Pre-build dev container
-    #   uses: devcontainers/ci@v0.3
-    #   with:
-    #     imageName: ghcr.io/curlyfire/test
-    #     cacheFrom: ghcr.io/curlyfire/test
-    #     push: always
-
-    - name: Build and run dev container task
+    - name: Pre-build dev container
       uses: devcontainers/ci@v0.3
       with:
-        cacheFrom: ghcr.io/curlyfire/test
-        runCmd: echo $WORKSPACE_ROOT
-        
-    - name: check containers
-      run: docker ps -a
+        imageName: ghcr.io/curlyfire/ctf-sandbox-devcontainer
+        cacheFrom: ghcr.io/curlyfire/ctf-sandbox-devcontainer
+        push: always
+
+    # - name: Build and run dev container task
+    #   uses: devcontainers/ci@v0.3
+    #   with:
+    #     cacheFrom: ghcr.io/curlyfire/ctf-sandbox-devcontainer
+    #     runCmd: echo $WORKSPACE_ROOT
 
     # # - name: Setup requirements to build and test
     # #   uses: ./.github/actions/build-setup
