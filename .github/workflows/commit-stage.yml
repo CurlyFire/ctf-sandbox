@@ -38,11 +38,12 @@ jobs:
 
     - name: Build and run dev container task
       uses: devcontainers/ci@v0.3
-      env:
-        GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-        GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+
       with:
         cacheFrom: ghcr.io/curlyfire/ctf-sandbox-devcontainer
+        env: |
+          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
         runCmd: |
           set -euo pipefail
 
