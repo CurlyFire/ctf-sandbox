@@ -45,20 +45,23 @@ jobs:
           GCP_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }}
           GCP_SA_KEY=${{ secrets.GCP_SA_KEY }}
         runCmd: |
-          pwsh -Command @'
-          $ErrorActionPreference = "Stop"
+          set -euo pipefail
+          pwsh -NoProfile -NonInteractive -Command - <<'PS'
+          $ErrorActionPreference = 'Stop'
 
-          # Put the JSON service account key into a here-string
+          # Inject the JSON key as a PowerShell here-string (newlines preserved)
           $jsonKey = @"
           ${{ secrets.GCP_SA_KEY }}
           "@
 
-          # Pipe the here-string to gcloud
+          # Auth from stdin
           $jsonKey | gcloud auth activate-service-account `
             --key-file=- `
             --project "${{ secrets.GCP_PROJECT_ID }}"
 
-          gcloud auth configure-docker ${{ secrets.GCP_REGION }}-docker.pkg.dev --quiet
+          # Configure Docker auth non-interactively
+          gcloud auth configure-docker "${{ secrets.GCP_REGION }}-docker.pkg.dev" --quiet
+          PS
 
     # # - name: Setup requirements to build and test
     # #   uses: ./.github/actions/build-setup
