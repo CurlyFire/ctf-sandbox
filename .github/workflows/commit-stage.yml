@@ -36,11 +36,6 @@ jobs:
     #     cacheFrom: ghcr.io/curlyfire/ctf-sandbox-devcontainer
     #     push: always
 
-
-
-
-
-
     - name: Build and run dev container task
       uses: devcontainers/ci@v0.3
 
@@ -59,9 +54,7 @@ jobs:
           ${{ secrets.GCP_SA_KEY }}
           EOF
 
-          # Sanity checks
-          gcloud auth list
-          gcloud config list project
+          gcloud auth configure-docker ${{ secrets.GCP_REGION }}-docker.pkg.dev
 
     # # - name: Setup requirements to build and test
     # #   uses: ./.github/actions/build-setup
