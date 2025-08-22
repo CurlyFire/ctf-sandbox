@@ -48,22 +48,20 @@ jobs:
           set -euo pipefail
           pwsh -NoProfile -NonInteractive -Command - <<'PS'
           $ErrorActionPreference = 'Stop'
-
+          
           # Inject the JSON key as a PowerShell here-string (newlines preserved)
           $jsonKey = @"
           ${{ secrets.GCP_SA_KEY }}
           "@
-
+          
           # Auth from stdin
           $jsonKey | gcloud auth activate-service-account `
             --key-file=- `
             --project "${{ secrets.GCP_PROJECT_ID }}"
-
+          
           # Configure Docker auth non-interactively
           gcloud auth configure-docker "${{ secrets.GCP_REGION }}-docker.pkg.dev" --quiet
           PS
-          Write-Host "Hello"
-
     # # - name: Setup requirements to build and test
     # #   uses: ./.github/actions/build-setup
 
