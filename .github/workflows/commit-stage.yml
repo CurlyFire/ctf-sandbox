@@ -29,32 +29,32 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    # - name: Pre-build dev container
-    #   uses: devcontainers/ci@v0.3
-    #   with:
-    #     imageName: ghcr.io/curlyfire/ctf-sandbox-devcontainer
-    #     cacheFrom: ghcr.io/curlyfire/ctf-sandbox-devcontainer
-    #     push: always
-
-    - name: Build and run dev container task
+    - name: Pre-build dev container
       uses: devcontainers/ci@v0.3
-
       with:
+        imageName: ghcr.io/curlyfire/ctf-sandbox-devcontainer
         cacheFrom: ghcr.io/curlyfire/ctf-sandbox-devcontainer
-        env: |
-          GCP_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }}
-          GCP_SA_KEY=${{ secrets.GCP_SA_KEY }}
-        runCmd: |
-          set -euo pipefail
+        push: always
 
-          # Feed the JSON secret directly to gcloud via stdin
-          cat <<'EOF' | gcloud auth activate-service-account \
-            --key-file=- \
-            --project "${{ secrets.GCP_PROJECT_ID }}"
-          ${{ secrets.GCP_SA_KEY }}
-          EOF
+    # - name: Build and run dev container task
+    #   uses: devcontainers/ci@v0.3
 
-          gcloud auth configure-docker ${{ secrets.GCP_REGION }}-docker.pkg.dev
+    #   with:
+    #     cacheFrom: ghcr.io/curlyfire/ctf-sandbox-devcontainer
+    #     env: |
+    #       GCP_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }}
+    #       GCP_SA_KEY=${{ secrets.GCP_SA_KEY }}
+    #     runCmd: |
+    #       set -euo pipefail
+
+    #       # Feed the JSON secret directly to gcloud via stdin
+    #       cat <<'EOF' | gcloud auth activate-service-account \
+    #         --key-file=- \
+    #         --project "${{ secrets.GCP_PROJECT_ID }}"
+    #       ${{ secrets.GCP_SA_KEY }}
+    #       EOF
+
+    #       gcloud auth configure-docker ${{ secrets.GCP_REGION }}-docker.pkg.dev
 
     # # - name: Setup requirements to build and test
     # #   uses: ./.github/actions/build-setup
