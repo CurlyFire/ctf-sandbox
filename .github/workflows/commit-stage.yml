@@ -44,7 +44,7 @@ jobs:
       with:
         cacheFrom: ghcr.io/curlyfire/ctf-sandbox-devcontainer
         runCmd: |
-          pwsh -Command @'
+          pwsh -Command {
             $ErrorActionPreference = 'Stop'
 
             # Send the JSON key directly to gcloud via stdin
@@ -55,7 +55,7 @@ jobs:
             # Quick sanity check
             gcloud auth list
             gcloud config list project
-          '@
+          }
 
     # # - name: Setup requirements to build and test
     # #   uses: ./.github/actions/build-setup
