@@ -44,18 +44,16 @@ jobs:
       with:
         cacheFrom: ghcr.io/curlyfire/ctf-sandbox-devcontainer
         runCmd: |
-          pwsh -Command {
-            $ErrorActionPreference = 'Stop'
+          set -euo pipefail
 
-            # Send the JSON key directly to gcloud via stdin
-            $env:GCP_SA_KEY | gcloud auth activate-service-account `
-              --key-file=- `
-              --project $env:GCP_PROJECT_ID
+          # If your secret is plain JSON
+          printf '%s' "$GCP_SA_KEY" | gcloud auth activate-service-account \
+            --key-file=- \
+            --project "$GCP_PROJECT_ID"
 
-            # Quick sanity check
-            gcloud auth list
-            gcloud config list project
-          }
+          # Quick sanity check
+          gcloud auth list
+          gcloud config list project
 
     # # - name: Setup requirements to build and test
     # #   uses: ./.github/actions/build-setup
