@@ -38,7 +38,7 @@ jobs:
 
 
 
-    
+
 
 
     - name: Build and run dev container task
@@ -52,12 +52,14 @@ jobs:
         runCmd: |
           set -euo pipefail
 
-          # If your secret is plain JSON
-          printf '%s' "$GCP_SA_KEY" | gcloud auth activate-service-account \
+          # Feed the JSON secret directly to gcloud via stdin
+          cat <<'EOF' | gcloud auth activate-service-account \
             --key-file=- \
-            --project "$GCP_PROJECT_ID"
+            --project "${{ secrets.GCP_PROJECT_ID }}"
+          ${{ secrets.GCP_SA_KEY }}
+          EOF
 
-          # Quick sanity check
+          # Sanity checks
           gcloud auth list
           gcloud config list project
 
