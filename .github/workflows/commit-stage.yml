@@ -41,10 +41,12 @@ jobs:
       with:
         cacheFrom: ghcr.io/curlyfire/test
         runCmd: echo $WORKSPACE_ROOT
+        
+    - name: check containers
+      run: docker ps -a
 
-
-    # - name: Setup requirements to build and test
-    #   uses: ./.github/actions/build-setup
+    # # - name: Setup requirements to build and test
+    # #   uses: ./.github/actions/build-setup
 
     # - name: Setup requirements to deploy
     #   uses: ./.github/actions/gcloud-setup
