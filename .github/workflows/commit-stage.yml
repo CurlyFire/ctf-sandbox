@@ -37,7 +37,7 @@ jobs:
         cacheFrom: ghcr.io/curlyfire/ctf-sandbox-devcontainer
         push: always
 
-    - name: Build and run dev container task
+    - name: Run commit stage script in dev container
       uses: devcontainers/ci@v0.3
 
       with:
