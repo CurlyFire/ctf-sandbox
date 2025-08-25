@@ -58,7 +58,7 @@ jobs:
           gcloud auth configure-docker "${{ secrets.GCP_REGION }}-docker.pkg.dev" --quiet
 
           # Call the commit pipeline script with args
-          pwsh -NoProfile -NonInteractive -Command @'
+          pwsh -NoProfile -NonInteractive -Command "@'
             $version = "${{ github.sha }}"
             $psArgs = @(
               "-Version", $version,
@@ -69,7 +69,7 @@ jobs:
               $psArgs += "-PushImage"
             }
             & ./pipelines/stages/commit/invoke.ps1 @psArgs
-          '@          
+          '@"
 
     - name: Publish test results
       uses: dorny/test-reporter@v1
