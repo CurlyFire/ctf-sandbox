@@ -120,9 +120,9 @@ class CICDConfig {
 
         return $stageTable[$env]
     }
-} 
+}
 
-class EnvironmentConfiguration {
+class GCloudEnvironment {
     [string]$WebServerUrl
     [string]$MailpitUrl
     [string]$IpInfoUrl
@@ -146,19 +146,19 @@ function Build-DotNetSolution {
 function Invoke-Tests {
     param(
         [string]$Stage,
-        [string]$Env = "Default",
-        [EnvironmentConfiguration]$EnvConfig = $null
+        [string]$EnvironmentName = "Default",
+        [GCloudEnvironment]$GCloudEnvironment = $null
     )
     [CICDConfig]$config = Get-CICDConfig
-    $Categories = $config.GetTestCategories($Stage, $Env)
+    $Categories = $config.GetTestCategories($Stage, $EnvironmentName)
     try 
     {
-        if ($null -ne $EnvConfig) {
+        if ($null -ne $GCloudEnvironment) {
             Write-Log "Overriding test app settings with provided configuration using environment variables"
-            $env:AdminPassword = $EnvConfig.AdminPassword
-            $env:WebServer__Url = $EnvConfig.WebServerUrl
-            $env:Mailpit__Url = $EnvConfig.MailpitUrl
-            $env:IpInfo__Url = $EnvConfig.IpInfoUrl
+            $env:AdminPassword = $GCloudEnvironment.AdminPassword
+            $env:WebServer__Url = $GCloudEnvironment.WebServerUrl
+            $env:Mailpit__Url = $GCloudEnvironment.MailpitUrl
+            $env:IpInfo__Url = $GCloudEnvironment.IpInfoUrl
         } else {
             Write-Log "No deployment configuration provided, using app settings from config"
         }
@@ -265,13 +265,6 @@ function Register-TestedSha {
     "Tested on $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')" | Set-Content $tmpFile
     Invoke-NativeCommandWithoutReturn gsutil cp $tmpFile $bucketPath | Out-Null
     Remove-Item $tmpFile -Force
-}
-
-function Get-LocalAppOnlyEnvironmentConfig {
-    $envConfig = [EnvironmentConfiguration]::new()
-    # Leave empty to enable self hosting in test process
-    $envConfig.WebServerUrl = ""
-    return $envConfig
 }
 
 function ConvertTo-FileFromTemplate {
@@ -384,7 +377,7 @@ function Remove-AllGCloudRessources()
 }
 
 function Deploy-GCloudEnvironment {
-    [OutputType([EnvironmentConfiguration])]
+    [OutputType([GCloudEnvironment])]
     param(
         [Parameter(Mandatory = $true)]
         [string]$Name,
@@ -399,7 +392,7 @@ function Deploy-GCloudEnvironment {
         [string]$IpInfoToken
     )
 
-    Write-Log "🚀 Deploying GCloud environment $Name with version $($this.Version)"
+    Write-Log "🚀 Deploying GCloud environment $Name with version $Version"
 
     [CICDConfig]$config = Get-CICDConfig
 
@@ -424,8 +417,7 @@ function Deploy-GCloudEnvironment {
     Write-Host "Resolved advertised address: $rqliteUrl`:443"
     Invoke-NativeCommandWithoutReturn gcloud run services update "rqlite-$Name" `
         --region=$($config.GoogleCloud.Region) `
-        --update-env-vars=HTTP_ADV_ADDR="$rqliteUrl`:443" `
-        --args="--http-addr=0.0.0.0:4001"
+        --update-env-vars=HTTP_ADV_ADDR="$rqliteUrl`:443"
 
     ### Deploy mailpit-ui
 
@@ -584,7 +576,7 @@ function Deploy-GCloudEnvironment {
     $mailpitUrl = "https://mailpit-ui-$Name-$projectNumber.$($config.GoogleCloud.Region).run.app"
     $webAppUrl = "https://mvc-app-$Name-$projectNumber.$($config.GoogleCloud.Region).run.app"
 
-    $envConfig = [EnvironmentConfiguration]::new()
+    $envConfig = [GCloudEnvironment]::new()
     $envConfig.WebServerUrl = $webAppUrl
     $envConfig.MailpitUrl = $mailpitUrl
     $envConfig.IpInfoUrl = $config.IpInfo.Url
