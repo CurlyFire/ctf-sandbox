@@ -57,19 +57,25 @@ jobs:
           # Configure Docker auth non-interactively
           gcloud auth configure-docker "${{ secrets.GCP_REGION }}-docker.pkg.dev" --quiet
 
-          # Call the commit pipeline script with args
-          pwsh -NoProfile -NonInteractive -Command "@'
-            $version = "${{ github.sha }}"
-            $psArgs = @(
-              "-Version", $version,
-              "-AdminPassword", "${{ secrets.ADMIN_PASSWORD }}",
-              "-IpInfoToken", "${{ secrets.IPINFO_TOKEN }}"
+          VERSION="${{ github.sha }}"
+          ADMIN_PASSWORD="${{ secrets.ADMIN_PASSWORD }}"
+          IPINFO_TOKEN="${{ secrets.IPINFO_TOKEN }}"
+          GITHUB_EVENT_NAME="${{ github.event_name }}"
+
+          psArgs_base=(
+            "-Version" "$VERSION"
+            "-AdminPassword" "$ADMIN_PASSWORD"
+            "-IpInfoToken" "$IPINFO_TOKEN"
+          )
+
+          psArgs_push=()
+          if [ "$GITHUB_EVENT_NAME" == "push" ]; then
+            psArgs_push+=(
+              "-PushImage"
             )
-            if ("${{ github.event_name }}" -eq "push") {
-              $psArgs += "-PushImage"
-            }
-            & ./pipelines/stages/commit/invoke.ps1 @psArgs
-          '@"
+          fi
+
+          pwsh -Command "./pipelines/stages/commit/invoke.ps1 ${psArgs_base[@]} ${psArgs_push[@]}"
 
     - name: Publish test results
       uses: dorny/test-reporter@v1
