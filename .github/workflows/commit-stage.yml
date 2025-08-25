@@ -29,12 +29,13 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    # - name: Pre-build dev container
-    #   uses: devcontainers/ci@v0.3
-    #   with:
-    #     imageName: ghcr.io/curlyfire/ctf-sandbox-devcontainer
-    #     cacheFrom: ghcr.io/curlyfire/ctf-sandbox-devcontainer
-    #     push: always
+    - name: Pre-build dev container and push to GHCR (if on main branch)
+      uses: devcontainers/ci@v0.3
+      if: github.event_name == 'push'
+      with:
+        imageName: ghcr.io/curlyfire/ctf-sandbox-devcontainer
+        cacheFrom: ghcr.io/curlyfire/ctf-sandbox-devcontainer
+        push: always
 
     - name: Build and run dev container task
       uses: devcontainers/ci@v0.3
