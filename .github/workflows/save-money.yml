@@ -10,16 +10,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup requirements to deploy
-      uses: ./.github/actions/gcloud-setup
-      with:
-        gcp_project_id: ${{ secrets.GCP_PROJECT_ID }}
-        gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
+      - name: Run save money script in dev container
+        uses: devcontainers/ci@v0.3
 
-    - name: Run teardown all gcloud script
-      shell: pwsh
-      run: |
-        ./pipelines/teardown-all-gcloud.ps1
+        with:
+          cacheFrom: ghcr.io/curlyfire/ctf-sandbox-devcontainer
+          runCmd: |
+            set -euo pipefail
+
+            # Feed the JSON secret directly to gcloud via stdin
+            cat <<'EOF' | gcloud auth activate-service-account \
+              --key-file=- \
+              --project "${{ secrets.GCP_PROJECT_ID }}"
+            ${{ secrets.GCP_SA_KEY }}
+            EOF
+            
+            # Configure Docker auth non-interactively
+            gcloud auth configure-docker "${{ secrets.GCP_REGION }}-docker.pkg.dev" --quiet
+
+            pwsh -Command "./pipelines/teardown-all-gcloud.ps1"

@@ -48,4 +48,4 @@ jobs:
             "-IpInfoToken" "$IPINFO_TOKEN"
           )
 
-          pwsh -Command "./pipelines/stages/acceptance/invoke.ps1 ${psArgs_base[@]}
+          pwsh -Command "./pipelines/stages/acceptance/invoke.ps1 ${psArgs_base[@]}"
