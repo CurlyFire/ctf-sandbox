@@ -12,10 +12,6 @@
 	"forwardPorts": [5191],
 	"containerEnv": {
 	    "WORKSPACE_ROOT": "${containerWorkspaceFolder}", // Set the workspace root for powershell scripts
-	  	// Temporary fix for playwright tests in dev containers.  It's reading the BROWSER environment variable if
-		// this is not set and throwing.
-		// Issue created here: https://github.com/microsoft/playwright-dotnet/issues/3174
-		"CODESPACES": "true",
 		// This is needed to run the browser tests in the dev container in headed mode.
 		"DISPLAY": "host.docker.internal:0.0"
 	},

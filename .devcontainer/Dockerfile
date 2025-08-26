@@ -4,7 +4,7 @@ FROM mcr.microsoft.com/devcontainers/dotnet:1-9.0-bookworm
 RUN mkdir /tmp/installplaywright && \
     cd /tmp/installplaywright && \
     dotnet new xunit && \
-    dotnet add package Microsoft.Playwright -v 1.52.0 && \
+    dotnet add package Microsoft.Playwright -v 1.54.0 && \
     dotnet build && \
     pwsh ./bin/Debug/net9.0/playwright.ps1 install-deps
 
