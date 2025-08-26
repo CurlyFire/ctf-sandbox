@@ -81,5 +81,6 @@ jobs:
               "-AdminPassword" "$ADMIN_PASSWORD"
               "-IpInfoToken" "$IPINFO_TOKEN"
             )
+            env
 
-            pwsh -Command "./pipelines/stages/release/invoke.ps1 ${psArgs_base[@]}"
+            #pwsh -Command "./pipelines/stages/release/invoke.ps1 ${psArgs_base[@]}"
