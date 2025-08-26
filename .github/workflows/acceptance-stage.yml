@@ -13,19 +13,39 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Setup requirements to build and test
-      uses: ./.github/actions/build-setup
-
-    - name: Setup requirements to deploy
-      uses: ./.github/actions/gcloud-setup
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v2
       with:
-        gcp_project_id: ${{ secrets.GCP_PROJECT_ID }}
-        gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Run acceptance stage script
-      shell: pwsh
-      run: |
-        ./pipelines/stages/acceptance/invoke.ps1 `
-          -Version "${{ github.sha }}" `
-          -AdminPassword "${{ secrets.ADMIN_PASSWORD }}" `
-          -IpInfoToken "${{ secrets.IPINFO_TOKEN }}"
+    - name: Run acceptance stage script in dev container
+      uses: devcontainers/ci@v0.3
+
+      with:
+        cacheFrom: ghcr.io/curlyfire/ctf-sandbox-devcontainer
+        runCmd: |
+          set -euo pipefail
+
+          # Feed the JSON secret directly to gcloud via stdin
+          cat <<'EOF' | gcloud auth activate-service-account \
+            --key-file=- \
+            --project "${{ secrets.GCP_PROJECT_ID }}"
+          ${{ secrets.GCP_SA_KEY }}
+          EOF
+          
+          # Configure Docker auth non-interactively
+          gcloud auth configure-docker "${{ secrets.GCP_REGION }}-docker.pkg.dev" --quiet
+
+          VERSION="${{ github.sha }}"
+          ADMIN_PASSWORD="${{ secrets.ADMIN_PASSWORD }}"
+          IPINFO_TOKEN="${{ secrets.IPINFO_TOKEN }}"
+
+          psArgs_base=(
+            "-Version" "$VERSION"
+            "-AdminPassword" "$ADMIN_PASSWORD"
+            "-IpInfoToken" "$IPINFO_TOKEN"
+          )
+
+          pwsh -Command "./pipelines/stages/acceptance/invoke.ps1 ${psArgs_base[@]}

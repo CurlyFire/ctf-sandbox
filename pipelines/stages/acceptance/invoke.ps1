@@ -21,27 +21,28 @@ if (Test-IsShaAlreadyProcessed -Version $Version) {
     Write-Log "⚠️ SHA $Version already tested. Skipping."
     return
 }
-Build-DotNetSolution
 
-$environments = @(
-    New-DockerEnvironment -Name "docker" -Version $Version -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
-    New-GCloudEnvironment -Name "acceptance" -Version $Version -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
-    New-GCloudEnvironment -Name "e2e" -Version $Version -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
-)
-
+$environmentNamesToDeploy = @("acceptance","e2e")
+$deployedEnvironmentNames = @()
 try {
-    foreach ($env in $environments) {
-        $envConfig = $env.Deploy()
-        Invoke-Tests -Stage "acceptance" -Env $env.Name -EnvConfig $envConfig
+    foreach ($name in $environmentNamesToDeploy) {
+        $deployedEnvironmentNames += $name
+        $environment = Deploy-GCloudEnvironment -Name $name -Version $Version -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
+        Invoke-Tests -Stage "acceptance" -EnvironmentName $environment.Name -GCloudEnvironment $environment
     }
 
     Write-Log "✅ Acceptance stage completed successfully"
 }
 finally {
     Write-Log "🧹 Tearing down environments..."
-    foreach ($env in $environments) {
-        $env.Teardown()
+    foreach ($name in $deployedEnvironmentNames) {
+        try {
+            Remove-GCloudEnvironment -Name $name
+        } catch {
+            Write-Log "⚠️ Failed to remove environment $name): $_"
+        }
     }
+
 
     try {
         Register-TestedSha -Version $Version

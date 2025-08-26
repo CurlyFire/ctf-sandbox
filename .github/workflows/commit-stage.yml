@@ -11,6 +11,7 @@ on:
 permissions:
   checks: write
   contents: read
+  packages: write
 
 jobs:
   build-and-test:
@@ -21,27 +22,58 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Setup requirements to build and test
-      uses: ./.github/actions/build-setup
-
-    - name: Setup requirements to deploy
-      uses: ./.github/actions/gcloud-setup
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v2
       with:
-        gcp_project_id: ${{ secrets.GCP_PROJECT_ID }}
-        gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
-      if: github.event_name == 'push'
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Run commit stage script
-      shell: pwsh
-      env:
-        WORKSPACE_ROOT: ${{ github.workspace }}
-      run: |
-        $version = "${{ github.sha }}"
-        $psArgs = @("-Version", $version, "-AdminPassword", "${{ secrets.ADMIN_PASSWORD }}", "-IpInfoToken", "${{ secrets.IPINFO_TOKEN }}")
-        if ("${{ github.event_name }}" -eq "push") {
-          $psArgs += "-PushImage"
-        }
-        & pwsh ./pipelines/stages/commit/invoke.ps1 @psArgs
+    - name: Pre-build dev container and push to GHCR (if on main branch)
+      uses: devcontainers/ci@v0.3
+      if: github.event_name == 'push'
+      with:
+        imageName: ghcr.io/curlyfire/ctf-sandbox-devcontainer
+        cacheFrom: ghcr.io/curlyfire/ctf-sandbox-devcontainer
+        push: always
+
+    - name: Run commit stage script in dev container
+      uses: devcontainers/ci@v0.3
+
+      with:
+        cacheFrom: ghcr.io/curlyfire/ctf-sandbox-devcontainer
+        runCmd: |
+          set -euo pipefail
+
+          # Feed the JSON secret directly to gcloud via stdin
+          cat <<'EOF' | gcloud auth activate-service-account \
+            --key-file=- \
+            --project "${{ secrets.GCP_PROJECT_ID }}"
+          ${{ secrets.GCP_SA_KEY }}
+          EOF
+          
+          # Configure Docker auth non-interactively
+          gcloud auth configure-docker "${{ secrets.GCP_REGION }}-docker.pkg.dev" --quiet
+
+          VERSION="${{ github.sha }}"
+          ADMIN_PASSWORD="${{ secrets.ADMIN_PASSWORD }}"
+          IPINFO_TOKEN="${{ secrets.IPINFO_TOKEN }}"
+          GITHUB_EVENT_NAME="${{ github.event_name }}"
+
+          psArgs_base=(
+            "-Version" "$VERSION"
+            "-AdminPassword" "$ADMIN_PASSWORD"
+            "-IpInfoToken" "$IPINFO_TOKEN"
+          )
+
+          psArgs_push=()
+          if [ "$GITHUB_EVENT_NAME" == "push" ]; then
+            psArgs_push+=(
+              "-PushImage"
+            )
+          fi
+
+          pwsh -Command "./pipelines/stages/commit/invoke.ps1 ${psArgs_base[@]} ${psArgs_push[@]}"
 
     - name: Publish test results
       uses: dorny/test-reporter@v1

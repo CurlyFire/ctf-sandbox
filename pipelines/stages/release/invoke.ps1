@@ -18,7 +18,7 @@ $ErrorActionPreference = 'Stop'
 
 Import-Module (Join-Path $env:WORKSPACE_ROOT "pipelines/shared/CICD.psm1") -Force
 
-$environment = New-GCloudEnvironment -Name $Env -Version $Version -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
-$environment.Deploy()
+Write-Log "🚀 Starting release stage"
 
-Invoke-Tests -Stage "release" -Env $Env
+$environment = Deploy-GCloudEnvironment -Name $Env -Version $Version -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
+Invoke-Tests -Stage "release" -EnvironmentName $Env -GCloudEnvironment $environment
