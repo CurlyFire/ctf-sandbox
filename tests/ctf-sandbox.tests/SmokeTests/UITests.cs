@@ -1,6 +1,3 @@
-using System.Diagnostics;
-using ctf_sandbox.tests.Extensions;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Playwright;
 
 namespace ctf_sandbox.tests.SmokeTests;
@@ -49,19 +46,11 @@ public class UITests : WebServerPageTest
     [Fact]
     public async Task ShouldLoginWithValidCredentials()
     {
-        var configBuilder = new ConfigurationBuilder();
-        configBuilder.Sources.Clear();
-        configBuilder.AddJsonFile("appsettings.web.json", optional: false)
-            .AddJsonFile("appsettings.web.dev.json", optional: true)
-            .AddEnvironmentVariables();
-        var config = configBuilder.Build();
-        var username = config.GetRequiredValue<string>("AdminAccount:Email");
-        var password = config.GetRequiredValue<string>("AdminAccount:Password");
         // Navigate to login page
         await Page.GotoAsync("/Identity/Account/Login");
         // Fill in the login form
-        await Page.GetByRole(AriaRole.Textbox, new() { Name = "Handle" }).FillAsync(username);
-        await Page.GetByRole(AriaRole.Textbox, new() { Name = "Access Code" }).FillAsync(password);
+        await Page.GetByRole(AriaRole.Textbox, new() { Name = "Handle" }).FillAsync(WebServer.WebServerCredentials.Username);
+        await Page.GetByRole(AriaRole.Textbox, new() { Name = "Access Code" }).FillAsync(WebServer.WebServerCredentials.Password);
         // Submit the form
         await Page.GetByRole(AriaRole.Button, new() { Name = "AUTHENTICATE" }).ClickAsync();
         // Wait for navigation to the main page
@@ -70,6 +59,6 @@ public class UITests : WebServerPageTest
         // Verify that the user's email is displayed in the navigation
         var accountLink = Page.GetByRole(AriaRole.Link, new() { Name = "Manage Account Settings" });
         await Expect(accountLink).ToBeVisibleAsync();
-        await Expect(accountLink.GetByText(username)).ToBeVisibleAsync();
+        await Expect(accountLink).ToContainTextAsync(WebServer.WebServerCredentials.Username);
     }
 }
