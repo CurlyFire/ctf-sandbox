@@ -6,7 +6,7 @@ public class ServerConfiguration
 {
     public string? WebServerUrl { get; protected set; }
 
-    public string? MailPitUrl { get; private set; }
+    public string? MailpitUrl { get; private set; }
 
     public Credentials WebServerCredentials { get; private set; }
 
@@ -21,7 +21,7 @@ public class ServerConfiguration
         .AddEnvironmentVariables();
         var config = configBuilder.Build();
         WebServerUrl = config.GetValue<string>("WebServer:Url");
-        MailPitUrl = config.GetValue<string>("MailPit:Url");
+        MailpitUrl = config.GetValue<string>("Mailpit:Url");
 
         WebServerCredentials = new Credentials(
             config.GetValue<string>("WebServer:AdminAccount")!,
@@ -29,8 +29,8 @@ public class ServerConfiguration
         );
 
         MailpitCredentials = new Credentials(
-            config.GetValue<string>("MailPit:AdminAccount")!,
-            config.GetValue<string>("MailPit:AdminPassword")!
+            config.GetValue<string>("Mailpit:AdminAccount")!,
+            config.GetValue<string>("Mailpit:AdminPassword")!
         );
     }
 }

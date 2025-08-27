@@ -26,9 +26,9 @@ public class ExternalSystemsHealthTests : IClassFixture<ServerConfiguration>
                 client.DefaultRequestHeaders.Authorization = 
                     new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
             }
-            response = await client.GetAsync(_serverConfiguration.MailPitUrl);
+            response = await client.GetAsync(_serverConfiguration.MailpitUrl);
         }
         // Check if the response is successful
-        Assert.True(response.IsSuccessStatusCode, $"Failed to connect to Mailpit at {_serverConfiguration.MailPitUrl}, status code: {response.StatusCode}");
+        Assert.True(response.IsSuccessStatusCode, $"Failed to connect to Mailpit at {_serverConfiguration.MailpitUrl}, status code: {response.StatusCode}");
     }
 }

@@ -127,6 +127,8 @@ class GCloudEnvironment {
     [string]$MailpitUrl
     [string]$IpInfoUrl
     [string]$IpInfoToken
+    [string]$WebServerAdminAccount
+    [string]$MailpitAdminAccount
     [string]$AdminPassword
 }
 
@@ -155,10 +157,14 @@ function Invoke-Tests {
     {
         if ($null -ne $GCloudEnvironment) {
             Write-Log "Overriding test app settings with provided configuration using environment variables"
-            $env:AdminPassword = $GCloudEnvironment.AdminPassword
             $env:WebServer__Url = $GCloudEnvironment.WebServerUrl
+            $env:WebServer__AdminAccount = $GCloudEnvironment.WebServerAdminAccount
+            $env:WebServer__AdminPassword = $GCloudEnvironment.AdminPassword
             $env:Mailpit__Url = $GCloudEnvironment.MailpitUrl
+            $env:Mailpit__AdminAccount = $GCloudEnvironment.MailpitAdminAccount
+            $env:Mailpit__AdminPassword = $GCloudEnvironment.AdminPassword
             $env:IpInfo__Url = $GCloudEnvironment.IpInfoUrl
+            $env:IpInfo__Token = $GCloudEnvironment.IpInfoToken
         } else {
             Write-Log "No deployment configuration provided, using app settings from config"
         }
@@ -170,34 +176,16 @@ function Invoke-Tests {
     finally {
         # Clean up environment variables
         Write-Log "Cleaning up environment variables"
-        Remove-Item env:AdminPassword -ErrorAction SilentlyContinue
         Remove-Item env:WebServer__Url -ErrorAction SilentlyContinue
+        Remove-Item env:WebServer__AdminAccount -ErrorAction SilentlyContinue
+        Remove-Item env:WebServer__AdminPassword -ErrorAction SilentlyContinue
         Remove-Item env:Mailpit__Url -ErrorAction SilentlyContinue
+        Remove-Item env:Mailpit__AdminAccount -ErrorAction SilentlyContinue
+        Remove-Item env:Mailpit__AdminPassword -ErrorAction SilentlyContinue
         Remove-Item env:IpInfo__Url -ErrorAction SilentlyContinue
+        Remove-Item env:IpInfo__Token -ErrorAction SilentlyContinue
         Write-Log "Cleaned up environment variables"
     }
-}
-
-function Invoke-LocalTests{
-    param(
-        [string]$AdminPassword,
-        [string]$IpInfoToken,
-        [string]$Stage
-    )
-    try {
-    # Set secrets to the in process host environment
-    $env:AdminAccount__Password = $AdminPassword
-    $env:IpInfo__Token = $IpInfoToken
-    # 2. Run tests with the host in process for commit stage categories
-    Invoke-Tests -Stage $Stage -AdminPassword $AdminPassword -IpInfoToken $ipInfoToken
-}
-finally {
-    # Clean up environment variables
-    Write-Log "Cleaning up environment variables for local tests"
-    Remove-Item env:AdminAccount__Password -ErrorAction SilentlyContinue
-    Remove-Item env:IpInfo__Token -ErrorAction SilentlyContinue
-    Write-Log "Cleaned up environment variables for local tests"
-}
 }
 
 function Publish-DotNetApp {
@@ -386,6 +374,12 @@ function Deploy-GCloudEnvironment {
         [string]$Version,
 
         [Parameter(Mandatory = $true)]
+        [string]$WebServerAdminAccount,
+
+        [Parameter(Mandatory = $true)]
+        [string]$MailpitAdminAccount,        
+
+        [Parameter(Mandatory = $true)]
         [string]$AdminPassword,
 
         [Parameter(Mandatory = $false)]
@@ -432,7 +426,7 @@ function Deploy-GCloudEnvironment {
         --subnet=default `
         --vpc-egress=all-traffic `
         --args="--database=https://$rqliteUrl" `
-        --set-env-vars="MP_UI_AUTH=admin:$AdminPassword" `
+        --set-env-vars="MP_UI_AUTH=$($MailpitAdminAccount):$($AdminPassword)" `
         --startup-probe=httpGet.path=/readyz
 
     $mailpitSa = (gcloud run services describe "mailpit-ui-$Name" `
@@ -568,7 +562,7 @@ function Deploy-GCloudEnvironment {
         --allow-unauthenticated `
         --vpc-connector=run-connector `
         --vpc-egress=all-traffic `
-        --set-env-vars="EmailSettings__SmtpServer=$smtpIp,AdminAccount__Password=$AdminPassword,EmailSettings__MailpitUrl=https://$mailpitUrl,IPInfo__Token=$IpInfoToken" `
+        --set-env-vars="EmailSettings__SmtpServer=$smtpIp,AdminAccount__Email=$WebServerAdminAccount,AdminAccount__Password=$AdminPassword,EmailSettings__MailpitUrl=https://$mailpitUrl,IPInfo__Token=$IpInfoToken" `
         --startup-probe=httpGet.path=/health 
 
     Write-Host "✅ Deployment complete"
@@ -580,6 +574,8 @@ function Deploy-GCloudEnvironment {
     $envConfig.WebServerUrl = $webAppUrl
     $envConfig.MailpitUrl = $mailpitUrl
     $envConfig.IpInfoUrl = $config.IpInfo.Url
+    $envConfig.WebServerAdminAccount = $WebServerAdminAccount
+    $envConfig.MailpitAdminAccount = $MailpitAdminAccount
     $envConfig.AdminPassword = $AdminPassword
     $envConfig.IpInfoToken = $IpInfoToken
     return $envConfig
