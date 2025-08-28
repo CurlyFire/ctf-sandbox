@@ -127,7 +127,7 @@ class GCloudEnvironment {
     [string]$MailpitUrl
     [string]$IpInfoUrl
     [string]$IpInfoToken
-    [string]$WebServerAdminAccount
+    [string]$WebAdminAccount
     [string]$MailpitAdminAccount
     [string]$AdminPassword
 }
@@ -158,7 +158,7 @@ function Invoke-Tests {
         if ($null -ne $GCloudEnvironment) {
             Write-Log "Overriding test app settings with provided configuration using environment variables"
             $env:WebServer__Url = $GCloudEnvironment.WebServerUrl
-            $env:WebServer__AdminAccount = $GCloudEnvironment.WebServerAdminAccount
+            $env:WebServer__AdminAccount = $GCloudEnvironment.WebAdminAccount
             $env:WebServer__AdminPassword = $GCloudEnvironment.AdminPassword
             $env:Mailpit__Url = $GCloudEnvironment.MailpitUrl
             $env:Mailpit__AdminAccount = $GCloudEnvironment.MailpitAdminAccount
@@ -374,7 +374,7 @@ function Deploy-GCloudEnvironment {
         [string]$Version,
 
         [Parameter(Mandatory = $true)]
-        [string]$WebServerAdminAccount,
+        [string]$WebAdminAccount,
 
         [Parameter(Mandatory = $true)]
         [string]$MailpitAdminAccount,        
@@ -562,7 +562,7 @@ function Deploy-GCloudEnvironment {
         --allow-unauthenticated `
         --vpc-connector=run-connector `
         --vpc-egress=all-traffic `
-        --set-env-vars="EmailSettings__SmtpServer=$smtpIp,AdminAccount__Email=$WebServerAdminAccount,AdminAccount__Password=$AdminPassword,EmailSettings__MailpitUrl=https://$mailpitUrl,IPInfo__Token=$IpInfoToken" `
+        --set-env-vars="EmailSettings__SmtpServer=$smtpIp,AdminAccount__Email=$WebAdminAccount,AdminAccount__Password=$AdminPassword,EmailSettings__MailpitUrl=https://$mailpitUrl,IPInfo__Token=$IpInfoToken" `
         --startup-probe=httpGet.path=/health 
 
     Write-Host "✅ Deployment complete"
@@ -574,7 +574,7 @@ function Deploy-GCloudEnvironment {
     $envConfig.WebServerUrl = $webAppUrl
     $envConfig.MailpitUrl = $mailpitUrl
     $envConfig.IpInfoUrl = $config.IpInfo.Url
-    $envConfig.WebServerAdminAccount = $WebServerAdminAccount
+    $envConfig.WebAdminAccount = $WebAdminAccount
     $envConfig.MailpitAdminAccount = $MailpitAdminAccount
     $envConfig.AdminPassword = $AdminPassword
     $envConfig.IpInfoToken = $IpInfoToken
