@@ -74,12 +74,16 @@ jobs:
             ENV="${{ inputs.environment }}"
             ADMIN_PASSWORD="${{ secrets.ADMIN_PASSWORD }}"
             IPINFO_TOKEN="${{ secrets.IPINFO_TOKEN }}"
+            WEB_ADMIN_ACCOUNT="${{ secrets.WEB_ADMIN_ACCOUNT }}"
+            MAILPIT_ADMIN_ACCOUNT="${{ secrets.MAILPIT_ADMIN_ACCOUNT }}"
 
             psArgs_base=(
               "-Version" "$VERSION"
               "-Env" "$ENV"
               "-AdminPassword" "$ADMIN_PASSWORD"
               "-IpInfoToken" "$IPINFO_TOKEN"
+              "-WebAdminAccount" "$WEB_ADMIN_ACCOUNT"
+              "-MailpitAdminAccount" "$MAILPIT_ADMIN_ACCOUNT"
             )
-            
+              
             pwsh -Command "./pipelines/stages/release/invoke.ps1 ${psArgs_base[@]}"

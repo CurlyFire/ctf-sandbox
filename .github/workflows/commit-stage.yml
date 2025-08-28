@@ -62,8 +62,6 @@ jobs:
 
           psArgs_base=(
             "-Version" "$VERSION"
-            "-AdminPassword" "$ADMIN_PASSWORD"
-            "-IpInfoToken" "$IPINFO_TOKEN"
           )
 
           psArgs_push=()

@@ -1,32 +1,18 @@
 using ctf_sandbox.tests.Extensions;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 
 namespace ctf_sandbox.tests;
 
-public class WebServer : IDisposable
+public class WebServer : ServerConfiguration, IDisposable
 {
     private IHost? _host;
-    public string Url { get; private set; }
 
     public WebServer()
     {
-        var configBuilder = new ConfigurationBuilder();
-        configBuilder.Sources.Clear();
-        configBuilder.AddJsonFile("appsettings.tests.json", optional: false)
-        .AddJsonFile("appsettings.tests.dev.json", optional: true)
-        .AddEnvironmentVariables();
-        var config = configBuilder.Build();
-        var url = config.GetValue<string>("WebServer:Url");
-
-        if (string.IsNullOrWhiteSpace(url))
+        if (string.IsNullOrWhiteSpace(WebServerUrl))
         {
-            Url = HostWithinProcess();
-        }
-        else
-        {
-            Url = url;
+            WebServerUrl = HostWithinProcess();
         }
     }
 

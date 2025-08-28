@@ -3,24 +3,18 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$Version,
 
-    [Parameter(Mandatory = $true)]
-    [string]$AdminPassword,
-
-    [Parameter(Mandatory = $true)]
-    [string]$IpInfoToken,
-
     [switch]$PushImage
 )
 
 $ErrorActionPreference = "Stop"
 
-# Import shared module
+# 1. Import shared module
 Import-Module (Join-Path $env:WORKSPACE_ROOT "pipelines/shared/CICD.psm1") -Force
 
 Write-Log "🚀 Starting commit stage"
 
 # 2. Run tests
-Invoke-LocalTests -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken -Stage "commit"
+Invoke-Tests -Stage "commit"
 
 # 3. Publish .NET app
 Publish-DotNetApp

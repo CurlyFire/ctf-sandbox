@@ -5,11 +5,11 @@ namespace ctf_sandbox.tests;
 
 public class WebServerPageTest : PageTest, IClassFixture<WebServer>
 {
-    private readonly WebServer _webServer;
+    protected WebServer WebServer { get; private set; }
 
     public WebServerPageTest(WebServer webServer)
     {
-        _webServer = webServer;
+        WebServer = webServer;
     }
 
 
@@ -17,7 +17,7 @@ public class WebServerPageTest : PageTest, IClassFixture<WebServer>
     {
         var options = new BrowserNewContextOptions()
         {
-            BaseURL = _webServer.Url
+            BaseURL = WebServer.WebServerUrl
         };
         return options;
     }

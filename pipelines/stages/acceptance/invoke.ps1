@@ -4,6 +4,12 @@ param(
     [string]$Version,
 
     [Parameter(Mandatory = $true)]
+    [string]$WebServerAdminAccount,
+    
+    [Parameter(Mandatory = $true)]
+    [string]$MailpitAdminAccount,    
+
+    [Parameter(Mandatory = $true)]
     [string]$AdminPassword,
 
     [Parameter(Mandatory = $true)]
@@ -27,7 +33,7 @@ $deployedEnvironmentNames = @()
 try {
     foreach ($name in $environmentNamesToDeploy) {
         $deployedEnvironmentNames += $name
-        $environment = Deploy-GCloudEnvironment -Name $name -Version $Version -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
+        $environment = Deploy-GCloudEnvironment -Name $name -Version $Version -WebServerAdminAccount $WebServerAdminAccount -MailpitAdminAccount $MailpitAdminAccount -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
         Invoke-Tests -Stage "acceptance" -EnvironmentName $environment.Name -GCloudEnvironment $environment
     }
 
