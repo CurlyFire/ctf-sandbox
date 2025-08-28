@@ -21,4 +21,4 @@ jobs:
           gcp_region: ${{ secrets.GCP_REGION }}
 
           run_command: |
-            pwsh -Command "./pipelines/teardown-all-gcloud.ps1"
+            pwsh ./pipelines/teardown-all-gcloud.ps1
