@@ -37,29 +37,16 @@ jobs:
         cacheFrom: ghcr.io/curlyfire/ctf-sandbox-devcontainer
         push: always
 
-    - name: Run commit stage script in dev container
-      uses: devcontainers/ci@v0.3
-
+    - name: Run Commit Stage Script
+      uses: ./.github/actions/run-in-gcloud-authenticated-devcontainer
       with:
-        cacheFrom: ghcr.io/curlyfire/ctf-sandbox-devcontainer
-        runCmd: |
-          set -euo pipefail
+        # Pass secrets to the action
+        gcp_project_id: ${{ secrets.GCP_PROJECT_ID }}
+        gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
+        gcp_region: ${{ secrets.GCP_REGION }}
 
-          # Feed the JSON secret directly to gcloud via stdin
-          cat <<'EOF' | gcloud auth activate-service-account \
-            --key-file=- \
-            --project "${{ secrets.GCP_PROJECT_ID }}"
-          ${{ secrets.GCP_SA_KEY }}
-          EOF
-          
-          # Configure Docker auth non-interactively
-          gcloud auth configure-docker "${{ secrets.GCP_REGION }}-docker.pkg.dev" --quiet
-
-          VERSION="${{ github.sha }}"
-          ADMIN_PASSWORD="${{ secrets.ADMIN_PASSWORD }}"
-          IPINFO_TOKEN="${{ secrets.IPINFO_TOKEN }}"
-          GITHUB_EVENT_NAME="${{ github.event_name }}"
-
+        # Provide the unique script and arguments for this specific workflow
+        run_command: |
           psArgs_base=(
             "-Version" "$VERSION"
           )

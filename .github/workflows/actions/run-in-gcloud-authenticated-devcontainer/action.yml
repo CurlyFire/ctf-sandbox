@@ -1,0 +1,38 @@
+name: 'Run command in gcloud-authenticated dev container'
+description: 'Sets up auth and runs a specified command inside the dev container.'
+
+inputs:
+  run_command:
+    description: 'The command to execute after authentication is complete.'
+    required: true
+  gcp_project_id:
+    description: 'Google Cloud Project ID'
+    required: true
+  gcp_sa_key:
+    description: 'Google Cloud Service Account Key'
+    required: true
+  gcp_region:
+    description: 'Google Cloud Region for Docker registry'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Run command in dev container
+      uses: devcontainers/ci@v0.3
+      shell: bash
+      with:
+        cacheFrom: ghcr.io/curlyfire/ctf-sandbox-devcontainer
+        runCmd: |
+          set -euo pipefail
+
+          # Feed the JSON secret directly to gcloud via stdin
+          echo "${{ inputs.gcp_sa_key }}" | gcloud auth activate-service-account \
+            --key-file=- \
+            --project "${{ inputs.gcp_project_id }}"
+
+          # Configure Docker auth non-interactively
+          gcloud auth configure-docker "${{ inputs.gcp_region }}-docker.pkg.dev" --quiet
+
+          # Execute the unique command passed from the workflow
+          ${{ inputs.run_command }}
