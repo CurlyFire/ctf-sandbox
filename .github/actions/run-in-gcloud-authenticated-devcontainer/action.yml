@@ -34,4 +34,4 @@ runs:
           gcloud auth configure-docker "${{ inputs.gcp_region }}-docker.pkg.dev" --quiet
 
           # Execute the unique command passed from the workflow
-          #${{ inputs.run_command }}
+          ${{ inputs.run_command }}

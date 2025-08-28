@@ -40,15 +40,28 @@ jobs:
     - name: Run Commit Stage Script
       uses: ./.github/actions/run-in-gcloud-authenticated-devcontainer
       with:
-        # Pass secrets to the action
         gcp_project_id: ${{ secrets.GCP_PROJECT_ID }}
         gcp_sa_key_base64: ${{ secrets.GCP_SA_KEY_BASE64 }}
         gcp_region: ${{ secrets.GCP_REGION }}
 
-        # Provide the unique script and arguments for this specific workflow
         run_command: |
-          echo "hello"
+          VERSION="${{ github.sha }}"
+          ADMIN_PASSWORD="${{ secrets.ADMIN_PASSWORD }}"
+          IPINFO_TOKEN="${{ secrets.IPINFO_TOKEN }}"
+          GITHUB_EVENT_NAME="${{ github.event_name }}"
 
+          psArgs_base=(
+            "-Version" "$VERSION"
+          )
+
+          psArgs_push=()
+          if [ "$GITHUB_EVENT_NAME" == "push" ]; then
+            psArgs_push+=(
+              "-PushImage"
+            )
+          fi
+
+          pwsh -Command "./pipelines/stages/commit/invoke.ps1 ${psArgs_base[@]} ${psArgs_push[@]}"
 
     - name: Publish test results
       uses: dorny/test-reporter@v1
