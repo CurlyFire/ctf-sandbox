@@ -20,36 +20,17 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Run acceptance stage script in dev container
-      uses: devcontainers/ci@v0.3
-
+    - name: Run Acceptance Stage Script in dev container
+      uses: ./.github/actions/run-in-gcloud-authenticated-devcontainer
       with:
-        cacheFrom: ghcr.io/curlyfire/ctf-sandbox-devcontainer
-        runCmd: |
-          set -euo pipefail
+        gcp_project_id: ${{ secrets.GCP_PROJECT_ID }}
+        gcp_sa_key_base64: ${{ secrets.GCP_SA_KEY_BASE64 }}
+        gcp_region: ${{ secrets.GCP_REGION }}
 
-          # Feed the JSON secret directly to gcloud via stdin
-          cat <<'EOF' | gcloud auth activate-service-account \
-            --key-file=- \
-            --project "${{ secrets.GCP_PROJECT_ID }}"
-          ${{ secrets.GCP_SA_KEY }}
-          EOF
-          
-          # Configure Docker auth non-interactively
-          gcloud auth configure-docker "${{ secrets.GCP_REGION }}-docker.pkg.dev" --quiet
-
-          VERSION="${{ github.sha }}"
-          WEB_ADMIN_ACCOUNT="${{ secrets.WEB_ADMIN_ACCOUNT }}"
-          MAILPIT_ADMIN_ACCOUNT="${{ secrets.MAILPIT_ADMIN_ACCOUNT }}"
-          ADMIN_PASSWORD="${{ secrets.ADMIN_PASSWORD }}"
-          IPINFO_TOKEN="${{ secrets.IPINFO_TOKEN }}"
-
-          psArgs_base=(
-            "-Version" "$VERSION"
-            "-AdminPassword" "$ADMIN_PASSWORD"
-            "-IpInfoToken" "$IPINFO_TOKEN"
-            "-WebAdminAccount" "$WEB_ADMIN_ACCOUNT"
-            "-MailpitAdminAccount" "$MAILPIT_ADMIN_ACCOUNT"
-          )
-
-          pwsh -Command "./pipelines/stages/acceptance/invoke.ps1 ${psArgs_base[@]}"
+        run_command: |
+          pwsh -Command "./pipelines/stages/acceptance/invoke.ps1 `
+          -Version ${{ github.sha }} `
+          -AdminPassword ${{ secrets.ADMIN_PASSWORD }} `
+          -IpInfoToken  ${{ secrets.IPINFO_TOKEN }}`
+          -WebAdminAccount ${{ secrets.WEB_ADMIN_ACCOUNT }} `
+          -MailpitAdminAccount ${{ secrets.MAILPIT_ADMIN_ACCOUNT }}"
