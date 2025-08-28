@@ -20,7 +20,6 @@ runs:
   steps:
     - name: Run command in dev container
       uses: devcontainers/ci@v0.3
-      shell: bash
       with:
         cacheFrom: ghcr.io/curlyfire/ctf-sandbox-devcontainer
         runCmd: |
