@@ -47,18 +47,8 @@ jobs:
 
         # Provide the unique script and arguments for this specific workflow
         run_command: |
-          psArgs_base=(
-            "-Version" "$VERSION"
-          )
+          echo "hello"
 
-          psArgs_push=()
-          if [ "$GITHUB_EVENT_NAME" == "push" ]; then
-            psArgs_push+=(
-              "-PushImage"
-            )
-          fi
-
-          pwsh -Command "./pipelines/stages/commit/invoke.ps1 ${psArgs_base[@]} ${psArgs_push[@]}"
 
     - name: Publish test results
       uses: dorny/test-reporter@v1
