@@ -28,9 +28,9 @@ jobs:
         gcp_region: ${{ secrets.GCP_REGION }}
 
         run_command: |
-          pwsh -Command "./pipelines/stages/acceptance/invoke.ps1 `
-          -Version ${{ github.sha }} `
-          -AdminPassword ${{ secrets.ADMIN_PASSWORD }} `
-          -IpInfoToken  ${{ secrets.IPINFO_TOKEN }}`
-          -WebAdminAccount ${{ secrets.WEB_ADMIN_ACCOUNT }} `
-          -MailpitAdminAccount ${{ secrets.MAILPIT_ADMIN_ACCOUNT }}"
+          pwsh ./pipelines/stages/acceptance/invoke.ps1 \
+          -Version ${{ github.sha }} \
+          -AdminPassword ${{ secrets.ADMIN_PASSWORD }} \
+          -IpInfoToken  ${{ secrets.IPINFO_TOKEN }} \
+          -WebAdminAccount ${{ secrets.WEB_ADMIN_ACCOUNT }} \
+          -MailpitAdminAccount ${{ secrets.MAILPIT_ADMIN_ACCOUNT }}
