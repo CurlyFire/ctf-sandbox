@@ -8,7 +8,7 @@ param (
     [string]$Env,
 
     [Parameter(Mandatory = $true)]
-    [string]$WebServerAdminAccount,
+    [string]$WebAdminAccount,
     
     [Parameter(Mandatory = $true)]
     [string]$MailpitAdminAccount,
@@ -26,5 +26,5 @@ Import-Module (Join-Path $env:WORKSPACE_ROOT "pipelines/shared/CICD.psm1") -Forc
 
 Write-Log "🚀 Starting release stage"
 
-$environment = Deploy-GCloudEnvironment -Name $Env -Version $Version -WebServerAdminAccount $WebServerAdminAccount -MailpitAdminAccount $MailpitAdminAccount -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
+$environment = Deploy-GCloudEnvironment -Name $Env -Version $Version -WebAdminAccount $WebAdminAccount -MailpitAdminAccount $MailpitAdminAccount -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
 Invoke-Tests -Stage "release" -EnvironmentName $Env -GCloudEnvironment $environment
