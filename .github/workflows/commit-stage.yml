@@ -42,7 +42,7 @@ jobs:
       with:
         # Pass secrets to the action
         gcp_project_id: ${{ secrets.GCP_PROJECT_ID }}
-        gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
+        gcp_sa_key_base64: ${{ secrets.GCP_SA_KEY_BASE64 }}
         gcp_region: ${{ secrets.GCP_REGION }}
 
         # Provide the unique script and arguments for this specific workflow
