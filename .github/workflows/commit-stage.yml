@@ -37,7 +37,7 @@ jobs:
         cacheFrom: ghcr.io/curlyfire/ctf-sandbox-devcontainer
         push: always
 
-    - name: Run Commit Stage Script
+    - name: Run Commit Stage Script in dev container
       uses: ./.github/actions/run-in-gcloud-authenticated-devcontainer
       with:
         gcp_project_id: ${{ secrets.GCP_PROJECT_ID }}
@@ -46,8 +46,6 @@ jobs:
 
         run_command: |
           VERSION="${{ github.sha }}"
-          ADMIN_PASSWORD="${{ secrets.ADMIN_PASSWORD }}"
-          IPINFO_TOKEN="${{ secrets.IPINFO_TOKEN }}"
           GITHUB_EVENT_NAME="${{ github.event_name }}"
 
           psArgs_base=(
