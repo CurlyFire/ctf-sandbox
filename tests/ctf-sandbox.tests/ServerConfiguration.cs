@@ -8,6 +8,10 @@ public class ServerConfiguration
 
     public string? MailpitUrl { get; private set; }
 
+    public string? IpInfoUrl { get; private set; }
+
+    public string? DatabaseConnectionString { get; private set; }
+
     public Credentials WebServerCredentials { get; private set; }
 
     public Credentials MailpitCredentials { get; private set; }
@@ -22,6 +26,8 @@ public class ServerConfiguration
         var config = configBuilder.Build();
         WebServerUrl = config.GetValue<string>("WebServer:Url");
         MailpitUrl = config.GetValue<string>("Mailpit:Url");
+        IpInfoUrl = config.GetValue<string>("IpInfo:Url");
+        DatabaseConnectionString = config.GetValue<string>("Database:ConnectionString");
 
         WebServerCredentials = new Credentials(
             config.GetValue<string>("WebServer:AdminAccount")!,

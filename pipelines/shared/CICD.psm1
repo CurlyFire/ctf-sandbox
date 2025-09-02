@@ -153,7 +153,7 @@ function Invoke-Tests {
     )
     [CICDConfig]$config = Get-CICDConfig
     $Categories = $config.GetTestCategories($Stage, $EnvironmentName)
-    try 
+    try
     {
         if ($null -ne $GCloudEnvironment) {
             Write-Log "Overriding test app settings with provided configuration using environment variables"
