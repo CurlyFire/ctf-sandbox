@@ -12,6 +12,7 @@ public class BackEndHealthTests : IClassFixture<ServerConfiguration>
         _serverConfiguration = serverConfiguration;
     }
 
+    [Trait("Category", "Smoke_BackEndHealth")]
     [Fact]
     public async Task Database_ShouldBeUpAndRunning()
     {
