@@ -5,8 +5,8 @@ namespace ctf_sandbox.Data;
 
 public static class SeedData
 {
-    public static async Task Initialize(IServiceProvider serviceProvider, 
-        UserManager<IdentityUser> userManager, 
+    public static async Task Initialize(IServiceProvider serviceProvider,
+        UserManager<IdentityUser> userManager,
         RoleManager<IdentityRole> roleManager,
         IConfiguration configuration)
     {
@@ -23,7 +23,7 @@ public static class SeedData
         // Seed admin user
         var adminEmail = configuration["AdminAccount:Email"];
         var adminPassword = configuration["AdminAccount:Password"];
-        
+
         if (string.IsNullOrEmpty(adminEmail) || string.IsNullOrEmpty(adminPassword))
         {
             throw new InvalidOperationException("Admin account configuration is missing in appsettings.json");
@@ -45,6 +45,6 @@ public static class SeedData
             {
                 await userManager.AddToRoleAsync(adminUser, "Admin");
             }
-        }
+        }        
     }
 }

@@ -2,9 +2,9 @@ using Microsoft.Playwright;
 
 namespace ctf_sandbox.tests.E2ETests;
 
-public class ExternalSystemsTests : WebServerPageTest
+public class EmailSystemTests : WebServerPageTest
 {
-    public ExternalSystemsTests(WebServer webServer) : base(webServer)
+    public EmailSystemTests(WebServer webServer) : base(webServer)
     {
     }
 
