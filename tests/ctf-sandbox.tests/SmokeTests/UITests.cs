@@ -16,8 +16,13 @@ public class UITests : WebServerPageTest
         var title = await homePage.GetPageTitle();
         Assert.Equal("Home Page - CTF Arena", title);
 
-        // Verify main layout components
-        await homePage.VerifyMainLayoutComponents();
+        // Verify each main layout component individually
+        Assert.True(await homePage.IsBannerVisible(), "Header banner should be visible on the home page");
+        Assert.True(await homePage.IsMainNavigationVisible(), "Main navigation menu should be visible on the home page");
+        Assert.True(await homePage.IsDashboardLinkVisible(), "Dashboard link should be visible on the home page");
+        Assert.True(await homePage.IsMainContentAreaVisible(), "Main content area should be visible on the home page");
+        Assert.True(await homePage.IsFooterVisible(), "Footer should be visible on the home page");
+        Assert.True(await homePage.IsBrandLogoVisible(), "CTF Arena logo should be visible on the home page");
     }
 
     [Trait("Category", "Smoke_UI")]
