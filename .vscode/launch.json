@@ -16,7 +16,9 @@
                 "uriFormat": "%s"
             },
             "env": {
-                "ASPNETCORE_ENVIRONMENT": "Development"
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                // Override Mailpit URL to point to forwarded port on host machine as the browser is running on the host
+                "EmailSettings__MailpitUrl": "http://localhost:8025"
             },
             "sourceFileMap": {
                 "/Views": "${workspaceFolder}/src/ctf-sandbox/Views"

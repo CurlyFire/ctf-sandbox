@@ -37,14 +37,14 @@
                         {
                             <li class="nav-item">
                                 <a class="nav-link" asp-area="" asp-controller="Teams" asp-action="Index" 
-                                   aria-label="Browse Teams"
+                                   aria-label="Manage Teams"
                                    aria-current="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "Teams" ? "page" : null)">
                                     Teams
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" asp-area="" asp-controller="Challenges" asp-action="Index" 
-                                   aria-label="View Challenges"
+                                   aria-label="Manage Challenges"
                                    aria-current="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "Challenges" ? "page" : null)">
                                     Challenges
                                 </a>
@@ -61,7 +61,7 @@
                     <ul class="navbar-nav">
                         <li class="nav-item">
                             <a class="nav-link" rel="noopener noreferrer" href="@Configuration["EmailSettings:MailpitUrl"]" target="_blank" 
-                               aria-label="Open Mail Server Dashboard">
+                               aria-label="Open Email">
                                 <i class="bi bi-envelope" aria-hidden="true"></i>
                             </a>
                         </li>

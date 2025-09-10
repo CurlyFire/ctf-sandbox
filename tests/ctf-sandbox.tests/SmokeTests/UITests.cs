@@ -1,5 +1,3 @@
-using Microsoft.Playwright;
-
 namespace ctf_sandbox.tests.SmokeTests;
 
 public class UITests : WebServerPageTest
@@ -12,53 +10,34 @@ public class UITests : WebServerPageTest
     [Fact]
     public async Task ShouldLoadMainPage()
     {
-        // Go to home page
-        var response = await Page.GotoAsync(string.Empty);
+        var homePage = await GoToHomePage();
 
-        // Check if the response is successful
-        Assert.True(response?.Ok, "Failed to load the home page");
         // Check if the page title is correct
-        var title = await Page.TitleAsync();
+        var title = await homePage.GetPageTitle();
         Assert.Equal("Home Page - CTF Arena", title);
 
-        // Verify main layout components
-
-        // Header with navigation
-        await Expect(Page.GetByRole(AriaRole.Banner)).ToBeVisibleAsync();
-
-        // Main navigation
-        await Expect(Page.GetByRole(AriaRole.Navigation, new() { Name = "Main" })).ToBeVisibleAsync();
-
-        // Dashboard link should always be present
-        await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "View Dashboard" })).ToBeVisibleAsync();
-
-        // Main content area
-        await Expect(Page.GetByRole(AriaRole.Main)).ToBeVisibleAsync();
-
-        // Footer
-        await Expect(Page.GetByRole(AriaRole.Contentinfo)).ToBeVisibleAsync();
-
-        // Brand logo/link
-        await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "CTF Arena" })).ToBeVisibleAsync();
+        // Verify each main layout component individually
+        Assert.True(await homePage.IsBannerVisible(), "Header banner should be visible on the home page");
+        Assert.True(await homePage.IsMainNavigationVisible(), "Main navigation menu should be visible on the home page");
+        Assert.True(await homePage.IsDashboardLinkVisible(), "Dashboard link should be visible on the home page");
+        Assert.True(await homePage.IsMainContentAreaVisible(), "Main content area should be visible on the home page");
+        Assert.True(await homePage.IsFooterVisible(), "Footer should be visible on the home page");
+        Assert.True(await homePage.IsBrandLogoVisible(), "CTF Arena logo should be visible on the home page");
     }
 
     [Trait("Category", "Smoke_UI")]
     [Fact]
     public async Task ShouldLoginWithValidCredentials()
     {
-        // Navigate to login page
-        await Page.GotoAsync("/Identity/Account/Login");
-        // Fill in the login form
-        await Page.GetByRole(AriaRole.Textbox, new() { Name = "Handle" }).FillAsync(WebServer.WebServerCredentials.Username);
-        await Page.GetByRole(AriaRole.Textbox, new() { Name = "Access Code" }).FillAsync(WebServer.WebServerCredentials.Password);
-        // Submit the form
-        await Page.GetByRole(AriaRole.Button, new() { Name = "AUTHENTICATE" }).ClickAsync();
-        // Wait for navigation to the main page
-        await Page.WaitForURLAsync(string.Empty);
+        // Start from home page
+        var homePage = await GoToHomePage();
+
+        // Navigate to sign in page and login
+        var signInPage = await homePage.GoToSignInPage();
+        homePage = await signInPage.SignIn(WebServer.WebServerCredentials.Username, WebServer.WebServerCredentials.Password);
 
         // Verify that the user's email is displayed in the navigation
-        var accountLink = Page.GetByRole(AriaRole.Link, new() { Name = "Manage Account Settings" });
-        await Expect(accountLink).ToBeVisibleAsync();
-        await Expect(accountLink).ToContainTextAsync(WebServer.WebServerCredentials.Username);
+        var username = await homePage.GetLoggedInUsername();
+        Assert.Contains(WebServer.WebServerCredentials.Username, username);
     }
 }

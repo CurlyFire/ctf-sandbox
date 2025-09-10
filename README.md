@@ -170,6 +170,13 @@ CI/CD is enabled for the main branch and will deploy to the Acceptance environem
 ## Manual testing
 [Procedure](docs/manualtesting.md)
 
+## Team Roles
+### Developers
+Responsible for writing the software and maintaining the PageObjectModels and Tests.
+
+### QA
+Responsible for writing addditional E2E tests.
+
 # Contribute
 ## Software requirements
 ### Windows

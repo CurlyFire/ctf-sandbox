@@ -1,3 +1,4 @@
+using ctf_sandbox.tests.PageObjectModels;
 using Microsoft.Playwright;
 using Microsoft.Playwright.Xunit;
 
@@ -20,5 +21,12 @@ public class WebServerPageTest : PageTest, IClassFixture<WebServer>
             BaseURL = WebServer.WebServerUrl
         };
         return options;
+    }
+
+    protected async Task<HomePage> GoToHomePage()
+    {
+        await Page.GotoAsync(string.Empty);
+        var page = new HomePage(Page);
+        return page;
     }
 }
