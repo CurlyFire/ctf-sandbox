@@ -1,4 +1,5 @@
 using Microsoft.Playwright;
+using static Microsoft.Playwright.Assertions;
 
 namespace ctf_sandbox.tests.PageObjectModels;
 
@@ -9,6 +10,39 @@ public class HomePage
     public HomePage(IPage page)
     {
         _page = page;
+    }
+
+    public async Task<string> GetPageTitle()
+    {
+        return await _page.TitleAsync();
+    }
+
+    public async Task VerifyMainLayoutComponents()
+    {
+        // Header with navigation
+        await Expect(_page.GetByRole(AriaRole.Banner)).ToBeVisibleAsync();
+
+        // Main navigation
+        await Expect(_page.GetByRole(AriaRole.Navigation, new() { Name = "Main" })).ToBeVisibleAsync();
+
+        // Dashboard link
+        await Expect(_page.GetByRole(AriaRole.Link, new() { Name = "View Dashboard" })).ToBeVisibleAsync();
+
+        // Main content area
+        await Expect(_page.GetByRole(AriaRole.Main)).ToBeVisibleAsync();
+
+        // Footer
+        await Expect(_page.GetByRole(AriaRole.Contentinfo)).ToBeVisibleAsync();
+
+        // Brand logo/link
+        await Expect(_page.GetByRole(AriaRole.Link, new() { Name = "CTF Arena" })).ToBeVisibleAsync();
+    }
+
+    public async Task<string> GetLoggedInUsername()
+    {
+        var accountLink = _page.GetByRole(AriaRole.Link, new() { Name = "Manage Account Settings" });
+        await Expect(accountLink).ToBeVisibleAsync();
+        return (await accountLink.TextContentAsync()) ?? string.Empty;
     }
 
     public async Task<EmailsPage> GoToEmailsPage()
