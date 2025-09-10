@@ -1,5 +1,3 @@
-using Microsoft.Playwright;
-
 namespace ctf_sandbox.tests.E2ETests;
 
 public class EmailSystemTests : WebServerPageTest
@@ -12,12 +10,10 @@ public class EmailSystemTests : WebServerPageTest
     [Fact]
     public async Task ShouldBeAbleToViewEmails()
     {
-        await Page.GotoAsync(string.Empty);
-        await Page.GetByRole(AriaRole.Link, new() { Name = "Open Email" }).ClickAsync();
-        var mailpit = await Page.WaitForPopupAsync();
-        await mailpit.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
+        var homePage = await GoToHomePage();
+        var emailsPage = await homePage.GoToEmailsPage();
 
-        await Expect(mailpit.GetByRole(AriaRole.Button, new() { Name = "Inbox" })).ToBeVisibleAsync();
+        Assert.True(await emailsPage.IsInboxVisible());
     }
 }
 
