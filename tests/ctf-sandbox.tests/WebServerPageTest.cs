@@ -11,6 +11,7 @@ public class WebServerPageTest : PageTest, IClassFixture<WebServer>
     public WebServerPageTest(WebServer webServer)
     {
         WebServer = webServer;
+        InitializeAsync().GetAwaiter().GetResult();
     }
 
 
@@ -23,7 +24,7 @@ public class WebServerPageTest : PageTest, IClassFixture<WebServer>
         return options;
     }
 
-    protected async Task<HomePage> GoToHomePage()
+    public async Task<HomePage> GoToHomePage()
     {
         await Page.GotoAsync(string.Empty);
         var page = new HomePage(Page);
