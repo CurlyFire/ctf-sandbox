@@ -1,22 +1,16 @@
 namespace ctf_sandbox.tests.E2ETests;
 
-public class TeamTests : WebServerPageTest
+public class TeamTests : CTFDslTests
 {
-    public TeamTests(WebServer webServer) : base(webServer)
-    {
-    }
-
     [Fact]
     [Trait("Category", "E2E")]
     public async Task ShouldBeAbleToCreateTeam()
     {
-        var homePage = await GoToHomePage();
-        var signInPage = await homePage.GoToSignInPage();
-        await signInPage.SignIn(WebServer.WebServerCredentials.Username, WebServer.WebServerCredentials.Password);
-        var manageTeamsPage = await homePage.GoToManageTeamsPage();
-        var createNewTeamPage = await manageTeamsPage.GoToCreateNewTeamPage();
+        await CTFDsl.SignInAsAdmin();
+
         var randomTeamName = $"team_{Guid.NewGuid()}";
-        await createNewTeamPage.CreateTeam(randomTeamName);
-        Assert.True(await manageTeamsPage.IsTeamVisible(randomTeamName));
+        await CTFDsl.CreateTeam(randomTeamName);
+
+        Assert.True(await CTFDsl.IsTeamVisible(randomTeamName));
     }
 }

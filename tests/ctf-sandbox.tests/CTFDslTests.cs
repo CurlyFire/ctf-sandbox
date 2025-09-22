@@ -10,6 +10,6 @@ public class CTFDslTests
         var webServer = new WebServer();
         var pageTest = new WebServerPageTest(webServer);
         var homePage = pageTest.GoToHomePage().GetAwaiter().GetResult();
-        CTFDsl = new CTFDsl(homePage);
+        CTFDsl = new CTFDsl(homePage, webServer.WebServerCredentials, webServer.MailpitCredentials);
     }
 }
