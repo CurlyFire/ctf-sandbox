@@ -1,25 +1,23 @@
-using System.Reflection;
-using ctf_sandbox.tests.PageObjectModels;
+using ctf_sandbox.tests.Drivers;
 
 namespace ctf_sandbox.tests.Dsl;
 
 public class EmailsDsl
 {
-    private readonly EmailsPage _page;
+    private readonly IEmailsDriver _driver;
 
-    public EmailsDsl(EmailsPage page)
+    public EmailsDsl(IEmailsDriver driver)
     {
-        _page = page;
+        _driver = driver;
     }
 
     public async Task<bool> IsInboxAvailable()
     {
-        return await _page.IsInboxVisible();
+        return await _driver.IsInboxAvailable();
     }
 
     public async Task<bool> ConfirmRegistrationSentTo(string email)
     {
-        var confirmEmailPage = await _page.OpenLatestEmailSentToAndOpenConfirmationLink(email);
-        return await confirmEmailPage.IsThankYouMessageVisible();
+        return await _driver.ConfirmRegistrationSentTo(email);
     }
 }

@@ -1,12 +1,21 @@
 namespace ctf_sandbox.tests.E2ETests;
 
-public class EmailSystemTests : CTFDslTests
+public class EmailSystemTests : IClassFixture<CTFFixture>
 {
-    [Trait("Category", "E2E")]
-    [Fact]
-    public async Task ShouldBeAbleToViewEmails()
+    private readonly CTFFixture _fixture;
+
+    public EmailSystemTests(CTFFixture fixture)
     {
-        var emailsDsl = await CTFDsl.CheckEmails();
+        _fixture = fixture;
+    }
+
+    [Trait("Category", "E2E")]
+    [Theory]
+    [Channel(Channel.UI)]
+    public async Task ShouldBeAbleToViewEmails(Channel channel)
+    {
+        var ctfDsl = _fixture.GetDsl(channel);
+        var emailsDsl = await ctfDsl.CheckEmails();
         Assert.True(await emailsDsl.IsInboxAvailable());
     }
 }
