@@ -1,4 +1,5 @@
 using System.Data;
+using ctf_sandbox.tests.Fixture;
 using Microsoft.Data.Sqlite;
 
 namespace ctf_sandbox.tests.SmokeTests;

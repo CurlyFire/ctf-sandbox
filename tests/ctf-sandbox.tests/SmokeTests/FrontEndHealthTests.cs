@@ -1,33 +1,38 @@
-// namespace ctf_sandbox.tests.SmokeTests;
+using ctf_sandbox.tests.Fixture;
+using ctf_sandbox.tests.Fixtures;
 
-// public class FrontEndHealthTests : IClassFixture<WebServer>
-// {
-//     private readonly WebServer _webServer;
+namespace ctf_sandbox.tests.SmokeTests;
 
-//     public FrontEndHealthTests(WebServer webServer)
-//     {
-//         _webServer = webServer;
-//     }
+public class FrontEndHealthTests : IClassFixture<ServerFixture>
+{
+    private ServerFixture _fixture;
 
-//     [Trait("Category", "Smoke_FrontEndHealth")]
-//     [Fact]
-//     public async Task FrontEnd_ShouldBeUpAndRunning()
-//     {
-//         using var client = new HttpClient()
-//         {
-//             BaseAddress = new Uri(_webServer.WebServerUrl!)
-//         };
+    public FrontEndHealthTests(ServerFixture fixture)
+    {
+        _fixture = fixture;
+    }
+
+
+    [Trait("Category", "Smoke_FrontEndHealth")]
+    [Fact]
+    public async Task FrontEnd_ShouldBeUpAndRunning()
+    {
+        var config = _fixture.GetServerConfiguration();
+        using var client = new HttpClient()
+        {
+            BaseAddress = new Uri(config.WebServerUrl!)
+        };
         
-//         // Check main health endpoint
-//         var response = await client.GetAsync($"/health");
-//         Assert.True(response.IsSuccessStatusCode, $"Health check failed at {_webServer.WebServerUrl}/health - status code: {response.StatusCode}");
+        // Check main health endpoint
+        var response = await client.GetAsync($"/health");
+        Assert.True(response.IsSuccessStatusCode, $"Health check failed at {config.WebServerUrl}/health - status code: {response.StatusCode}");
         
-//         // Check readiness probe
-//         response = await client.GetAsync($"/health/ready");
-//         Assert.True(response.IsSuccessStatusCode, $"Readiness check failed at {_webServer.WebServerUrl}/health/ready - status code: {response.StatusCode}");
+        // Check readiness probe
+        response = await client.GetAsync($"/health/ready");
+        Assert.True(response.IsSuccessStatusCode, $"Readiness check failed at {config.WebServerUrl}/health/ready - status code: {response.StatusCode}");
         
-//         // Check liveness probe
-//         response = await client.GetAsync($"/health/live");
-//         Assert.True(response.IsSuccessStatusCode, $"Liveness check failed at {_webServer.WebServerUrl}/health/live - status code: {response.StatusCode}");
-//     }
-// }
+        // Check liveness probe
+        response = await client.GetAsync($"/health/live");
+        Assert.True(response.IsSuccessStatusCode, $"Liveness check failed at {config.WebServerUrl}/health/live - status code: {response.StatusCode}");
+    }
+}

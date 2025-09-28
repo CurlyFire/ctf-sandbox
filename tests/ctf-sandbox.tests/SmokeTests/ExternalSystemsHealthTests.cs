@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using System.Net.Sockets;
 using System.Text;
+using ctf_sandbox.tests.Fixture;
 
 namespace ctf_sandbox.tests.SmokeTests;
 

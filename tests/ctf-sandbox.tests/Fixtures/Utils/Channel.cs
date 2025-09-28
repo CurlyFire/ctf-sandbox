@@ -1,4 +1,4 @@
-namespace ctf_sandbox.tests;
+namespace ctf_sandbox.tests.Fixture;
 
 public enum Channel
 {

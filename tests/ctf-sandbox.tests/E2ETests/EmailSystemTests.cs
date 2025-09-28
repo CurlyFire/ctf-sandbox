@@ -1,10 +1,13 @@
+using ctf_sandbox.tests.Fixture;
+using ctf_sandbox.tests.Fixtures;
+
 namespace ctf_sandbox.tests.E2ETests;
 
-public class EmailSystemTests : IClassFixture<CTFFixture>
+public class EmailSystemTests : IClassFixture<DSLFixture>
 {
-    private readonly CTFFixture _fixture;
+    private readonly DSLFixture _fixture;
 
-    public EmailSystemTests(CTFFixture fixture)
+    public EmailSystemTests(DSLFixture fixture)
     {
         _fixture = fixture;
     }

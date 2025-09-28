@@ -1,4 +1,4 @@
-namespace ctf_sandbox.tests.Drivers;
+namespace ctf_sandbox.tests.Fixture.Drivers;
 
 public interface IEmailsDriver
 {

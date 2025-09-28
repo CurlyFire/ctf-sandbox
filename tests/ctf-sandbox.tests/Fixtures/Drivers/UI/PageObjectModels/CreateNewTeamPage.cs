@@ -1,6 +1,6 @@
 using Microsoft.Playwright;
 
-namespace ctf_sandbox.tests.PageObjectModels;
+namespace ctf_sandbox.tests.Fixture.Drivers.UI.PageObjectModels;
 
 public class CreateNewTeamPage
 {

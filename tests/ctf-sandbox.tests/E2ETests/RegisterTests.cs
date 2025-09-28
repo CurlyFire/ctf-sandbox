@@ -1,10 +1,13 @@
+using ctf_sandbox.tests.Fixture;
+using ctf_sandbox.tests.Fixtures;
+
 namespace ctf_sandbox.tests.E2ETests;
 
-public class RegisterTests : IClassFixture<CTFFixture>
+public class RegisterTests : IClassFixture<DSLFixture>
 {
-    private readonly CTFFixture _fixture;
+    private readonly DSLFixture _fixture;
 
-    public RegisterTests(CTFFixture fixture)
+    public RegisterTests(DSLFixture fixture)
     {
         _fixture = fixture;
     }

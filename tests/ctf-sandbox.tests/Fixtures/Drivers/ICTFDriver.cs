@@ -1,8 +1,8 @@
-using ctf_sandbox.tests.Dsl;
+using ctf_sandbox.tests.Fixture.Dsl;
 
-namespace ctf_sandbox.tests.Drivers;
+namespace ctf_sandbox.tests.Fixture.Drivers;
 
-public interface ICTFDriver : IDisposable
+public interface ICTFDriver
 {
     Task<EmailsDsl> CheckEmails();
     Task<bool> CreateAccount(string email, string password);

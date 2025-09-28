@@ -1,10 +1,20 @@
 using Microsoft.Extensions.Configuration;
 
-namespace ctf_sandbox.tests;
+namespace ctf_sandbox.tests.Fixture;
 
-public class ServerConfiguration
+public interface IServerConfiguration
 {
-    public string? WebServerUrl { get; protected set; }
+    string? WebServerUrl { get; set; }
+    string? MailpitUrl { get; }
+    string? IpInfoUrl { get; }
+    string? DatabaseConnectionString { get; }
+    Credentials WebServerCredentials { get; }
+    Credentials MailpitCredentials { get; }
+}
+
+public class ServerConfiguration : IServerConfiguration
+{
+    public string? WebServerUrl { get; set; }
 
     public string? MailpitUrl { get; private set; }
 
@@ -15,7 +25,7 @@ public class ServerConfiguration
     public Credentials WebServerCredentials { get; private set; }
 
     public Credentials MailpitCredentials { get; private set; }
-    
+
     public ServerConfiguration()
     {
         var configBuilder = new ConfigurationBuilder();
