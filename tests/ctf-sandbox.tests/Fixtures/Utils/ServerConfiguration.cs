@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Configuration;
 
-namespace ctf_sandbox.tests.Fixture;
+namespace ctf_sandbox.tests.Fixtures.Utils;
 
 public interface IServerConfiguration
 {

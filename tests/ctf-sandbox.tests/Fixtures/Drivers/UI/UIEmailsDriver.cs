@@ -1,6 +1,6 @@
-using ctf_sandbox.tests.Fixture.Drivers.UI.PageObjectModels;
+using ctf_sandbox.tests.Fixtures.Drivers.UI.PageObjectModels;
 
-namespace ctf_sandbox.tests.Fixture.Drivers.UI;
+namespace ctf_sandbox.tests.Fixtures.Drivers.UI;
 
 public class UIEmailsDriver : IEmailsDriver
 {

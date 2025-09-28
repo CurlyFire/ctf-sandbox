@@ -1,9 +1,8 @@
-using ctf_sandbox.tests.Fixture;
-using ctf_sandbox.tests.Fixture.Drivers;
-using ctf_sandbox.tests.Fixture.Drivers.UI;
+using ctf_sandbox.tests.Fixtures.Utils;
+using ctf_sandbox.tests.Fixtures.Drivers.UI;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace ctf_sandbox.tests.Fixtures.Utils;
+namespace ctf_sandbox.tests.Fixtures.Drivers;
 
 public class CTFDriverFactory
 {

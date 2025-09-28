@@ -1,5 +1,5 @@
 using ctf_sandbox.tests.Extensions;
-using ctf_sandbox.tests.Fixture;
+using ctf_sandbox.tests.Fixtures.Utils;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

@@ -1,6 +1,6 @@
-using ctf_sandbox.tests.Fixture.Drivers;
+using ctf_sandbox.tests.Fixtures.Drivers;
 
-namespace ctf_sandbox.tests.Fixture.Dsl;
+namespace ctf_sandbox.tests.Fixtures.Dsl;
 
 public class EmailsDsl
 {

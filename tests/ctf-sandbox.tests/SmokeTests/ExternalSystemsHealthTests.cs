@@ -1,12 +1,13 @@
 using System.Net.Http.Headers;
 using System.Net.Sockets;
 using System.Text;
-using ctf_sandbox.tests.Fixture;
+using ctf_sandbox.tests.Fixtures.Utils;
 using ctf_sandbox.tests.Fixtures;
 
 namespace ctf_sandbox.tests.SmokeTests;
 
-public class ExternalSystemsHealthTests : IClassFixture<ServerFixture>
+[Collection("Server Tests")]
+public class ExternalSystemsHealthTests
 {
 
     private readonly IServerConfiguration _serverConfiguration;

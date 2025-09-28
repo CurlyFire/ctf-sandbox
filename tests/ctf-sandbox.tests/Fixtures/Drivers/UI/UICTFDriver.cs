@@ -1,6 +1,6 @@
-using ctf_sandbox.tests.Fixture.Drivers.UI.PageObjectModels;
-using ctf_sandbox.tests.Fixture.Dsl;
-namespace ctf_sandbox.tests.Fixture.Drivers.UI;
+using ctf_sandbox.tests.Fixtures.Drivers.UI.PageObjectModels;
+using ctf_sandbox.tests.Fixtures.Dsl;
+namespace ctf_sandbox.tests.Fixtures.Drivers.UI;
 
 public class UICTFDriver : ICTFDriver
 {

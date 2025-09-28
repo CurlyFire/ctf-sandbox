@@ -1,9 +1,10 @@
-using ctf_sandbox.tests.Fixture;
+using ctf_sandbox.tests.Fixtures.Utils;
 using ctf_sandbox.tests.Fixtures;
 
 namespace ctf_sandbox.tests.SmokeTests;
 
-public class FrontEndHealthTests : IClassFixture<ServerFixture>
+[Collection("Server Tests")]
+public class FrontEndHealthTests
 {
     private ServerFixture _fixture;
 

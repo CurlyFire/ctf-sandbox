@@ -1,10 +1,11 @@
-using ctf_sandbox.tests.Fixture;
-using ctf_sandbox.tests.Fixture.Drivers.UI.PageObjectModels;
+using ctf_sandbox.tests.Fixtures.Utils;
+using ctf_sandbox.tests.Fixtures.Drivers.UI.PageObjectModels;
 using ctf_sandbox.tests.Fixtures;
 
 namespace ctf_sandbox.tests.SmokeTests;
 
-public class UITests : IClassFixture<HomePageFixture>
+[Collection("HomePage Tests")]
+public class UITests
 {
     private HomePage _homePage;
     private IServerConfiguration _serverConfiguration;

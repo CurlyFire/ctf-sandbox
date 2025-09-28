@@ -1,5 +1,5 @@
-using ctf_sandbox.tests.Fixture.Drivers.UI;
-using ctf_sandbox.tests.Fixture.Drivers.UI.PageObjectModels;
+using ctf_sandbox.tests.Fixtures.Drivers.UI;
+using ctf_sandbox.tests.Fixtures.Drivers.UI.PageObjectModels;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ctf_sandbox.tests.Fixtures;

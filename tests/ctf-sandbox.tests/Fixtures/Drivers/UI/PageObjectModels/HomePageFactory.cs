@@ -1,7 +1,8 @@
 using Microsoft.Playwright;
 using Microsoft.Playwright.TestAdapter;
+using ctf_sandbox.tests.Fixtures.Utils;
 
-namespace ctf_sandbox.tests.Fixture.Drivers.UI.PageObjectModels;
+namespace ctf_sandbox.tests.Fixtures.Drivers.UI.PageObjectModels;
 
 public class HomePageFactory : IDisposable
 {
