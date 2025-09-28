@@ -2,17 +2,20 @@ using System.Net.Http.Headers;
 using System.Net.Sockets;
 using System.Text;
 using ctf_sandbox.tests.Fixture;
+using ctf_sandbox.tests.Fixtures;
 
 namespace ctf_sandbox.tests.SmokeTests;
 
-public class ExternalSystemsHealthTests : IClassFixture<ServerConfiguration>
+public class ExternalSystemsHealthTests : IClassFixture<ServerFixture>
 {
-    private readonly ServerConfiguration _serverConfiguration;
 
-    public ExternalSystemsHealthTests(ServerConfiguration serverConfiguration)
+    private readonly IServerConfiguration _serverConfiguration;
+
+    public ExternalSystemsHealthTests(ServerFixture serverFixture)
     {
-        _serverConfiguration = serverConfiguration;
+        _serverConfiguration = serverFixture.GetServerConfiguration();
     }
+
 
     [Trait("Category", "Smoke_ExternalSystemsHealth")]
     [Fact]
