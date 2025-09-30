@@ -1,21 +1,38 @@
 using ctf_sandbox.tests.Extensions;
+using ctf_sandbox.tests.Fixtures.Utils;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
-namespace ctf_sandbox.tests;
+namespace ctf_sandbox.tests.Fixtures;
 
-public class WebServer : ServerConfiguration, IDisposable
+public class ServerFixture : IAsyncLifetime
 {
     private IHost? _host;
-    public WebServer()
+    public ServerConfiguration Configuration { get; private set; }
+
+    public ServerFixture()
     {
-        if (string.IsNullOrWhiteSpace(WebServerUrl))
+        Configuration = new ServerConfiguration();
+    }
+
+    public async Task InitializeAsync()
+    {
+        if (string.IsNullOrWhiteSpace(Configuration.WebServerUrl))
         {
-            HostWithinProcess();
+            await HostWithinProcess();
         }
     }
 
-    private void HostWithinProcess()
+    public async Task DisposeAsync()
+    {
+        if (_host != null)
+        {
+            await _host.StopAsync();
+            _host.Dispose();
+        }
+    }
+
+    private async Task HostWithinProcess()
     {
         var builder = Program.CreateHostBuilder(Array.Empty<string>());
         builder.UseEnvironment(Environments.Development);
@@ -25,17 +42,12 @@ public class WebServer : ServerConfiguration, IDisposable
             webHostBuilder.UseUrls("http://127.0.0.1:0");
         });
         _host = builder.Build();
-        _host.Start();
+        await _host.StartAsync();
         var webServerUrl = _host.GetWebServerUrl();
         if (string.IsNullOrWhiteSpace(webServerUrl))
         {
             throw new InvalidOperationException("Web server URL is not configured.");
         }
-        WebServerUrl = webServerUrl;
-    }
-
-    public void Dispose()
-    {
-        _host?.StopAsync().GetAwaiter().GetResult();
+        Configuration.WebServerUrl = webServerUrl;
     }
 }

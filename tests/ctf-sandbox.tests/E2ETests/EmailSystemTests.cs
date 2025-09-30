@@ -1,19 +1,22 @@
+using ctf_sandbox.tests.Fixtures.Utils;
+using ctf_sandbox.tests.Fixtures;
+
 namespace ctf_sandbox.tests.E2ETests;
 
-public class EmailSystemTests : WebServerPageTest
+public class EmailSystemTests : DSLTests
 {
-    public EmailSystemTests(WebServer webServer) : base(webServer)
+    public EmailSystemTests(ServerFixture fixture) : base(fixture)
     {
     }
 
     [Trait("Category", "E2E")]
-    [Fact]
-    public async Task ShouldBeAbleToViewEmails()
+    [Theory]
+    [Channel(Channel.UI)]
+    public async Task ShouldBeAbleToViewEmails(Channel channel)
     {
-        var homePage = await GoToHomePage();
-        var emailsPage = await homePage.GoToEmailsPage();
-
-        Assert.True(await emailsPage.IsInboxVisible());
+        var ctfDsl = GetDsl(channel);
+        var emailsDsl = await ctfDsl.CheckEmails();
+        Assert.True(await emailsDsl.IsInboxAvailable());
     }
 }
 

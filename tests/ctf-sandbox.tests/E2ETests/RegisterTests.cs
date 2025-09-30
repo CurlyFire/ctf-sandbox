@@ -1,27 +1,26 @@
+using ctf_sandbox.tests.Fixtures.Utils;
+using ctf_sandbox.tests.Fixtures;
+
 namespace ctf_sandbox.tests.E2ETests;
 
-public class RegisterTests : WebServerPageTest
+public class RegisterTests : DSLTests
 {
-    public RegisterTests(WebServer webServer) : base(webServer)
+    public RegisterTests(ServerFixture fixture) : base(fixture)
     {
     }
 
-    [Fact]
     [Trait("Category", "E2E")]
-    public async Task ShouldBeAbleToRegister()
+    [Theory]
+    [Channel(Channel.UI)]
+    public async Task ShouldBeAbleToRegister(Channel channel)
     {
-        var homePage = await GoToHomePage();
-        var createAccountPage = await homePage.GoToCreateAccountPage();
+        var ctfDsl = GetDsl(channel);
+
         var randomEmail = $"registertest_{Guid.NewGuid()}@test.com";
         var password = "RegisterTest123!";
-        await createAccountPage.FillEmail(randomEmail);
-        await createAccountPage.FillPassword(password);
-        await createAccountPage.FillConfirmPassword(password);
-        var accountCreationConfirmationPage = await createAccountPage.CreateAccount();
-        Assert.True(await accountCreationConfirmationPage.IsConfirmationMessageVisible());
+        Assert.True(await ctfDsl.CreateAccount(randomEmail, password));
 
-        var emailsPage = await homePage.GoToEmailsPage();
-        var confirmEmailPage = await emailsPage.OpenLatestEmailSentToAndOpenConfirmationLink(randomEmail);
-        Assert.True(await confirmEmailPage.IsThankYouMessageVisible());
+        var emailsDsl = await ctfDsl.CheckEmails();
+        Assert.True(await emailsDsl.ConfirmRegistrationSentTo(randomEmail));
     }
 }

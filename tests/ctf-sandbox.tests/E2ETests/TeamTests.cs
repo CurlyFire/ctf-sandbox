@@ -1,22 +1,26 @@
+using ctf_sandbox.tests.Fixtures.Utils;
+using ctf_sandbox.tests.Fixtures;
+
 namespace ctf_sandbox.tests.E2ETests;
 
-public class TeamTests : WebServerPageTest
+public class TeamTests : DSLTests
 {
-    public TeamTests(WebServer webServer) : base(webServer)
+    public TeamTests(ServerFixture fixture) : base(fixture)
     {
     }
 
-    [Fact]
     [Trait("Category", "E2E")]
-    public async Task ShouldBeAbleToCreateTeam()
+    [Theory]
+    [Channel(Channel.UI)]
+    public async Task ShouldBeAbleToCreateTeam(Channel channel)
     {
-        var homePage = await GoToHomePage();
-        var signInPage = await homePage.GoToSignInPage();
-        await signInPage.SignIn(WebServer.WebServerCredentials.Username, WebServer.WebServerCredentials.Password);
-        var manageTeamsPage = await homePage.GoToManageTeamsPage();
-        var createNewTeamPage = await manageTeamsPage.GoToCreateNewTeamPage();
+        var CTFDsl = GetDsl(channel);
+        var serverConfig = ServerFixture.Configuration;
+        await CTFDsl.SignIn(serverConfig.WebServerCredentials.Username, serverConfig.WebServerCredentials.Password);
+
         var randomTeamName = $"team_{Guid.NewGuid()}";
-        await createNewTeamPage.CreateTeam(randomTeamName);
-        Assert.True(await manageTeamsPage.IsTeamVisible(randomTeamName));
+        await CTFDsl.CreateTeam(randomTeamName);
+
+        Assert.True(await CTFDsl.IsTeamVisible(randomTeamName));
     }
 }
