@@ -1,33 +1,38 @@
 using ctf_sandbox.tests.Extensions;
 using ctf_sandbox.tests.Fixtures.Utils;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 namespace ctf_sandbox.tests.Fixtures;
 
-public class ServerFixture : Fixture
+public class ServerFixture : IAsyncLifetime
 {
     private IHost? _host;
-    private IServerConfiguration? _serverConfiguration;
+    public ServerConfiguration Configuration { get; private set; }
 
-    public override void ConfigureServices(IServiceCollection services)
+    public ServerFixture()
     {
-        base.ConfigureServices(services);
-        services.AddSingleton<IServerConfiguration, ServerConfiguration>();
+        Configuration = new ServerConfiguration();
     }
 
-    public override void Configure(IServiceProvider serviceProvider)
+    public async Task InitializeAsync()
     {
-        base.Configure(serviceProvider);
-        _serverConfiguration = serviceProvider.GetRequiredService<IServerConfiguration>();
-        if (string.IsNullOrWhiteSpace(_serverConfiguration.WebServerUrl))
+        if (string.IsNullOrWhiteSpace(Configuration.WebServerUrl))
         {
-            HostWithinProcess(_serverConfiguration);
+            await HostWithinProcess();
         }
     }
 
-    private void HostWithinProcess(IServerConfiguration serverConfiguration)
+    public async Task DisposeAsync()
+    {
+        if (_host != null)
+        {
+            await _host.StopAsync();
+            _host.Dispose();
+        }
+    }
+
+    private async Task HostWithinProcess()
     {
         var builder = Program.CreateHostBuilder(Array.Empty<string>());
         builder.UseEnvironment(Environments.Development);
@@ -37,17 +42,12 @@ public class ServerFixture : Fixture
             webHostBuilder.UseUrls("http://127.0.0.1:0");
         });
         _host = builder.Build();
-        _host.Start();
+        await _host.StartAsync();
         var webServerUrl = _host.GetWebServerUrl();
         if (string.IsNullOrWhiteSpace(webServerUrl))
         {
             throw new InvalidOperationException("Web server URL is not configured.");
         }
-        serverConfiguration.WebServerUrl = webServerUrl;
-    }
-
-    public IServerConfiguration GetServerConfiguration()
-    {
-        return _serverConfiguration!;
+        Configuration.WebServerUrl = webServerUrl;
     }
 }

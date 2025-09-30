@@ -1,6 +1,6 @@
-using ctf_sandbox.tests.Fixtures.Drivers;
+using ctf_sandbox.tests.Drivers;
 
-namespace ctf_sandbox.tests.Fixtures.Dsl;
+namespace ctf_sandbox.tests.Dsl;
 
 public class CTFDsl
 {

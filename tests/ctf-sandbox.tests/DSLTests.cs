@@ -1,14 +1,19 @@
+using ctf_sandbox.tests.Drivers;
+using ctf_sandbox.tests.Drivers.UI;
+using ctf_sandbox.tests.Dsl;
+using ctf_sandbox.tests.Fixtures;
 using ctf_sandbox.tests.Fixtures.Utils;
-using ctf_sandbox.tests.Fixtures.Drivers.UI;
-using ctf_sandbox.tests.Fixtures.Dsl;
 using Microsoft.Extensions.DependencyInjection;
-using ctf_sandbox.tests.Fixtures.Drivers;
 
-namespace ctf_sandbox.tests.Fixtures;
+namespace ctf_sandbox.tests;
 
-public class DSLFixture : HomePageFixture
+public class DSLTests : HomePageTests
 {
     private CTFDriverFactory? _CTFDriverFactory;
+
+    public DSLTests(ServerFixture fixture) : base(fixture)
+    {
+    }
 
     public override void ConfigureServices(IServiceCollection services)
     {

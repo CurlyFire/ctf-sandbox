@@ -1,12 +1,17 @@
-using ctf_sandbox.tests.Fixtures.Drivers.UI;
-using ctf_sandbox.tests.Fixtures.Drivers.UI.PageObjectModels;
+using ctf_sandbox.tests.Drivers.UI.PageObjectModels;
+using ctf_sandbox.tests.Fixtures;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace ctf_sandbox.tests.Fixtures;
+namespace ctf_sandbox.tests;
 
-public class HomePageFixture : ServerFixture
+public class HomePageTests : WebServerTests
 {
     private HomePage? _homePage;
+
+    public HomePageTests(ServerFixture fixture) : base(fixture)
+    {
+    }
+
     override public void ConfigureServices(IServiceCollection services)
     {
         base.ConfigureServices(services);
@@ -16,7 +21,6 @@ public class HomePageFixture : ServerFixture
             var factory = sp.GetRequiredService<HomePageFactory>();
             return factory.CreateHomePage();
         });
-        services.AddSingleton<UICTFDriver>();
     }
 
     public override void Configure(IServiceProvider serviceProvider)

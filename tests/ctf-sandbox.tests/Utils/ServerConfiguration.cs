@@ -2,17 +2,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace ctf_sandbox.tests.Fixtures.Utils;
 
-public interface IServerConfiguration
-{
-    string? WebServerUrl { get; set; }
-    string? MailpitUrl { get; }
-    string? IpInfoUrl { get; }
-    string? DatabaseConnectionString { get; }
-    Credentials WebServerCredentials { get; }
-    Credentials MailpitCredentials { get; }
-}
-
-public class ServerConfiguration : IServerConfiguration
+public class ServerConfiguration
 {
     public string? WebServerUrl { get; set; }
 

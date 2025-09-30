@@ -1,16 +1,16 @@
+using ctf_sandbox.tests.Fixtures.Utils;
 using Microsoft.Playwright;
 using Microsoft.Playwright.TestAdapter;
-using ctf_sandbox.tests.Fixtures.Utils;
 
-namespace ctf_sandbox.tests.Fixtures.Drivers.UI.PageObjectModels;
+namespace ctf_sandbox.tests.Drivers.UI.PageObjectModels;
 
 public class HomePageFactory : IDisposable
 {
     private IPlaywright _playwright;
-    private IServerConfiguration _serverConfiguration;
+    private ServerConfiguration _serverConfiguration;
     private bool disposedValue;
 
-    public HomePageFactory(IServerConfiguration serverConfiguration)
+    public HomePageFactory(ServerConfiguration serverConfiguration)
     {
         _serverConfiguration = serverConfiguration;
         _playwright = Playwright.CreateAsync().Result;

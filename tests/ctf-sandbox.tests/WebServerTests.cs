@@ -1,14 +1,17 @@
+using ctf_sandbox.tests.Fixtures;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace ctf_sandbox.tests.Fixtures;
+namespace ctf_sandbox.tests;
 
-public abstract class Fixture : IDisposable
+[Collection("Server Tests")]
+public abstract class WebServerTests : IDisposable
 {
-    private bool disposedValue;
     private IServiceScope _scope;
-
-    public Fixture()
+    private bool disposedValue;
+    protected ServerFixture ServerFixture { get; }
+    public WebServerTests(ServerFixture fixture)
     {
+        ServerFixture = fixture;
         var services = new ServiceCollection();
         ConfigureServices(services);
         var serviceProvider = services.BuildServiceProvider();
@@ -16,8 +19,10 @@ public abstract class Fixture : IDisposable
         Configure(_scope.ServiceProvider);
     }
 
+
     public virtual void ConfigureServices(IServiceCollection services)
     {
+        services.AddSingleton(ServerFixture.Configuration);
     }
 
     public virtual void Configure(IServiceProvider serviceProvider)
@@ -28,7 +33,10 @@ public abstract class Fixture : IDisposable
     {
         if (!disposedValue)
         {
-            _scope.Dispose();
+            if (disposing)
+            {
+                _scope.Dispose();
+            }
             disposedValue = true;
         }
     }

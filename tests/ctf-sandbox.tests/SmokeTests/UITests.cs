@@ -1,21 +1,16 @@
-using ctf_sandbox.tests.Fixtures.Utils;
-using ctf_sandbox.tests.Fixtures.Drivers.UI.PageObjectModels;
+using ctf_sandbox.tests.Drivers.UI.PageObjectModels;
 using ctf_sandbox.tests.Fixtures;
 
 namespace ctf_sandbox.tests.SmokeTests;
 
-[Collection("HomePage Tests")]
-public class UITests
+public class UITests : HomePageTests
 {
     private HomePage _homePage;
-    private IServerConfiguration _serverConfiguration;
 
-    public UITests(HomePageFixture fixture)
+    public UITests(ServerFixture fixture) : base(fixture)
     {
-        _homePage = fixture.GetHomePage();
-        _serverConfiguration = fixture.GetServerConfiguration();
+        _homePage = GetHomePage();
     }
-
 
     [Trait("Category", "Smoke_UI")]
     [Fact]
@@ -41,10 +36,10 @@ public class UITests
     {
         // Navigate to sign in page and login
         var signInPage = await _homePage.GoToSignInPage();
-        _homePage = await signInPage.SignIn(_serverConfiguration.WebServerCredentials.Username, _serverConfiguration.WebServerCredentials.Password);
+        _homePage = await signInPage.SignIn(ServerFixture.Configuration.WebServerCredentials.Username, ServerFixture.Configuration.WebServerCredentials.Password);
 
         // Verify that the user's email is displayed in the navigation
         var username = await _homePage.GetLoggedInUsername();
-        Assert.Contains(_serverConfiguration.WebServerCredentials.Username, username);
+        Assert.Contains(ServerFixture.Configuration.WebServerCredentials.Username, username);
     }
 }

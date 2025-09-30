@@ -1,6 +1,6 @@
-using ctf_sandbox.tests.Fixtures.Dsl;
+using ctf_sandbox.tests.Dsl;
 
-namespace ctf_sandbox.tests.Fixtures.Drivers;
+namespace ctf_sandbox.tests.Drivers;
 
 public interface ICTFDriver
 {

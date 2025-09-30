@@ -1,24 +1,18 @@
-using ctf_sandbox.tests.Fixtures.Utils;
 using ctf_sandbox.tests.Fixtures;
 
 namespace ctf_sandbox.tests.SmokeTests;
 
-[Collection("Server Tests")]
-public class FrontEndHealthTests
+public class FrontEndHealthTests : WebServerTests
 {
-    private ServerFixture _fixture;
-
-    public FrontEndHealthTests(ServerFixture fixture)
+    public FrontEndHealthTests(ServerFixture fixture) : base(fixture)
     {
-        _fixture = fixture;
     }
-
 
     [Trait("Category", "Smoke_FrontEndHealth")]
     [Fact]
     public async Task FrontEnd_ShouldBeUpAndRunning()
     {
-        var config = _fixture.GetServerConfiguration();
+        var config = ServerFixture.Configuration;
         using var client = new HttpClient()
         {
             BaseAddress = new Uri(config.WebServerUrl!)

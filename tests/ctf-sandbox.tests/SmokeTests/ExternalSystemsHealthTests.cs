@@ -1,22 +1,15 @@
 using System.Net.Http.Headers;
 using System.Net.Sockets;
 using System.Text;
-using ctf_sandbox.tests.Fixtures.Utils;
 using ctf_sandbox.tests.Fixtures;
 
 namespace ctf_sandbox.tests.SmokeTests;
 
-[Collection("Server Tests")]
-public class ExternalSystemsHealthTests
+public class ExternalSystemsHealthTests : WebServerTests
 {
-
-    private readonly IServerConfiguration _serverConfiguration;
-
-    public ExternalSystemsHealthTests(ServerFixture serverFixture)
+    public ExternalSystemsHealthTests(ServerFixture fixture) : base(fixture)
     {
-        _serverConfiguration = serverFixture.GetServerConfiguration();
     }
-
 
     [Trait("Category", "Smoke_ExternalSystemsHealth")]
     [Fact]
@@ -26,16 +19,16 @@ public class ExternalSystemsHealthTests
         HttpResponseMessage response;
         using (var client = new HttpClient())
         {
-            if (!_serverConfiguration.MailpitCredentials.IsEmpty())
+            if (!ServerFixture.Configuration.MailpitCredentials.IsEmpty())
             {
-                var byteArray = Encoding.ASCII.GetBytes($"{_serverConfiguration.MailpitCredentials.Username}:{_serverConfiguration.MailpitCredentials.Password}");
+                var byteArray = Encoding.ASCII.GetBytes($"{ServerFixture.Configuration.MailpitCredentials.Username}:{ServerFixture.Configuration.MailpitCredentials.Password}");
                 client.DefaultRequestHeaders.Authorization =
                     new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
             }
-            response = await client.GetAsync(_serverConfiguration.MailpitUrl);
+            response = await client.GetAsync(ServerFixture.Configuration.MailpitUrl);
         }
         // Check if the response is successful
-        Assert.True(response.IsSuccessStatusCode, $"Failed to connect to Mailpit at {_serverConfiguration.MailpitUrl}, status code: {response.StatusCode}");
+        Assert.True(response.IsSuccessStatusCode, $"Failed to connect to Mailpit at {ServerFixture.Configuration.MailpitUrl}, status code: {response.StatusCode}");
     }
 
     [Fact]
@@ -43,10 +36,10 @@ public class ExternalSystemsHealthTests
     public async Task IpInfo_ShouldBeUpAndRunning()
     {
         // Ensure we have a URL configured
-        Assert.NotNull(_serverConfiguration.IpInfoUrl);
+        Assert.NotNull(ServerFixture.Configuration.IpInfoUrl);
         
         // Parse the URL to get host and port
-        var uri = new Uri(_serverConfiguration.IpInfoUrl);
+        var uri = new Uri(ServerFixture.Configuration.IpInfoUrl);
         var port = uri.Port == -1 ? (uri.Scheme == "https" ? 443 : 80) : uri.Port;
         
         using var client = new TcpClient();

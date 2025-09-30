@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace ctf_sandbox.tests;
+namespace ctf_sandbox.tests.Utils;
 
 public static class DebugHelper
 {
