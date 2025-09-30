@@ -13,7 +13,10 @@ param(
     [string]$AdminPassword,
 
     [Parameter(Mandatory = $true)]
-    [string]$IpInfoToken
+    [string]$IpInfoToken,
+
+    [Parameter(Mandatory = $false)]
+    [switch]$Force
 )
 
 $ErrorActionPreference = "Stop"
@@ -23,7 +26,10 @@ Import-Module (Join-Path $workspace "pipelines/shared/CICD.psm1") -Force
 
 Write-Log "🚀 Starting acceptance stage for version $Version"
 
-if (Test-IsShaAlreadyProcessed -Version $Version) {
+if ($Force) {
+    Write-Log "⚠️ Execution is forced, ignoring previous test results."
+}
+elseif (Test-IsShaAlreadyProcessed -Version $Version) {
     Write-Log "⚠️ SHA $Version already tested. Skipping."
     return
 }
