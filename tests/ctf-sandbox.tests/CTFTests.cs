@@ -7,11 +7,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ctf_sandbox.tests;
 
-public class DSLTests : HomePageTests
+public class CTFTests : HomePageTests
 {
     private CTFDriverFactory? _CTFDriverFactory;
 
-    public DSLTests(ServerFixture fixture) : base(fixture)
+    public CTFTests(ServerFixture fixture) : base(fixture)
     {
     }
 
@@ -28,9 +28,9 @@ public class DSLTests : HomePageTests
         _CTFDriverFactory = serviceProvider.GetRequiredService<CTFDriverFactory>();
     }
 
-    public CTFDsl GetDsl(Channel channel)
+    public CTF InteractWithCTFThrough(Channel channel)
     {
         var driver = _CTFDriverFactory!.Create(channel);
-        return new CTFDsl(driver);
+        return new CTF(driver, ServerFixture.Configuration);
     }
 }

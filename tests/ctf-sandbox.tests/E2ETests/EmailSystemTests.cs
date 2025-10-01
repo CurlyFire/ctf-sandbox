@@ -3,7 +3,7 @@ using ctf_sandbox.tests.Fixtures;
 
 namespace ctf_sandbox.tests.E2ETests;
 
-public class EmailSystemTests : DSLTests
+public class EmailSystemTests : CTFTests
 {
     public EmailSystemTests(ServerFixture fixture) : base(fixture)
     {
@@ -14,9 +14,10 @@ public class EmailSystemTests : DSLTests
     [Channel(Channel.UI)]
     public async Task ShouldBeAbleToViewEmails(Channel channel)
     {
-        var ctfDsl = GetDsl(channel);
-        var emailsDsl = await ctfDsl.CheckEmails();
-        Assert.True(await emailsDsl.IsInboxAvailable());
+        var ctf = InteractWithCTFThrough(channel);
+        
+        var emails = await ctf.CheckEmails();
+
+        await emails.ConfirmInboxIsAvailable();
     }
 }
-

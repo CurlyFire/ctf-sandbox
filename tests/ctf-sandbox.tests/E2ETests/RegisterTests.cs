@@ -3,7 +3,7 @@ using ctf_sandbox.tests.Fixtures;
 
 namespace ctf_sandbox.tests.E2ETests;
 
-public class RegisterTests : DSLTests
+public class RegisterTests : CTFTests
 {
     public RegisterTests(ServerFixture fixture) : base(fixture)
     {
@@ -14,13 +14,13 @@ public class RegisterTests : DSLTests
     [Channel(Channel.UI)]
     public async Task ShouldBeAbleToRegister(Channel channel)
     {
-        var ctfDsl = GetDsl(channel);
-
+        var ctf = InteractWithCTFThrough(channel);
         var randomEmail = $"registertest_{Guid.NewGuid()}@test.com";
         var password = "RegisterTest123!";
-        Assert.True(await ctfDsl.CreateAccount(randomEmail, password));
+        
+        await ctf.CreateAccount(randomEmail, password);
 
-        var emailsDsl = await ctfDsl.CheckEmails();
-        Assert.True(await emailsDsl.ConfirmRegistrationSentTo(randomEmail));
+        var emails = await ctf.CheckEmails();
+        await emails.ConfirmRegistrationSentTo(randomEmail);
     }
 }
