@@ -3,7 +3,7 @@ using ctf_sandbox.tests.Fixtures;
 
 namespace ctf_sandbox.tests.E2ETests;
 
-public class TeamTests : DSLTests
+public class TeamTests : CTFTests
 {
     public TeamTests(ServerFixture fixture) : base(fixture)
     {
@@ -14,13 +14,12 @@ public class TeamTests : DSLTests
     [Channel(Channel.UI)]
     public async Task ShouldBeAbleToCreateTeam(Channel channel)
     {
-        var CTFDsl = GetDsl(channel);
-        var serverConfig = ServerFixture.Configuration;
-        await CTFDsl.SignIn(serverConfig.WebServerCredentials.Username, serverConfig.WebServerCredentials.Password);
-
+        var ctf = InteractWithCTFThrough(channel);
+        await ctf.SignIn();
         var randomTeamName = $"team_{Guid.NewGuid()}";
-        await CTFDsl.CreateTeam(randomTeamName);
+        
+        await ctf.CreateTeam(randomTeamName);
 
-        Assert.True(await CTFDsl.IsTeamVisible(randomTeamName));
+        await ctf.ConfirmTeamIsAvailable(randomTeamName);
     }
 }

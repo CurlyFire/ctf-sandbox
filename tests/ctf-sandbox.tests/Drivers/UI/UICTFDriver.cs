@@ -11,11 +11,11 @@ public class UICTFDriver : ICTFDriver
         _homePage = homePage;
     }
 
-    public async Task<EmailsDsl> CheckEmails()
+    public async Task<Emails> CheckEmails()
     {
         var emailsPage = await _homePage.GoToEmailsPage();
         var uiEmailsDriver = new UIEmailsDriver(emailsPage);
-        return new EmailsDsl(uiEmailsDriver);
+        return new Emails(uiEmailsDriver);
     }
 
     public async Task<bool> CreateAccount(string email, string password)

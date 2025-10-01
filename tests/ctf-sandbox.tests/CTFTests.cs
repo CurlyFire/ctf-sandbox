@@ -1,4 +1,5 @@
 using ctf_sandbox.tests.Drivers;
+using ctf_sandbox.tests.Drivers.API;
 using ctf_sandbox.tests.Drivers.UI;
 using ctf_sandbox.tests.Dsl;
 using ctf_sandbox.tests.Fixtures;
@@ -7,11 +8,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ctf_sandbox.tests;
 
-public class DSLTests : HomePageTests
+public class CTFTests : HomePageTests
 {
     private CTFDriverFactory? _CTFDriverFactory;
 
-    public DSLTests(ServerFixture fixture) : base(fixture)
+    public CTFTests(ServerFixture fixture) : base(fixture)
     {
     }
 
@@ -20,6 +21,7 @@ public class DSLTests : HomePageTests
         base.ConfigureServices(services);
         services.AddSingleton<CTFDriverFactory>();
         services.AddSingleton<UICTFDriver>();
+        services.AddSingleton<APICTFDriver>();
     }
 
     override public void Configure(IServiceProvider serviceProvider)
@@ -28,9 +30,9 @@ public class DSLTests : HomePageTests
         _CTFDriverFactory = serviceProvider.GetRequiredService<CTFDriverFactory>();
     }
 
-    public CTFDsl GetDsl(Channel channel)
+    public CTF InteractWithCTFThrough(Channel channel)
     {
         var driver = _CTFDriverFactory!.Create(channel);
-        return new CTFDsl(driver);
+        return new CTF(driver, ServerFixture.Configuration);
     }
 }

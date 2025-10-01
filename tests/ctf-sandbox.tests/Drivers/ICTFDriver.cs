@@ -4,7 +4,7 @@ namespace ctf_sandbox.tests.Drivers;
 
 public interface ICTFDriver
 {
-    Task<EmailsDsl> CheckEmails();
+    Task<Emails> CheckEmails();
     Task<bool> CreateAccount(string email, string password);
     Task SignIn(string email, string password);
     Task CreateTeam(string teamName);

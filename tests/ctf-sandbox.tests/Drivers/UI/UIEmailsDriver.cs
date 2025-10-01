@@ -16,7 +16,7 @@ public class UIEmailsDriver : IEmailsDriver
         return await _page.IsInboxVisible();
     }
 
-    public async Task<bool> ConfirmRegistrationSentTo(string email)
+    public async Task<bool> IsRegistrationSentTo(string email)
     {
         var confirmEmailPage = await _page.OpenLatestEmailSentToAndOpenConfirmationLink(email);
         return await confirmEmailPage.IsThankYouMessageVisible();
