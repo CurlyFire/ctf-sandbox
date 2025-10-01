@@ -15,7 +15,7 @@ public class EmailSystemTests : CTFTests
     public async Task ShouldBeAbleToViewEmails(Channel channel)
     {
         var ctf = InteractWithCTFThrough(channel);
-        
+
         var emails = await ctf.CheckEmails();
 
         await emails.ConfirmInboxIsAvailable();

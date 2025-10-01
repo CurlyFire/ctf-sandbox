@@ -1,3 +1,4 @@
+using ctf_sandbox.tests.Drivers.API;
 using ctf_sandbox.tests.Drivers.UI;
 using ctf_sandbox.tests.Fixtures.Utils;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,7 +20,7 @@ public class CTFDriverFactory
         return channel switch
         {
             Channel.UI => _drivers.TryGetValue(channel, out var existingDriver) ? existingDriver : _drivers[channel] = _serviceProvider.GetRequiredService<UICTFDriver>(),
-            Channel.API => throw new NotImplementedException("API driver is not implemented yet."),
+            Channel.API => _drivers.TryGetValue(channel, out var existingDriver) ? existingDriver : _drivers[channel] = _serviceProvider.GetRequiredService<APICTFDriver>(),
             _ => throw new ArgumentOutOfRangeException(nameof(channel), channel, null)
         };
     }

@@ -1,4 +1,5 @@
 using ctf_sandbox.tests.Drivers;
+using ctf_sandbox.tests.Drivers.API;
 using ctf_sandbox.tests.Drivers.UI;
 using ctf_sandbox.tests.Dsl;
 using ctf_sandbox.tests.Fixtures;
@@ -20,6 +21,7 @@ public class CTFTests : HomePageTests
         base.ConfigureServices(services);
         services.AddSingleton<CTFDriverFactory>();
         services.AddSingleton<UICTFDriver>();
+        services.AddSingleton<APICTFDriver>();
     }
 
     override public void Configure(IServiceProvider serviceProvider)
