@@ -12,11 +12,15 @@ public class ChallengesController : Controller
 {
     private readonly ApplicationDbContext _context;
     private readonly UserManager<IdentityUser> _userManager;
+    private readonly TimeProvider _timeProvider;
 
-    public ChallengesController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+    public ChallengesController(ApplicationDbContext context,
+     UserManager<IdentityUser> userManager,
+     TimeProvider timeProvider)
     {
         _context = context;
         _userManager = userManager;
+        _timeProvider = timeProvider;
     }
 
     // GET: Challenges
@@ -51,7 +55,7 @@ public class ChallengesController : Controller
         if (challenge.CreatorId != currentUser!.Id && !User.IsInRole("Admin"))
         {
             // For regular users, look for an active competition containing this challenge
-            var now = DateTime.UtcNow;
+            var now = _timeProvider.GetUtcNow();
             var competitionChallenge = await _context.CompetitionChallenges
                 .Include(cc => cc.Competition)
                 .FirstOrDefaultAsync(cc => 
@@ -97,7 +101,7 @@ public class ChallengesController : Controller
         {
             var currentUser = await _userManager.GetUserAsync(User);
             challenge.CreatorId = currentUser!.Id;
-            challenge.CreatedAt = DateTime.UtcNow;
+            challenge.CreatedAt = _timeProvider.GetUtcNow().UtcDateTime;
             challenge.ChallengeType = "Plaintext";
 
             _context.Add(challenge);

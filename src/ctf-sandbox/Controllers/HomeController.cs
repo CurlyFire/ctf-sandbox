@@ -12,15 +12,18 @@ public class HomeController : Controller
     private readonly ILogger<HomeController> _logger;
     private readonly ApplicationDbContext _context;
     private readonly UserManager<IdentityUser> _userManager;
+    private readonly TimeProvider _timeProvider;
 
     public HomeController(
         ILogger<HomeController> logger,
         ApplicationDbContext context,
-        UserManager<IdentityUser> userManager)
+        UserManager<IdentityUser> userManager,
+        TimeProvider timeProvider)
     {
         _logger = logger;
         _context = context;
         _userManager = userManager;
+        _timeProvider = timeProvider;
     }
 
     public async Task<IActionResult> Index()
@@ -61,7 +64,7 @@ public class HomeController : Controller
             return NotFound();
         }
 
-        var now = DateTime.UtcNow;
+        var now = _timeProvider.GetUtcNow().UtcDateTime;
         var userId = _userManager.GetUserId(User);
 
         var userTeamIds = await _context.TeamMembers

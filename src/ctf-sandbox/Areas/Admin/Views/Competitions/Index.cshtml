@@ -1,4 +1,5 @@
 @model IEnumerable<ctf_sandbox.Models.Competition>
+@inject TimeProvider TimeProvider
 
 @{
     ViewData["Title"] = "Competitions";
@@ -26,7 +27,7 @@
         <tbody>
             @foreach (var item in Model)
             {
-                var now = DateTime.UtcNow;
+                var now = TimeProvider.GetUtcNow().UtcDateTime;
                 string status;
                 if (now < item.StartDate)
                     status = "Not Started";

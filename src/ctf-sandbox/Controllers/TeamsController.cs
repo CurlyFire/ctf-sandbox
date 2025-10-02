@@ -14,15 +14,18 @@ public class TeamsController : Controller
     private readonly ApplicationDbContext _context;
     private readonly UserManager<IdentityUser> _userManager;
     private readonly IEmailSender _emailSender;
+    private readonly TimeProvider _timeProvider;
 
     public TeamsController(
         ApplicationDbContext context, 
         UserManager<IdentityUser> userManager,
-        IEmailSender emailSender)
+        IEmailSender emailSender,
+        TimeProvider timeProvider)
     {
         _context = context;
         _userManager = userManager;
         _emailSender = emailSender;
+        _timeProvider = timeProvider;
     }
 
     // GET: Teams
@@ -59,7 +62,7 @@ public class TeamsController : Controller
         {
             var currentUser = await _userManager.GetUserAsync(User);
             team.OwnerId = currentUser!.Id;
-            team.CreatedAt = DateTime.UtcNow;
+            team.CreatedAt = _timeProvider.GetUtcNow().UtcDateTime;
             
             _context.Add(team);
             await _context.SaveChangesAsync();
@@ -136,7 +139,7 @@ public class TeamsController : Controller
         {
             TeamId = id,
             UserId = invitedUser.Id,
-            JoinedAt = DateTime.UtcNow,
+            JoinedAt = _timeProvider.GetUtcNow().UtcDateTime,
             IsInvitePending = true
         };
 
@@ -183,7 +186,7 @@ public class TeamsController : Controller
         }
 
         invitation.IsInvitePending = false;
-        invitation.JoinedAt = DateTime.UtcNow;
+        invitation.JoinedAt = _timeProvider.GetUtcNow().UtcDateTime;
         await _context.SaveChangesAsync();
 
         return RedirectToAction(nameof(Index));
