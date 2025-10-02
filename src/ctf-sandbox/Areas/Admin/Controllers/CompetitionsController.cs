@@ -13,13 +13,16 @@ public class CompetitionsController : Controller
 {
     private readonly ApplicationDbContext _context;
     private readonly UserManager<IdentityUser> _userManager;
+    private readonly TimeProvider _timeProvider;
 
     public CompetitionsController(
         ApplicationDbContext context,
-        UserManager<IdentityUser> userManager)
+        UserManager<IdentityUser> userManager,
+        TimeProvider timeProvider)
     {
         _context = context;
         _userManager = userManager;
+        _timeProvider = timeProvider;
     }
 
     public async Task<IActionResult> Index()
@@ -42,8 +45,9 @@ public class CompetitionsController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create([Bind("Name,Description,StartDate,EndDate")] Competition competition)
     {
+        var now = _timeProvider.GetUtcNow();
         // Validate dates
-        if (competition.StartDate < DateTime.UtcNow)
+        if (competition.StartDate < now)
         {
             ModelState.AddModelError("StartDate", "Start date cannot be in the past");
         }
@@ -58,7 +62,7 @@ public class CompetitionsController : Controller
         if (ModelState.IsValid)
         {
             competition.CreatorId = _userManager.GetUserId(User);
-            competition.CreatedAt = DateTime.UtcNow;
+            competition.CreatedAt = now.UtcDateTime;
 
             // Load and set the Creator navigation property
             var creator = await _userManager.FindByIdAsync(competition.CreatorId);
@@ -167,7 +171,7 @@ public class CompetitionsController : Controller
         {
             CompetitionId = competitionId,
             TeamId = teamId,
-            JoinedAt = DateTime.UtcNow,
+            JoinedAt = _timeProvider.GetUtcNow().UtcDateTime,
             Score = 0
         };
 
@@ -211,7 +215,7 @@ public class CompetitionsController : Controller
         {
             CompetitionId = competitionId,
             ChallengeId = challengeId,
-            AddedAt = DateTime.UtcNow,
+            AddedAt = _timeProvider.GetUtcNow().UtcDateTime,
             Points = points
         };
 
