@@ -42,16 +42,43 @@ The big ball of mud was created with github copilot agent mode using Claude Sonn
 - As a CTF organizer, I want to assign teams to an upcoming CTF competition
 
 # External systems
-- Email using [mailpit](https://mailpit.axllent.org/)
-- Ipinfo ip lookup [ipinfo](https://ipinfo.io/)
-- System clock
+Each environment has it's own external system docker container instances.  The test environments (acceptance, E2E, docker-compose) also have their own external test instances, however they are ephemeral and last only for the duration of the tests, so no links are provided here.
 
-Each environment has it's own external system instances.  The test environments (acceptance, E2E, docker-compose) also have their own external test instances, however they are ephemeral and last only for the duration of the tests, so no links are provided here.
+|             | Real                     |Stubbed                   |
+|-------------|--------------------------|--------------------------|
+| Email       | Mailpit Docker container | Mailpit Docker container |
+| Ip info     | https://ipinfo.io        | WireMock                 |
+| Time        | System clock             | WireMock                 |
+
+## Configuring real vs stubbed
+### Email
+As the protocols to communicate are smtp and http, to switch between real or stubbed, you only have to change the Email settings described in the [Configuring external system connections](#configuring-external-system-connections) section.
+
+### Ip info
+as the protocol to communicate is http, to switch between real or stubbed, you only have to change the Ipinfo settings described in the [Configuring external system connections](#configuring-external-system-connections) section.
+
+### Time
+The contract used to get the current time is through the abstract class System.TimeProvider.  To switch between real or stubbed, you only have to change the configuration settings between the system or http TimeProvider, like this:
+
+```json
+{
+  # Use these settings to use the system clock
+  "TimeProvider": {
+    "Type": "system"
+  }
+  # OR use these settings to use a stubbed WireMock provider that returns the time as a utc string
+  "TimeProvider": {
+    "Type": "http",
+    "Url": "http://wiremockserver/api/time"
+  },  
+}
+
+```
 ## Links to external systems
 | Environment | External system | Link |
 |-------------|-----------------|------|
-| UAT         | Mailpit | https://mailpit-ui-uat-663949819005.us-central1.run.app/
-| Production  | Mailpit | https://mailpit-ui-prod-663949819005.us-central1.run.app/
+| UAT         | Mailpit | https://mailpit-ui-uat-663949819005.us-central1.run.app/ |
+| Production  | Mailpit | https://mailpit-ui-prod-663949819005.us-central1.run.app/ |
 
 ## Configuring external system connections
 To configure which external system is used by the mvc-app, override the following configurations using either appsettings.web.json or environment variables as explained in this article https://learn.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-9.0

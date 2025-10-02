@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using ctf_sandbox.Time;
 
 namespace ctf_sandbox;
 
@@ -40,6 +41,7 @@ public class Startup
 
         services.AddScoped<IRoleService, RoleService>();
         services.AddTransient<IEmailSender, EmailSender>();
+        services.AddTimeProviderBasedOn(Configuration);
 
         services.AddAuthorization(options =>
         {
