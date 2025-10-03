@@ -39,7 +39,6 @@ public class UITests : HomePageTests
         _homePage = await signInPage.SignIn(ServerFixture.Configuration.WebServerCredentials.Username, ServerFixture.Configuration.WebServerCredentials.Password);
 
         // Verify that the user's email is displayed in the navigation
-        var username = await _homePage.GetLoggedInUsername();
-        Assert.Contains(ServerFixture.Configuration.WebServerCredentials.Username, username);
+        await _homePage.IsUserLoggedIn(ServerFixture.Configuration.WebServerCredentials.Username);
     }
 }

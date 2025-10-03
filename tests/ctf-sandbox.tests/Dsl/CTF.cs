@@ -24,16 +24,24 @@ public class CTF
         return await _driver.CreateAccount(email, password);
     }
 
-    public async Task<CTF> SignIn(string email, string password)
-    {
-        await _driver.SignIn(email, password);
-        return this;
-    }
-
     public async Task<CTF> SignIn()
     {
-        await _driver.SignIn(_configuration.WebServerCredentials.Username,
-            _configuration.WebServerCredentials.Password);
+        var parameters = new SignInParameters();
+        parameters.UserName = _configuration.WebServerCredentials.Username;
+        parameters.Password = _configuration.WebServerCredentials.Password;
+        return await SignIn(parameters);
+    }
+
+    public async Task<CTF> SignIn(Action<SignInParameters> configure)
+    {
+        var parameters = new SignInParameters();
+        configure(parameters);
+        return await SignIn(parameters);
+    }
+
+    private async Task<CTF> SignIn(SignInParameters parameters)
+    {
+        await _driver.SignIn(parameters.UserName, parameters.Password);
         return this;
     }
 
@@ -45,5 +53,10 @@ public class CTF
     public async Task ConfirmTeamIsAvailable(string randomTeamName)
     {
         Assert.True(await _driver.IsTeamVisible(randomTeamName));
+    }
+
+    public async Task ConfirmUserIsSignedIn(string email)
+    {
+        Assert.True(await _driver.IsUserSignedIn(email));
     }
 }

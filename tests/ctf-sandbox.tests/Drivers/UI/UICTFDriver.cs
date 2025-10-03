@@ -46,4 +46,9 @@ public class UICTFDriver : ICTFDriver
         var manageTeamsPage = await _homePage.GoToManageTeamsPage();
         return await manageTeamsPage.IsTeamVisible(teamName);
     }
+
+    public async Task<bool> IsUserSignedIn(string email)
+    {
+        return await _homePage.IsUserLoggedIn(email);
+    }
 }
