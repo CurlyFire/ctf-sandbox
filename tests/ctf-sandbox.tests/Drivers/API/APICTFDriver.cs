@@ -24,6 +24,11 @@ public class APICTFDriver : ICTFDriver
         throw new NotImplementedException();
     }
 
+    public Task<bool> IsUserSignedIn(string email)
+    {
+        throw new NotImplementedException();
+    }
+
     public Task SignIn(string email, string password)
     {
         throw new NotImplementedException();

@@ -9,4 +9,5 @@ public interface ICTFDriver
     Task SignIn(string email, string password);
     Task CreateTeam(string teamName);
     Task<bool> IsTeamVisible(string teamName);
+    Task<bool> IsUserSignedIn(string email);
 }

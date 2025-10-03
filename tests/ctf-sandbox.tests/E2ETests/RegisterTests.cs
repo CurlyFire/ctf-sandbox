@@ -17,10 +17,16 @@ public class RegisterTests : CTFTests
         var ctf = InteractWithCTFThrough(channel);
         var randomEmail = $"registertest_{Guid.NewGuid()}@test.com";
         var password = "RegisterTest123!";
-        
-        await ctf.CreateAccount(randomEmail, password);
 
+        await ctf.CreateAccount(randomEmail, password);
         var emails = await ctf.CheckEmails();
-        await emails.ConfirmRegistrationSentTo(randomEmail);
+        await emails.ActivateRegistrationSentTo(randomEmail);
+        await ctf.SignIn(credentials =>
+        {
+            credentials.UserName = randomEmail;
+            credentials.Password = password;
+        });
+
+        await ctf.ConfirmUserIsSignedIn(randomEmail);
     }
 }

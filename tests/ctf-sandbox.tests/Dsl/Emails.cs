@@ -11,9 +11,9 @@ public class Emails
         _driver = driver;
     }
 
-    public async Task ConfirmRegistrationSentTo(string email)
+    public async Task ActivateRegistrationSentTo(string email)
     {
-        Assert.True(await _driver.IsRegistrationSentTo(email));
+        await _driver.ActivateRegistrationSentTo(email);
     }
 
     public async Task ConfirmInboxIsAvailable()

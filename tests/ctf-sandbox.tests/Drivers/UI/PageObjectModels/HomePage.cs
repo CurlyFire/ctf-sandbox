@@ -46,10 +46,11 @@ public class HomePage
         return await _page.GetByRole(AriaRole.Link, new() { Name = "CTF Arena" }).IsVisibleAsync();
     }
 
-    public async Task<string> GetLoggedInUsername()
+    public async Task<bool> IsUserLoggedIn(string email)
     {
         var accountLink = _page.GetByRole(AriaRole.Link, new() { Name = "Manage Account Settings" });
-        return (await accountLink.TextContentAsync()) ?? string.Empty;
+        var textContent = await accountLink.TextContentAsync();
+        return textContent != null && textContent.Contains(email);
     }
 
     public async Task<EmailsPage> GoToEmailsPage()
