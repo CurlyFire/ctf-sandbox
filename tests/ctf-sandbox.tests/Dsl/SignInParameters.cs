@@ -1,7 +1,22 @@
+using ctf_sandbox.tests.Fixtures.Utils;
+
 namespace ctf_sandbox.tests.Dsl;
 
 public record SignInParameters
 {
     public string UserName { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
+
+    private SignInParameters()
+    {
+    }
+    
+    public static SignInParameters CreateWithDefaults(ServerConfiguration config)
+    {
+        return new SignInParameters
+        {
+            UserName = config.WebServerCredentials.Username,
+            Password = config.WebServerCredentials.Password
+        };
+    }
 }
