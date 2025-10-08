@@ -1,15 +1,15 @@
 using ctf_sandbox.tests.Drivers;
-using ctf_sandbox.tests.Fixtures.Utils;
+using ctf_sandbox.tests.Fixtures;
 
 namespace ctf_sandbox.tests.Dsl;
 
 public class CTF
 {
     private readonly ICTFDriver _driver;
-    private readonly ServerConfiguration _configuration;
+    private readonly EnvironmentConfiguration _configuration;
     private Action<SignInParameters> _noConfiguration;
 
-    public CTF(ICTFDriver driver, ServerConfiguration configuration)
+    public CTF(ICTFDriver driver, EnvironmentConfiguration configuration)
     {
         _driver = driver;
         _configuration = configuration;

@@ -2,9 +2,9 @@ using ctf_sandbox.tests.Fixtures;
 
 namespace ctf_sandbox.tests.SmokeTests;
 
-public class FrontEndHealthTests : WebServerTests
+public class FrontEndHealthTests : EnvironmentTests
 {
-    public FrontEndHealthTests(ServerFixture fixture) : base(fixture)
+    public FrontEndHealthTests(EnvironmentFixture fixture) : base(fixture)
     {
     }
 
@@ -12,7 +12,7 @@ public class FrontEndHealthTests : WebServerTests
     [Fact]
     public async Task FrontEnd_ShouldBeUpAndRunning()
     {
-        var config = ServerFixture.Configuration;
+        var config = EnvironmentFixture.Configuration;
         using var client = new HttpClient()
         {
             BaseAddress = new Uri(config.WebServerUrl!)

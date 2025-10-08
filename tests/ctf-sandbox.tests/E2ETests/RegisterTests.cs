@@ -1,11 +1,11 @@
-using ctf_sandbox.tests.Fixtures.Utils;
 using ctf_sandbox.tests.Fixtures;
+using ctf_sandbox.tests.Utils;
 
 namespace ctf_sandbox.tests.E2ETests;
 
 public class RegisterTests : CTFTests
 {
-    public RegisterTests(ServerFixture fixture) : base(fixture)
+    public RegisterTests(EnvironmentFixture fixture) : base(fixture)
     {
     }
 

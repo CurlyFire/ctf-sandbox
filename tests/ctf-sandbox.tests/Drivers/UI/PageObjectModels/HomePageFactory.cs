@@ -1,4 +1,4 @@
-using ctf_sandbox.tests.Fixtures.Utils;
+using ctf_sandbox.tests.Fixtures;
 using Microsoft.Playwright;
 using Microsoft.Playwright.TestAdapter;
 
@@ -7,12 +7,12 @@ namespace ctf_sandbox.tests.Drivers.UI.PageObjectModels;
 public class HomePageFactory : IDisposable
 {
     private IPlaywright _playwright;
-    private ServerConfiguration _serverConfiguration;
+    private EnvironmentConfiguration _environmentConfiguration;
     private bool disposedValue;
 
-    public HomePageFactory(ServerConfiguration serverConfiguration)
+    public HomePageFactory(EnvironmentConfiguration environmentConfiguration)
     {
-        _serverConfiguration = serverConfiguration;
+        _environmentConfiguration = environmentConfiguration;
         _playwright = Playwright.CreateAsync().Result;
     }
 
@@ -22,7 +22,7 @@ public class HomePageFactory : IDisposable
         var browser = browserType.LaunchAsync().Result;
         var options = new BrowserNewPageOptions
         {
-            BaseURL = _serverConfiguration.WebServerUrl
+            BaseURL = _environmentConfiguration.WebServerUrl
         };
         var page = browser.NewPageAsync(options).Result;
         page.GotoAsync(string.Empty).Wait();

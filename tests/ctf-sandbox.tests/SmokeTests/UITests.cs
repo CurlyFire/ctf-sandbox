@@ -7,7 +7,7 @@ public class UITests : HomePageTests
 {
     private HomePage _homePage;
 
-    public UITests(ServerFixture fixture) : base(fixture)
+    public UITests(EnvironmentFixture fixture) : base(fixture)
     {
         _homePage = GetHomePage();
     }
@@ -36,9 +36,9 @@ public class UITests : HomePageTests
     {
         // Navigate to sign in page and login
         var signInPage = await _homePage.GoToSignInPage();
-        _homePage = await signInPage.SignIn(ServerFixture.Configuration.WebServerCredentials.Username, ServerFixture.Configuration.WebServerCredentials.Password);
+        _homePage = await signInPage.SignIn(EnvironmentFixture.Configuration.WebServerCredentials.Username, EnvironmentFixture.Configuration.WebServerCredentials.Password);
 
         // Verify that the user's email is displayed in the navigation
-        await _homePage.IsUserLoggedIn(ServerFixture.Configuration.WebServerCredentials.Username);
+        await _homePage.IsUserLoggedIn(EnvironmentFixture.Configuration.WebServerCredentials.Username);
     }
 }

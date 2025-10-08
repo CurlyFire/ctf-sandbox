@@ -1,4 +1,4 @@
-namespace ctf_sandbox.tests.Fixtures.Utils;
+namespace ctf_sandbox.tests.Fixtures;
 
 public class Credentials
 {

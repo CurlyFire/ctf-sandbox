@@ -1,6 +1,6 @@
 using ctf_sandbox.tests.Drivers.API;
 using ctf_sandbox.tests.Drivers.UI;
-using ctf_sandbox.tests.Fixtures.Utils;
+using ctf_sandbox.tests.Utils;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ctf_sandbox.tests.Drivers;
