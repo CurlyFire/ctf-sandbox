@@ -9,7 +9,6 @@ namespace ctf_sandbox.tests.Fixtures;
 public class EnvironmentFixture : IDisposable
 {
     private IHost? _host;
-    private IHostBuilder _hostBuilder;
     private bool disposedValue;
 
     public EnvironmentConfiguration Configuration { get; }
@@ -23,45 +22,67 @@ public class EnvironmentFixture : IDisposable
         .AddEnvironmentVariables();
         var config = configBuilder.Build();
         var environmentType = config.GetValue<string>("Environment:Type");
+        IConfiguration configuration;
+        string webServerUrl;
         if (string.IsNullOrWhiteSpace(environmentType))
         {
             throw new InvalidOperationException("Environment type is not configured.");
         }
         if (environmentType == EnvironmentTypes.Internal)
         {
-            _hostBuilder = Program.CreateHostBuilder(Array.Empty<string>());
-            _hostBuilder.UseEnvironment(Environments.Development);
-            _hostBuilder.ConfigureWebHost(webHostBuilder =>
+            var hostBuilder = Program.CreateHostBuilder(Array.Empty<string>());
+            hostBuilder.UseEnvironment(Environments.Development);
+            hostBuilder.ConfigureAppConfiguration(config =>
+            {
+                config.AddJsonFile("appsettings.web.internal.json", optional: false)
+                      .AddJsonFile("appsettings.web.internal.dev.json", optional: true);
+            });
+            hostBuilder.ConfigureWebHost(webHostBuilder =>
             {
                 // Configure the web host to use a random port
                 webHostBuilder.UseUrls("http://127.0.0.1:0");
             });
-            _host = _hostBuilder.Build();
+            _host = hostBuilder.Build();
             _host.Start();
-            var webServerUrl = _host.GetWebServerUrl();
-            var configuration = _host.Services.GetRequiredService<IConfiguration>();
+            webServerUrl = _host.GetWebServerUrl();
+            configuration = _host.Services.GetRequiredService<IConfiguration>();
+
+
         }
         else if (environmentType == EnvironmentTypes.External)
         {
-            // WebServerUrl = config.GetValue<string>("WebServer:Url");
-            // MailpitUrl = config.GetValue<string>("Mailpit:Url");
-            // IpInfoUrl = config.GetValue<string>("IpInfo:Url");
-            // DatabaseConnectionString = config.GetValue<string>("Database:ConnectionString");
+            configBuilder = new ConfigurationBuilder();
+            configBuilder.AddJsonFile("appsettings.web.json", optional: false)
+            .AddJsonFile("appsettings.web.dev.json", optional: true)
+            .AddJsonFile("appsettings.web.external.json", optional: false)
+            .AddJsonFile("appsettings.web.external.dev.json", optional: true)
+            .AddEnvironmentVariables();
 
-            // WebServerCredentials = new Credentials(
-            //     config.GetValue<string>("WebServer:AdminAccount")!,
-            //     config.GetValue<string>("WebServer:AdminPassword")!
-            // );
-
-            // MailpitCredentials = new Credentials(
-            //     config.GetValue<string>("Mailpit:AdminAccount")!,
-            //     config.GetValue<string>("Mailpit:AdminPassword")!
-            // );
+            configuration = configBuilder.Build();
+            webServerUrl = configuration.GetRequiredValue<string>("WebServer:Url");
         }
         else
         {
             throw new InvalidOperationException($"Unknown environment type: {environmentType}");
         }
+
+        if (string.IsNullOrWhiteSpace(webServerUrl))
+        {
+            throw new InvalidOperationException("Web server URL is not configured.");
+        }
+        Configuration = new EnvironmentConfiguration(
+            webServerUrl,
+            configuration.GetRequiredValue<string>("EmailSettings:MailpitUrl"),
+            configuration.GetRequiredValue<string>("IPInfo:BaseUrl"),
+            configuration.GetRequiredValue<string>("ConnectionStrings:DefaultConnection"),
+            new Credentials(
+                configuration.GetRequiredValue<string>("AdminAccount:Email"),
+                configuration.GetRequiredValue<string>("AdminAccount:Password")
+            ),
+            new Credentials(
+                configuration.GetValue<string>("EmailSettings:Username") ?? string.Empty,
+                configuration.GetValue<string>("EmailSettings:Password") ?? string.Empty
+            ));            
     }
 
     protected virtual void Dispose(bool disposing)

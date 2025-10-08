@@ -8,6 +8,7 @@ public class HomePageFactory : IDisposable
 {
     private IPlaywright _playwright;
     private EnvironmentConfiguration _environmentConfiguration;
+    private HomePage? _homePage;
     private bool disposedValue;
 
     public HomePageFactory(EnvironmentConfiguration environmentConfiguration)
@@ -18,15 +19,19 @@ public class HomePageFactory : IDisposable
 
     public HomePage CreateHomePage()
     {
-        var browserType = _playwright[PlaywrightSettingsProvider.BrowserName];
-        var browser = browserType.LaunchAsync().Result;
-        var options = new BrowserNewPageOptions
+        if (_homePage == null)
         {
-            BaseURL = _environmentConfiguration.WebServerUrl
-        };
-        var page = browser.NewPageAsync(options).Result;
-        page.GotoAsync(string.Empty).Wait();
-        return new HomePage(page);
+            var browserType = _playwright[PlaywrightSettingsProvider.BrowserName];
+            var browser = browserType.LaunchAsync().Result;
+            var options = new BrowserNewPageOptions
+            {
+                BaseURL = _environmentConfiguration.WebServerUrl
+            };
+            var page = browser.NewPageAsync(options).Result;
+            page.GotoAsync(string.Empty).Wait();
+            _homePage = new HomePage(page);
+        }
+        return _homePage;
     }
 
     protected virtual void Dispose(bool disposing)

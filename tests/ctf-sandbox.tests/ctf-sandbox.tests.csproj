@@ -33,6 +33,18 @@
     <None Update="appsettings.tests.dev.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="appsettings.web.internal.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>    
+    <None Update="appsettings.web.internal.dev.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>    
+    <None Update="appsettings.web.external.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>    
+    <None Update="appsettings.web.external.dev.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>    
   </ItemGroup>
 
 </Project>
