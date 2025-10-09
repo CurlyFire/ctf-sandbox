@@ -1,4 +1,4 @@
-using ctf_sandbox.tests.Fixtures.Utils;
+using ctf_sandbox.tests.Fixtures;
 
 namespace ctf_sandbox.tests.Dsl;
 
@@ -11,7 +11,7 @@ public record SignInParameters
     {
     }
     
-    public static SignInParameters CreateWithDefaults(ServerConfiguration config)
+    public static SignInParameters CreateWithDefaults(EnvironmentConfiguration config)
     {
         return new SignInParameters
         {

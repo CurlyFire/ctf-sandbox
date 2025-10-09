@@ -3,15 +3,14 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ctf_sandbox.tests;
 
-[Collection("Server Tests")]
-public abstract class WebServerTests : IDisposable
+public abstract class EnvironmentTests : IDisposable
 {
     private IServiceScope _scope;
     private bool disposedValue;
-    protected ServerFixture ServerFixture { get; }
-    public WebServerTests(ServerFixture fixture)
+    protected EnvironmentFixture EnvironmentFixture { get; }
+    public EnvironmentTests(EnvironmentFixture fixture)
     {
-        ServerFixture = fixture;
+        EnvironmentFixture = fixture;
         var services = new ServiceCollection();
         ConfigureServices(services);
         var serviceProvider = services.BuildServiceProvider();
@@ -22,7 +21,7 @@ public abstract class WebServerTests : IDisposable
 
     public virtual void ConfigureServices(IServiceCollection services)
     {
-        services.AddSingleton(ServerFixture.Configuration);
+        services.AddSingleton(EnvironmentFixture.Configuration);
     }
 
     public virtual void Configure(IServiceProvider serviceProvider)

@@ -1,11 +1,12 @@
-using ctf_sandbox.tests.Fixtures.Utils;
 using ctf_sandbox.tests.Fixtures;
+using ctf_sandbox.tests.Utils;
 
 namespace ctf_sandbox.tests.E2ETests;
 
+[Collection(RealExternalSystemsTestCollection.Name)]
 public class TeamTests : CTFTests
 {
-    public TeamTests(ServerFixture fixture) : base(fixture)
+    public TeamTests(RealExternalSystemsEnvironmentFixture fixture) : base(fixture)
     {
     }
 
@@ -17,7 +18,7 @@ public class TeamTests : CTFTests
         var ctf = InteractWithCTFThrough(channel);
         await ctf.SignIn();
         var randomTeamName = $"team_{Guid.NewGuid()}";
-        
+
         await ctf.CreateTeam(randomTeamName);
 
         await ctf.ConfirmTeamIsAvailable(randomTeamName);
