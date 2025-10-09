@@ -1,16 +1,16 @@
 using ctf_sandbox.tests.Extensions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.EnvironmentVariables;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 namespace ctf_sandbox.tests.Fixtures;
 
-public class EnvironmentFixture : IDisposable
+public abstract class EnvironmentFixture : IDisposable
 {
     private IHost? _host;
     private bool disposedValue;
-
     public EnvironmentConfiguration Configuration { get; }
 
     public EnvironmentFixture()
@@ -21,22 +21,14 @@ public class EnvironmentFixture : IDisposable
         .AddJsonFile("appsettings.tests.dev.json", optional: true)
         .AddEnvironmentVariables();
         var config = configBuilder.Build();
-        var environmentType = config.GetValue<string>("Environment:Type");
+        var externalWebServerUrl = config.GetValue<string>("ExternalWebServerUrl");
         IConfiguration configuration;
         string webServerUrl;
-        if (string.IsNullOrWhiteSpace(environmentType))
-        {
-            throw new InvalidOperationException("Environment type is not configured.");
-        }
-        if (environmentType == EnvironmentTypes.Internal)
+        if (string.IsNullOrWhiteSpace(externalWebServerUrl))
         {
             var hostBuilder = Program.CreateHostBuilder(Array.Empty<string>());
             hostBuilder.UseEnvironment(Environments.Development);
-            hostBuilder.ConfigureAppConfiguration(config =>
-            {
-                config.AddJsonFile("appsettings.web.internal.json", optional: false)
-                      .AddJsonFile("appsettings.web.internal.dev.json", optional: true);
-            });
+            hostBuilder.ConfigureAppConfiguration(ConfigureAppConfiguration);
             hostBuilder.ConfigureWebHost(webHostBuilder =>
             {
                 // Configure the web host to use a random port
@@ -46,25 +38,23 @@ public class EnvironmentFixture : IDisposable
             _host.Start();
             webServerUrl = _host.GetWebServerUrl();
             configuration = _host.Services.GetRequiredService<IConfiguration>();
-
-
-        }
-        else if (environmentType == EnvironmentTypes.External)
-        {
-            configBuilder = new ConfigurationBuilder();
-            configBuilder.AddJsonFile("appsettings.web.json", optional: false)
-            .AddJsonFile("appsettings.web.dev.json", optional: true)
-            .AddJsonFile("appsettings.web.external.json", optional: false)
-            .AddJsonFile("appsettings.web.external.dev.json", optional: true)
-            .AddEnvironmentVariables();
-
-            configuration = configBuilder.Build();
-            webServerUrl = configuration.GetRequiredValue<string>("WebServer:Url");
         }
         else
         {
-            throw new InvalidOperationException($"Unknown environment type: {environmentType}");
+            configBuilder = new ConfigurationBuilder();
+            Program.ConfigureAppConfiguration(configBuilder);
+            var envVariableSources = configBuilder.Sources.Where(s => s is EnvironmentVariablesConfigurationSource);
+            foreach (var source in envVariableSources)
+            {
+                configBuilder.Sources.Remove(source);
+            }
+            ConfigureAppConfiguration(configBuilder);
+            configBuilder.AddEnvironmentVariables();
+
+            webServerUrl = externalWebServerUrl;
+            configuration = configBuilder.Build();
         }
+
 
         if (string.IsNullOrWhiteSpace(webServerUrl))
         {
@@ -83,6 +73,10 @@ public class EnvironmentFixture : IDisposable
                 configuration.GetValue<string>("EmailSettings:Username") ?? string.Empty,
                 configuration.GetValue<string>("EmailSettings:Password") ?? string.Empty
             ));            
+    }
+
+    protected virtual void ConfigureAppConfiguration(IConfigurationBuilder configBuilder)
+    {
     }
 
     protected virtual void Dispose(bool disposing)

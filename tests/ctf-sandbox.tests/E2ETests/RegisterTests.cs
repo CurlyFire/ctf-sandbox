@@ -3,9 +3,10 @@ using ctf_sandbox.tests.Utils;
 
 namespace ctf_sandbox.tests.E2ETests;
 
+[Collection(RealExternalSystemsTestCollection.Name)]
 public class RegisterTests : CTFTests
 {
-    public RegisterTests(EnvironmentFixture fixture) : base(fixture)
+    public RegisterTests(RealExternalSystemsEnvironmentFixture fixture) : base(fixture)
     {
     }
 

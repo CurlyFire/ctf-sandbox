@@ -3,11 +3,12 @@ using ctf_sandbox.tests.Fixtures;
 
 namespace ctf_sandbox.tests.SmokeTests;
 
+[Collection(RealExternalSystemsTestCollection.Name)]
 public class UITests : HomePageTests
 {
     private HomePage _homePage;
 
-    public UITests(EnvironmentFixture fixture) : base(fixture)
+    public UITests(RealExternalSystemsEnvironmentFixture fixture) : base(fixture)
     {
         _homePage = GetHomePage();
     }

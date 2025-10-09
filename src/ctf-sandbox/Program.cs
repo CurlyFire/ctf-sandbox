@@ -10,12 +10,7 @@ public static class Program
     public static IHostBuilder CreateHostBuilder(string[] args)
     {
         return Host.CreateDefaultBuilder(args)
-        .ConfigureAppConfiguration(builder =>
-        {
-            builder.AddJsonFile("appsettings.web.json")
-                .AddJsonFile("appsettings.web.dev.json", optional: true)
-                .AddEnvironmentVariables();
-        })
+        .ConfigureAppConfiguration(ConfigureAppConfiguration)
             .ConfigureWebHostDefaults(webBuilder =>
             {
                 var port = Environment.GetEnvironmentVariable("PORT");
@@ -28,5 +23,12 @@ public static class Program
                 }
                 webBuilder.UseStartup<Startup>();
             });
+    }
+
+    public static void ConfigureAppConfiguration(IConfigurationBuilder configBuilder)
+    {
+        configBuilder.AddJsonFile("appsettings.web.json")
+            .AddJsonFile("appsettings.web.dev.json", optional: true)
+            .AddEnvironmentVariables();
     }
 }

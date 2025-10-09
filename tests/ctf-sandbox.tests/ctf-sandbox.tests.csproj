@@ -29,20 +29,20 @@
   <ItemGroup>
     <None Update="appsettings.tests.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </None>    
     <None Update="appsettings.tests.dev.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="appsettings.web.internal.json">
+    </None>   
+    <None Update="appsettings.web.real.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>    
-    <None Update="appsettings.web.internal.dev.json">
+    <None Update="appsettings.web.real.dev.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>    
-    <None Update="appsettings.web.external.json">
+    <None Update="appsettings.web.stubbed.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>    
-    <None Update="appsettings.web.external.dev.json">
+    <None Update="appsettings.web.stubbed.dev.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>    
   </ItemGroup>

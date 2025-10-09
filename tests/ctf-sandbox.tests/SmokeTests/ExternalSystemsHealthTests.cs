@@ -5,9 +5,10 @@ using ctf_sandbox.tests.Fixtures;
 
 namespace ctf_sandbox.tests.SmokeTests;
 
+[Collection(RealExternalSystemsTestCollection.Name)]
 public class ExternalSystemsHealthTests : EnvironmentTests
 {
-    public ExternalSystemsHealthTests(EnvironmentFixture fixture) : base(fixture)
+    public ExternalSystemsHealthTests(RealExternalSystemsEnvironmentFixture fixture) : base(fixture)
     {
     }
 
@@ -37,22 +38,22 @@ public class ExternalSystemsHealthTests : EnvironmentTests
     {
         // Ensure we have a URL configured
         Assert.NotNull(EnvironmentFixture.Configuration.IpInfoUrl);
-        
+
         // Parse the URL to get host and port
         var uri = new Uri(EnvironmentFixture.Configuration.IpInfoUrl);
         var port = uri.Port == -1 ? (uri.Scheme == "https" ? 443 : 80) : uri.Port;
-        
+
         using var client = new TcpClient();
         var connectTask = client.ConnectAsync(uri.Host, port);
         // Use a reasonable timeout
         var timeoutTask = Task.Delay(TimeSpan.FromSeconds(10));
-        
+
         // Wait for either connection or timeout
         var completedTask = await Task.WhenAny(connectTask, timeoutTask);
-        
-        Assert.True(completedTask == connectTask, 
+
+        Assert.True(completedTask == connectTask,
             $"Failed to establish TCP connection to {uri.Host}:{port} within timeout period");
-        Assert.True(client.Connected, 
+        Assert.True(client.Connected,
             $"TCP connection to {uri.Host}:{port} was not established successfully");
     }
 }

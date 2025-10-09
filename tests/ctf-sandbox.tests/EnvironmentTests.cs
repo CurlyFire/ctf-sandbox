@@ -3,7 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ctf_sandbox.tests;
 
-[Collection("Server Tests")]
 public abstract class EnvironmentTests : IDisposable
 {
     private IServiceScope _scope;
