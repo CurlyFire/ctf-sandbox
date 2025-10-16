@@ -212,8 +212,13 @@ Responsible for writing addditional E2E tests.
 - [Visual Studio Code](https://code.visualstudio.com/)
     - [Dev containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
 
-## Setup
+## Local system startup
+- Make sure you have installed the software requirements
 - Clone the repository
 - Open the cloned folder
-- Reopen the folder inside a devcontainer (Visual Studio should detect the devcontainer configuration)
-- Everything needed to build and run is configured inside the devcontainer.  Just press F5
+- Reopen the folder inside a devcontainer (Visual Studio's Dev container extension should detect the devcontainer configuration)
+- Everything needed to build and run is configured inside the devcontainer with docker compose.  Just press F5 and the debug task will start the application.
+
+## Local system shutdown
+- Close Visual Studio code
+- Stop the containers in Docker desktop or close Docker desktop
