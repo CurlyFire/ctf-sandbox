@@ -1,16 +1,17 @@
 using System.Data;
-using ctf_sandbox.tests.Fixtures.Utils;
+using ctf_sandbox.tests.Fixtures;
 using Microsoft.Data.Sqlite;
 
 namespace ctf_sandbox.tests.SmokeTests;
 
-public class BackEndHealthTests : IClassFixture<ServerConfiguration>
+[Collection(RealExternalSystemsTestCollection.Name)]
+public class BackEndHealthTests
 {
-    private readonly ServerConfiguration _serverConfiguration;
+    private readonly EnvironmentFixture _environmentFixture;
 
-    public BackEndHealthTests(ServerConfiguration serverConfiguration)
+    public BackEndHealthTests(RealExternalSystemsEnvironmentFixture environmentFixture)
     {
-        _serverConfiguration = serverConfiguration;
+        _environmentFixture = environmentFixture;
     }
 
     [Trait("Category", "Smoke_BackEndHealth")]
@@ -18,14 +19,14 @@ public class BackEndHealthTests : IClassFixture<ServerConfiguration>
     public async Task Database_ShouldBeUpAndRunning()
     {
         // Arrange
-        using var connection = new SqliteConnection(_serverConfiguration.DatabaseConnectionString);
+        using var connection = new SqliteConnection(_environmentFixture.Configuration.DatabaseConnectionString);
 
         // Act
         await connection.OpenAsync();
-        
+
         // Assert
         Assert.True(connection.State == ConnectionState.Open);
-        
+
         // Cleanup
         await connection.CloseAsync();
     }

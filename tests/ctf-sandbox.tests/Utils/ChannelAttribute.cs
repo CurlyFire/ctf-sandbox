@@ -1,7 +1,7 @@
 using System.Reflection;
 using Xunit.Sdk;
 
-namespace ctf_sandbox.tests.Fixtures.Utils;
+namespace ctf_sandbox.tests.Utils;
 
 public class ChannelAttribute : DataAttribute
 {

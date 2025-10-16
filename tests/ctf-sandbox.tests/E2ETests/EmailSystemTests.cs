@@ -1,11 +1,12 @@
-using ctf_sandbox.tests.Fixtures.Utils;
 using ctf_sandbox.tests.Fixtures;
+using ctf_sandbox.tests.Utils;
 
 namespace ctf_sandbox.tests.E2ETests;
 
+[Collection(RealExternalSystemsTestCollection.Name)]
 public class EmailSystemTests : CTFTests
 {
-    public EmailSystemTests(ServerFixture fixture) : base(fixture)
+    public EmailSystemTests(RealExternalSystemsEnvironmentFixture fixture) : base(fixture)
     {
     }
 

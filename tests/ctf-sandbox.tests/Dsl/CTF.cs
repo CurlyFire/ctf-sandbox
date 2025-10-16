@@ -1,17 +1,19 @@
 using ctf_sandbox.tests.Drivers;
-using ctf_sandbox.tests.Fixtures.Utils;
+using ctf_sandbox.tests.Fixtures;
 
 namespace ctf_sandbox.tests.Dsl;
 
 public class CTF
 {
     private readonly ICTFDriver _driver;
-    private readonly ServerConfiguration _configuration;
+    private readonly EnvironmentConfiguration _configuration;
+    private Action<SignInParameters> _noConfiguration;
 
-    public CTF(ICTFDriver driver, ServerConfiguration configuration)
+    public CTF(ICTFDriver driver, EnvironmentConfiguration configuration)
     {
         _driver = driver;
         _configuration = configuration;
+        _noConfiguration = _ => { };
     }
 
     public async Task<Emails> CheckEmails()
@@ -26,15 +28,12 @@ public class CTF
 
     public async Task<CTF> SignIn()
     {
-        var parameters = new SignInParameters();
-        parameters.UserName = _configuration.WebServerCredentials.Username;
-        parameters.Password = _configuration.WebServerCredentials.Password;
-        return await SignIn(parameters);
+        return await SignIn(_noConfiguration);
     }
 
     public async Task<CTF> SignIn(Action<SignInParameters> configure)
     {
-        var parameters = new SignInParameters();
+        var parameters = SignInParameters.CreateWithDefaults(_configuration);
         configure(parameters);
         return await SignIn(parameters);
     }

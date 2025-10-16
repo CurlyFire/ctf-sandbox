@@ -4,11 +4,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ctf_sandbox.tests;
 
-public class HomePageTests : WebServerTests
+public class HomePageTests : EnvironmentTests
 {
     private HomePage? _homePage;
 
-    public HomePageTests(ServerFixture fixture) : base(fixture)
+    public HomePageTests(EnvironmentFixture fixture) : base(fixture)
     {
     }
 

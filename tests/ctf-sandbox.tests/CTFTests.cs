@@ -3,7 +3,7 @@ using ctf_sandbox.tests.Drivers.API;
 using ctf_sandbox.tests.Drivers.UI;
 using ctf_sandbox.tests.Dsl;
 using ctf_sandbox.tests.Fixtures;
-using ctf_sandbox.tests.Fixtures.Utils;
+using ctf_sandbox.tests.Utils;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ctf_sandbox.tests;
@@ -12,7 +12,7 @@ public class CTFTests : HomePageTests
 {
     private CTFDriverFactory? _CTFDriverFactory;
 
-    public CTFTests(ServerFixture fixture) : base(fixture)
+    public CTFTests(EnvironmentFixture fixture) : base(fixture)
     {
     }
 
@@ -33,6 +33,6 @@ public class CTFTests : HomePageTests
     public CTF InteractWithCTFThrough(Channel channel)
     {
         var driver = _CTFDriverFactory!.Create(channel);
-        return new CTF(driver, ServerFixture.Configuration);
+        return new CTF(driver, EnvironmentFixture.Configuration);
     }
 }
