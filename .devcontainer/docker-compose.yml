@@ -8,8 +8,7 @@ services:
     command: sleep infinity
     depends_on:
       - mailpit
-    links:
-      - mailpit
+      - wiremock
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
 
@@ -23,3 +22,8 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
+
+  wiremock:
+    image: wiremock/wiremock:3.13.1
+    ports:
+      - "8080:8080"

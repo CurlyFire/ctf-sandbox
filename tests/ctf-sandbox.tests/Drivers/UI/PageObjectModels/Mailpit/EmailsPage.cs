@@ -1,6 +1,6 @@
 using Microsoft.Playwright;
 
-namespace ctf_sandbox.tests.Drivers.UI.PageObjectModels;
+namespace ctf_sandbox.tests.Drivers.UI.PageObjectModels.Mailpit;
 
 public class EmailsPage
 {

@@ -14,7 +14,7 @@ public class UICTFDriver : ICTFDriver
     public async Task<Emails> CheckEmails()
     {
         var emailsPage = await _homePage.GoToEmailsPage();
-        var uiEmailsDriver = new UIEmailsDriver(emailsPage);
+        var uiEmailsDriver = new UIMailpitDriver(emailsPage);
         return new Emails(uiEmailsDriver);
     }
 

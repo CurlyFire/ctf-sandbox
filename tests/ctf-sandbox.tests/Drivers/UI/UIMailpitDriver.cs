@@ -1,12 +1,12 @@
-using ctf_sandbox.tests.Drivers.UI.PageObjectModels;
+using ctf_sandbox.tests.Drivers.UI.PageObjectModels.Mailpit;
 
 namespace ctf_sandbox.tests.Drivers.UI;
 
-public class UIEmailsDriver : IEmailsDriver
+public class UIMailpitDriver : IEmailsDriver
 {
     private readonly EmailsPage _page;
 
-    public UIEmailsDriver(EmailsPage page)
+    public UIMailpitDriver(EmailsPage page)
     {
         _page = page;
     }

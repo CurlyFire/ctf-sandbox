@@ -1,3 +1,4 @@
+using ctf_sandbox.tests.Drivers.UI.PageObjectModels.Mailpit;
 using Microsoft.Playwright;
 
 namespace ctf_sandbox.tests.Drivers.UI.PageObjectModels;
