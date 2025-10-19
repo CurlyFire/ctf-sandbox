@@ -19,6 +19,8 @@ The main goals of this project are:
 ## Artificial intelligence
 The big ball of mud was created with github copilot agent mode using Claude Sonnet 3.5.  I just wanted to create something that worked without being clean.
 
+# ![System behavior](docs/manualtesting.md)
+
 ## 🚦 Pipeline Dashboard
 
 ### Component stages
@@ -30,16 +32,6 @@ The big ball of mud was created with github copilot agent mode using Claude Sonn
 |        | Acceptance Stage | UAT Stage | Production Stage |
 |--------|------------------|-----------|------------------|
 | System | [![Acceptance Stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/acceptance-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/acceptance-stage.yml)  |[![UAT Stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/uat-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/uat-stage.yml) | [![Production Stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/production-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/production-stage.yml) |
-
-# System use cases
-- As a competitor or challenge creator, I want to sign up for future CTF competitions
-- As a competitor, I want to create a team of competitors
-- As a team leader, I want to assign competitors to my team
-- As a team leader, I want to particate in a CTF competition
-- As a challenge creator, I want to create CTF challenges
-- As a CTF organizer, I want to create upcoming CTF competitions
-- As a CTF organizer, I want to assign challenges to an upcoming CTF competition
-- As a CTF organizer, I want to assign teams to an upcoming CTF competition
 
 # External systems
 Each environment has it's own external system docker container instances.  The test environments (acceptance, E2E, docker-compose) also have their own external test instances, however they are ephemeral and last only for the duration of the tests, so no links are provided here.
@@ -193,9 +185,6 @@ The CTF competition UI has all the features mentionned in the Sytem use cases se
 
 # Deployment
 CI/CD is enabled for the main branch and will deploy to the Acceptance environement automatically.
-
-## Manual testing
-[Procedure](docs/manualtesting.md)
 
 ## Team Roles
 ### Developers
