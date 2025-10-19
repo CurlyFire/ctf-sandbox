@@ -21,14 +21,14 @@ The big ball of mud was created with github copilot agent mode using Claude Sonn
 
 # [System behavior](docs/systembehavior.md)
 
-## 🚦 Pipeline Dashboard
+# 🚦 Pipeline Dashboard
 
-### Component stages
+## Component stages
 | Component       | Commit Stage Status |
 |-----------------|---------------------|
 | ctf-sandbox     | [![Commit stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/commit-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/commit-stage.yml) |
 
-### System stages
+## System stages
 |        | Acceptance Stage | UAT Stage | Production Stage |
 |--------|------------------|-----------|------------------|
 | System | [![Acceptance Stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/acceptance-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/acceptance-stage.yml)  |[![UAT Stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/uat-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/uat-stage.yml) | [![Production Stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/production-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/production-stage.yml) |
