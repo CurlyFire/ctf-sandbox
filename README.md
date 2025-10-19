@@ -96,13 +96,14 @@ example with appsettings.json
 }
 
 ```
+# System structure
 
-# System architecture style
+## Architecture style
 MVC monolith
 
-# Architecture diagrams
+## Architecture diagrams
 
-## System context diagram
+### System context diagram
 ```mermaid
 C4Context
     UpdateLayoutConfig($c4ShapeInRow="2", $c4BoundaryInRow="1")
@@ -123,7 +124,7 @@ C4Context
     }
 ```
 
-## Container diagram
+### Container diagram
 ```mermaid
 C4Container
     UpdateLayoutConfig($c4ShapeInRow="2", $c4BoundaryInRow="1")
@@ -151,26 +152,26 @@ C4Container
     }
 ```
 
-# Tech stack
+## Tech stack
 Programming language: C#
 
 Frameworks: ASP.Net Core MVC
 
 Database: Sqlite
 
-# Repository Strategy
+## Repository Strategy
 Mono-Repo
 
-# Branching Strategy
+## Branching Strategy
 Feature Branching
 
-# Deployment Model
+## Deployment Model
 Google cloud platform
 
-# Pipeline Tool
+## Pipeline Tool
 Github Actions
 
-# Docker Registry
+## Docker Registry
 Google Cloud Artifact Registry
 
 # Project Board
