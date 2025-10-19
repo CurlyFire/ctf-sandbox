@@ -219,6 +219,69 @@ function Push-DockerImage {
     Invoke-NativeCommandWithoutReturn docker push $versionedTag
 }
 
+function Get-SemanticVersion {
+    <#
+    .SYNOPSIS
+    Calculates the semantic version using GitVersion.
+
+    .DESCRIPTION
+    Uses dotnet gitversion to calculate the next semantic version based on Git history and tags.
+    Returns a version in the format: {MajorMinorPatch}-{PreReleaseTag} if PreReleaseTag is provided,
+    otherwise returns: {MajorMinorPatch}
+
+    .PARAMETER PreReleaseTag
+    The pre-release tag to append (optional, e.g., "beta", "rc")
+
+    .EXAMPLE
+    $version = Get-SemanticVersion
+    # Returns: 1.0.0
+
+    .EXAMPLE
+    $version = Get-SemanticVersion -PreReleaseTag "beta"
+    # Returns: 1.0.0-beta
+
+    .EXAMPLE
+    $version = Get-SemanticVersion -PreReleaseTag "rc"
+    # Returns: 1.0.0-rc
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter()]
+        [string]$PreReleaseTag = ""
+    )
+
+    try {
+        Write-Log "📦 Calculating semantic version using GitVersion..."
+        
+        # Call dotnet gitversion and parse JSON output
+        $gitVersionJson = dotnet gitversion /output json 2>&1
+        
+        if ($LASTEXITCODE -ne 0) {
+            throw "GitVersion failed with exit code $LASTEXITCODE. Output: $gitVersionJson"
+        }
+        
+        $gitVersionOutput = $gitVersionJson | ConvertFrom-Json
+        
+        # Build version string
+        $baseVersion = $gitVersionOutput.MajorMinorPatch
+        
+        if ([string]::IsNullOrWhiteSpace($PreReleaseTag)) {
+            $version = $baseVersion
+        }
+        else {
+            $version = "$baseVersion-$PreReleaseTag"
+        }
+        
+        Write-Log "✅ Version calculated: $version"
+        
+        return $version
+    }
+    catch {
+        Write-Log "❌ Failed to calculate semantic version: $_" -Level "Error"
+        throw
+    }
+}
+
 function Get-CICDConfig {
     $configPath = Join-Path $env:WORKSPACE_ROOT "pipelines/shared/config.psd1"
     $rawConfig = Import-PowerShellDataFile $configPath
