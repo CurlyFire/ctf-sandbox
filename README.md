@@ -5,6 +5,9 @@ ctf-sandbox
 - [Stéphane Denommé](https://github.com/CurlyFire)
 - [Valentina (Cupać) Jemuović](https://github.com/valentinajemuovic)
 
+# Project Board
+https://github.com/users/CurlyFire/projects/4/views/1
+
 # Licence
 MIT
 
@@ -161,21 +164,6 @@ Database: Sqlite
 
 ## Repository Strategy
 Mono-Repo
-
-## Branching Strategy
-Feature Branching
-
-## Deployment Model
-Google cloud platform
-
-## Pipeline Tool
-Github Actions
-
-## Docker Registry
-Google Cloud Artifact Registry
-
-# Project Board
-https://github.com/users/CurlyFire/projects/4/views/1
 
 # Environments
 | Environment | Status | Link |
