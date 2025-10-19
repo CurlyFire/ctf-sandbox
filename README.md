@@ -3,6 +3,7 @@ ctf-sandbox
 
 # Contributors
 - [Stéphane Denommé](https://github.com/CurlyFire)
+- [Valentina (Cupać) Jemuović](https://github.com/valentinajemuovic)
 
 # Licence
 MIT
