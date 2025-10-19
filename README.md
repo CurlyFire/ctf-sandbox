@@ -3,6 +3,10 @@ ctf-sandbox
 
 # Contributors
 - [Stéphane Denommé](https://github.com/CurlyFire)
+- [Valentina (Cupać) Jemuović](https://github.com/valentinajemuovic)
+
+# Project Board
+https://github.com/users/CurlyFire/projects/4/views/1
 
 # Licence
 MIT
@@ -19,27 +23,75 @@ The main goals of this project are:
 ## Artificial intelligence
 The big ball of mud was created with github copilot agent mode using Claude Sonnet 3.5.  I just wanted to create something that worked without being clean.
 
-## 🚦 Pipeline Dashboard
+# [System behavior](docs/systembehavior.md)
 
-### Component stages
+# System structure
+
+## Architecture style
+MVC monolith
+
+## Architecture diagrams
+
+### System context diagram
+```mermaid
+C4Context
+    UpdateLayoutConfig($c4ShapeInRow="2", $c4BoundaryInRow="1")
+    Person(user, "Competitor", "Creates or participates in CTF competitions")
+    Enterprise_Boundary(b0, "CTF") {
+        System(systemctf, "CTF Sandbox", "Manage challenges, teams, and competitions")
+        System_Ext(systememail, "E-mail system", "SMTP testing tool for development")
+        System_Ext(systemipinfo, "Ip Lookup system", "Ip information lookup")
+
+        Rel(user, systemctf, "Registers, creates teams, participates")
+        UpdateRelStyle(user, systemctf, $offsetX="-230", $offsetY="-45")
+
+        Rel(systemctf, systememail, "Sends email")
+        UpdateRelStyle(systemctf, systememail, $offsetX="-40", $offsetY="-10")
+
+        Rel(systemctf, systemipinfo, "Lookup ip")
+        UpdateRelStyle(systemctf, systemipinfo, $offsetX="10", $offsetY="-10")
+    }
+```
+
+### Container diagram
+```mermaid
+C4Container
+    UpdateLayoutConfig($c4ShapeInRow="2", $c4BoundaryInRow="1")
+
+    Person(user, "User", "Creates or participates in CTF competitions")
+
+    System_Boundary(ctf, "CTF Sandbox") {
+        Container(webapp, "Web Application (ASP.NET MVC)", "C#", "Handles UI, business logic, and data access")
+        Container_Ext(mailpit, "E-mail System", "SMTP / Dev Tool", "Receives email notifications from the app")
+        ContainerDb(sqlite, "SQLite Database", "SQL", "Stores users, teams, challenges, competitions")
+        Container_Ext(systemipinfo, "Ip Lookup system", "HTTP REST", "Resolves ip information")
+
+        Rel(user, webapp, "Uses")
+        UpdateRelStyle(user, webapp,  $offsetX="-50", $offsetY="-20")
+
+        Rel(webapp, sqlite, "Reads from and writes to", "SQL")
+        UpdateRelStyle(webapp, sqlite,  $offsetX="-50", $offsetY="-20")
+
+        Rel(webapp, mailpit, "Sends email via SMTP")
+        UpdateRelStyle(webapp, mailpit, $offsetX="-50", $offsetY="-30")
+
+        Rel(webapp, systemipinfo, "Lookups ip information")
+        UpdateRelStyle(webapp, mailpit, $offsetX="-50", $offsetY="-30")
+
+    }
+```
+
+# 🚦 Pipeline Dashboard
+
+## Component stages
 | Component       | Commit Stage Status |
 |-----------------|---------------------|
 | ctf-sandbox     | [![Commit stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/commit-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/commit-stage.yml) |
 
-### System stages
+## System stages
 |        | Acceptance Stage | UAT Stage | Production Stage |
 |--------|------------------|-----------|------------------|
 | System | [![Acceptance Stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/acceptance-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/acceptance-stage.yml)  |[![UAT Stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/uat-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/uat-stage.yml) | [![Production Stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/production-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/production-stage.yml) |
-
-# System use cases
-- As a competitor or challenge creator, I want to sign up for future CTF competitions
-- As a competitor, I want to create a team of competitors
-- As a team leader, I want to assign competitors to my team
-- As a team leader, I want to particate in a CTF competition
-- As a challenge creator, I want to create CTF challenges
-- As a CTF organizer, I want to create upcoming CTF competitions
-- As a CTF organizer, I want to assign challenges to an upcoming CTF competition
-- As a CTF organizer, I want to assign teams to an upcoming CTF competition
 
 # External systems
 Each environment has it's own external system docker container instances.  The test environments (acceptance, E2E, docker-compose) also have their own external test instances, however they are ephemeral and last only for the duration of the tests, so no links are provided here.
@@ -104,84 +156,15 @@ example with appsettings.json
 
 ```
 
-# System architecture style
-MVC monolith
-
-# Architecture diagrams
-
-## System context diagram
-```mermaid
-C4Context
-    UpdateLayoutConfig($c4ShapeInRow="2", $c4BoundaryInRow="1")
-    Person(user, "Competitor", "Creates or participates in CTF competitions")
-    Enterprise_Boundary(b0, "CTF") {
-        System(systemctf, "CTF Sandbox", "Manage challenges, teams, and competitions")
-        System_Ext(systememail, "E-mail system", "SMTP testing tool for development")
-        System_Ext(systemipinfo, "Ip Lookup system", "Ip information lookup")
-
-        Rel(user, systemctf, "Registers, creates teams, participates")
-        UpdateRelStyle(user, systemctf, $offsetX="-230", $offsetY="-45")
-
-        Rel(systemctf, systememail, "Sends email")
-        UpdateRelStyle(systemctf, systememail, $offsetX="-40", $offsetY="-10")
-
-        Rel(systemctf, systemipinfo, "Lookup ip")
-        UpdateRelStyle(systemctf, systemipinfo, $offsetX="10", $offsetY="-10")
-    }
-```
-
-## Container diagram
-```mermaid
-C4Container
-    UpdateLayoutConfig($c4ShapeInRow="2", $c4BoundaryInRow="1")
-
-    Person(user, "User", "Creates or participates in CTF competitions")
-
-    System_Boundary(ctf, "CTF Sandbox") {
-        Container(webapp, "Web Application (ASP.NET MVC)", "C#", "Handles UI, business logic, and data access")
-        Container_Ext(mailpit, "E-mail System", "SMTP / Dev Tool", "Receives email notifications from the app")
-        ContainerDb(sqlite, "SQLite Database", "SQL", "Stores users, teams, challenges, competitions")
-        Container_Ext(systemipinfo, "Ip Lookup system", "HTTP REST", "Resolves ip information")
-
-        Rel(user, webapp, "Uses")
-        UpdateRelStyle(user, webapp,  $offsetX="-50", $offsetY="-20")
-
-        Rel(webapp, sqlite, "Reads from and writes to", "SQL")
-        UpdateRelStyle(webapp, sqlite,  $offsetX="-50", $offsetY="-20")
-
-        Rel(webapp, mailpit, "Sends email via SMTP")
-        UpdateRelStyle(webapp, mailpit, $offsetX="-50", $offsetY="-30")
-
-        Rel(webapp, systemipinfo, "Lookups ip information")
-        UpdateRelStyle(webapp, mailpit, $offsetX="-50", $offsetY="-30")
-
-    }
-```
-
-# Tech stack
+## Tech stack
 Programming language: C#
 
 Frameworks: ASP.Net Core MVC
 
 Database: Sqlite
 
-# Repository Strategy
+## Repository Strategy
 Mono-Repo
-
-# Branching Strategy
-Feature Branching
-
-# Deployment Model
-Google cloud platform
-
-# Pipeline Tool
-Github Actions
-
-# Docker Registry
-Google Cloud Artifact Registry
-
-# Project Board
-https://github.com/users/CurlyFire/projects/4/views/1
 
 # Environments
 | Environment | Status | Link |
@@ -193,9 +176,6 @@ The CTF competition UI has all the features mentionned in the Sytem use cases se
 
 # Deployment
 CI/CD is enabled for the main branch and will deploy to the Acceptance environement automatically.
-
-## Manual testing
-[Procedure](docs/manualtesting.md)
 
 ## Team Roles
 ### Developers
