@@ -10,4 +10,7 @@ git config --global --add safe.directory $workspaceRoot
 Write-Host "🔧 Installing dotnet-ef tool..."
 dotnet tool install --global dotnet-ef
 
+Write-Host "🔧 Installing gitversion tool..."
+dotnet tool install --global GitVersion.Tool
+
 Write-Host "✅ postCreateCommand script complete."
