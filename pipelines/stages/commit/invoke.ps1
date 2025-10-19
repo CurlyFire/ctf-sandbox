@@ -13,6 +13,8 @@ Write-Log "🚀 Starting commit stage"
 # 2. Run tests
 Invoke-Tests -Stage "commit"
 
+git status
+
 # 3. Calculate semantic version
 $version = Get-SemanticVersion -PreReleaseTag "beta"
 
