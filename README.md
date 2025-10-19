@@ -25,6 +25,62 @@ The big ball of mud was created with github copilot agent mode using Claude Sonn
 
 # [System behavior](docs/systembehavior.md)
 
+# System structure
+
+## Architecture style
+MVC monolith
+
+## Architecture diagrams
+
+### System context diagram
+```mermaid
+C4Context
+    UpdateLayoutConfig($c4ShapeInRow="2", $c4BoundaryInRow="1")
+    Person(user, "Competitor", "Creates or participates in CTF competitions")
+    Enterprise_Boundary(b0, "CTF") {
+        System(systemctf, "CTF Sandbox", "Manage challenges, teams, and competitions")
+        System_Ext(systememail, "E-mail system", "SMTP testing tool for development")
+        System_Ext(systemipinfo, "Ip Lookup system", "Ip information lookup")
+
+        Rel(user, systemctf, "Registers, creates teams, participates")
+        UpdateRelStyle(user, systemctf, $offsetX="-230", $offsetY="-45")
+
+        Rel(systemctf, systememail, "Sends email")
+        UpdateRelStyle(systemctf, systememail, $offsetX="-40", $offsetY="-10")
+
+        Rel(systemctf, systemipinfo, "Lookup ip")
+        UpdateRelStyle(systemctf, systemipinfo, $offsetX="10", $offsetY="-10")
+    }
+```
+
+### Container diagram
+```mermaid
+C4Container
+    UpdateLayoutConfig($c4ShapeInRow="2", $c4BoundaryInRow="1")
+
+    Person(user, "User", "Creates or participates in CTF competitions")
+
+    System_Boundary(ctf, "CTF Sandbox") {
+        Container(webapp, "Web Application (ASP.NET MVC)", "C#", "Handles UI, business logic, and data access")
+        Container_Ext(mailpit, "E-mail System", "SMTP / Dev Tool", "Receives email notifications from the app")
+        ContainerDb(sqlite, "SQLite Database", "SQL", "Stores users, teams, challenges, competitions")
+        Container_Ext(systemipinfo, "Ip Lookup system", "HTTP REST", "Resolves ip information")
+
+        Rel(user, webapp, "Uses")
+        UpdateRelStyle(user, webapp,  $offsetX="-50", $offsetY="-20")
+
+        Rel(webapp, sqlite, "Reads from and writes to", "SQL")
+        UpdateRelStyle(webapp, sqlite,  $offsetX="-50", $offsetY="-20")
+
+        Rel(webapp, mailpit, "Sends email via SMTP")
+        UpdateRelStyle(webapp, mailpit, $offsetX="-50", $offsetY="-30")
+
+        Rel(webapp, systemipinfo, "Lookups ip information")
+        UpdateRelStyle(webapp, mailpit, $offsetX="-50", $offsetY="-30")
+
+    }
+```
+
 # 🚦 Pipeline Dashboard
 
 ## Component stages
@@ -98,61 +154,6 @@ example with appsettings.json
   },  
 }
 
-```
-# System structure
-
-## Architecture style
-MVC monolith
-
-## Architecture diagrams
-
-### System context diagram
-```mermaid
-C4Context
-    UpdateLayoutConfig($c4ShapeInRow="2", $c4BoundaryInRow="1")
-    Person(user, "Competitor", "Creates or participates in CTF competitions")
-    Enterprise_Boundary(b0, "CTF") {
-        System(systemctf, "CTF Sandbox", "Manage challenges, teams, and competitions")
-        System_Ext(systememail, "E-mail system", "SMTP testing tool for development")
-        System_Ext(systemipinfo, "Ip Lookup system", "Ip information lookup")
-
-        Rel(user, systemctf, "Registers, creates teams, participates")
-        UpdateRelStyle(user, systemctf, $offsetX="-230", $offsetY="-45")
-
-        Rel(systemctf, systememail, "Sends email")
-        UpdateRelStyle(systemctf, systememail, $offsetX="-40", $offsetY="-10")
-
-        Rel(systemctf, systemipinfo, "Lookup ip")
-        UpdateRelStyle(systemctf, systemipinfo, $offsetX="10", $offsetY="-10")
-    }
-```
-
-### Container diagram
-```mermaid
-C4Container
-    UpdateLayoutConfig($c4ShapeInRow="2", $c4BoundaryInRow="1")
-
-    Person(user, "User", "Creates or participates in CTF competitions")
-
-    System_Boundary(ctf, "CTF Sandbox") {
-        Container(webapp, "Web Application (ASP.NET MVC)", "C#", "Handles UI, business logic, and data access")
-        Container_Ext(mailpit, "E-mail System", "SMTP / Dev Tool", "Receives email notifications from the app")
-        ContainerDb(sqlite, "SQLite Database", "SQL", "Stores users, teams, challenges, competitions")
-        Container_Ext(systemipinfo, "Ip Lookup system", "HTTP REST", "Resolves ip information")
-
-        Rel(user, webapp, "Uses")
-        UpdateRelStyle(user, webapp,  $offsetX="-50", $offsetY="-20")
-
-        Rel(webapp, sqlite, "Reads from and writes to", "SQL")
-        UpdateRelStyle(webapp, sqlite,  $offsetX="-50", $offsetY="-20")
-
-        Rel(webapp, mailpit, "Sends email via SMTP")
-        UpdateRelStyle(webapp, mailpit, $offsetX="-50", $offsetY="-30")
-
-        Rel(webapp, systemipinfo, "Lookups ip information")
-        UpdateRelStyle(webapp, mailpit, $offsetX="-50", $offsetY="-30")
-
-    }
 ```
 
 ## Tech stack
