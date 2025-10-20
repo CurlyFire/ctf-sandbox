@@ -64,7 +64,7 @@ jobs:
 
           run_command: |
             pwsh ./pipelines/stages/release/invoke.ps1 \
-            -Version ${{ github.sha }} \
+            -Version ${{ inputs.version }} \
             -Env ${{ inputs.environment }} \
             -AdminPassword ${{ secrets.ADMIN_PASSWORD }} \
             -IpInfoToken  ${{ secrets.IPINFO_TOKEN }} \
