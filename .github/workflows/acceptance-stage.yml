@@ -4,7 +4,8 @@ on:
   schedule:
     - cron: '0 * * * *'  # Every hour
   workflow_dispatch:
-
+permissions:
+  contents: write
 jobs:
   run-acceptance:
     runs-on: ubuntu-latest

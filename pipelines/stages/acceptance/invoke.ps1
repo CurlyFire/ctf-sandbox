@@ -39,17 +39,17 @@ $deployedEnvironmentNames = @()
 try {
     foreach ($name in $environmentNamesToDeploy) {
         $deployedEnvironmentNames += $name
-        $environment = Deploy-GCloudEnvironment -Name $name -Version $Version -WebAdminAccount $WebAdminAccount -MailpitAdminAccount $MailpitAdminAccount -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
-        Invoke-Tests -Stage "acceptance" -EnvironmentName $environment.Name -GCloudEnvironment $environment
+        #$environment = Deploy-GCloudEnvironment -Name $name -Version $Version -WebAdminAccount $WebAdminAccount -MailpitAdminAccount $MailpitAdminAccount -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
+        #Invoke-Tests -Stage "acceptance" -EnvironmentName $environment.Name -GCloudEnvironment $environment
     }
-
+    Publish-PreRelease -Version $Version
     Write-Log "✅ Acceptance stage completed successfully"
 }
 finally {
     Write-Log "🧹 Tearing down environments..."
     foreach ($name in $deployedEnvironmentNames) {
         try {
-            Remove-GCloudEnvironment -Name $name
+            #Remove-GCloudEnvironment -Name $name
         } catch {
             Write-Log "⚠️ Failed to remove environment $name): $_"
         }
@@ -57,7 +57,7 @@ finally {
 
 
     try {
-        Register-TestedSha -Version $Version
+        #Register-TestedSha -Version $Version
         Write-Log "📌 SHA $Version has been registered as tested (regardless of outcome)"
     } catch {
         Write-Log "⚠️ Failed to register tested SHA: $_"

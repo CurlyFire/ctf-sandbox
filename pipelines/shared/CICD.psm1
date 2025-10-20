@@ -219,6 +219,37 @@ function Push-DockerImage {
     Invoke-NativeCommandWithoutReturn docker push $versionedTag
 }
 
+function Set-DockerImageTag {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$SourceImage,
+        [Parameter(Mandatory = $true)]
+        [string]$TargetTag
+    )
+    Write-Log "Tagging Docker image: $SourceImage as $TargetTag"
+    Invoke-NativeCommandWithoutReturn docker tag $SourceImage $TargetTag
+}
+
+function Set-GitTag{
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$CommitSha,
+        [Parameter(Mandatory = $true)]
+        [string]$Tag
+    )
+    Write-Log "Setting Git tag: $Tag on commit $CommitSha"
+    Invoke-NativeCommandWithoutReturn git tag $Tag $CommitSha
+}
+
+function Push-GitTag{
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Tag
+    )
+    Write-Log "Pushing Git tag: $Tag"
+    Invoke-NativeCommandWithoutReturn git push origin $Tag
+}
+
 function Get-CICDConfig {
     $configPath = Join-Path $env:WORKSPACE_ROOT "pipelines/shared/config.psd1"
     $rawConfig = Import-PowerShellDataFile $configPath
@@ -313,35 +344,35 @@ function Remove-AllGCloudRessources()
     $project = (gcloud config get-value project)
     $region = $config.GoogleCloud.Region
     $zone = $config.GoogleCloud.Zone
-    Write-Host "⚙️ Using project: $project"
-    Write-Host "📍 Region: $region"
+    Write-Log "⚙️ Using project: $project"
+    Write-Log "📍 Region: $region"
 
     # 1. Delete Cloud Run services in us-central1
-    Write-Host "`n🚮 Deleting Cloud Run services in $region..."
+    Write-Log "`n🚮 Deleting Cloud Run services in $region..."
     $services = gcloud run services list --platform=managed --region=$region --format="value(metadata.name)"
     foreach ($svc in $services) {
-        Write-Host "  🧹 Deleting Cloud Run service '$svc'"
+        Write-Log "  🧹 Deleting Cloud Run service '$svc'"
         gcloud run services delete $svc --platform=managed --region=$region --quiet
     }
 
     # 2. Delete GKE clusters
-    Write-Host "`n🧨 Deleting GKE clusters..."
+    Write-Log "`n🧨 Deleting GKE clusters..."
     $clusters = gcloud container clusters list --zone $zone --format="value(name)"
     foreach ($cluster in $clusters) {
-        Write-Host "  🧹 Deleting GKE cluster '$cluster' in zone '$zone'"
+        Write-Log "  🧹 Deleting GKE cluster '$cluster' in zone '$zone'"
         gcloud container clusters delete --zone $zone $cluster --quiet
     }
 
     # 3. Delete VPC Access Connectors in us-central1
-    Write-Host "`n🔌 Deleting VPC Access Connectors in $region..."
+    Write-Log "`n🔌 Deleting VPC Access Connectors in $region..."
     $connectors = gcloud compute networks vpc-access connectors list --region=$region --format="value(name)"
     foreach ($connector in $connectors) {
-        Write-Host "  🧹 Deleting VPC connector '$connector'"
+        Write-Log "  🧹 Deleting VPC connector '$connector'"
         gcloud compute networks vpc-access connectors delete $connector --region=$region --quiet
     }
 
     # 4. Delete NAT configs and routers in us-central1
-    Write-Host "`n🌐 Deleting Cloud NAT configs and routers in $region..."
+    Write-Log "`n🌐 Deleting Cloud NAT configs and routers in $region..."
     $routers = gcloud compute routers list --format="table(name,region)" | Select-Object -Skip 1
     foreach ($line in $routers) {
         $fields = $line -split "\s+"
@@ -351,17 +382,17 @@ function Remove-AllGCloudRessources()
         if ($routerRegion -eq $region) {
             $nats = gcloud compute routers nats list --router=$routerName --region=$region --format="value(name)"
             foreach ($nat in $nats) {
-                Write-Host "  🧹 Deleting NAT config '$nat' from router '$routerName'"
+                Write-Log "  🧹 Deleting NAT config '$nat' from router '$routerName'"
                 gcloud compute routers nats delete $nat --router=$routerName --region=$region --quiet
             }
 
-            Write-Host "  🧹 Deleting router '$routerName'"
+            Write-Log "  🧹 Deleting router '$routerName'"
             gcloud compute routers delete $routerName --region=$region --quiet
         }
     }
 
 
-    Write-Host "`n✅ Done. All resources in $region have been deleted to minimize cost."
+    Write-Log "`n✅ Done. All resources in $region have been deleted to minimize cost."
 }
 
 function Deploy-GCloudEnvironment {
@@ -391,11 +422,11 @@ function Deploy-GCloudEnvironment {
     [CICDConfig]$config = Get-CICDConfig
 
     $workspaceRoot = $env:WORKSPACE_ROOT
-    Write-Host "📡 Retrieving project number"
+    Write-Log "📡 Retrieving project number"
     $projectNumber = $config.GoogleCloud.ProjectNumber
     ### Deploy rqlite
 
-    Write-Host "✅ Deploying rqlite (initial)"
+    Write-Log "✅ Deploying rqlite (initial)"
     Invoke-NativeCommandWithoutReturn gcloud run deploy "rqlite-$Name" `
         --image=rqlite/rqlite `
         --port=4001 `
@@ -407,15 +438,15 @@ function Deploy-GCloudEnvironment {
         --args="--http-addr=0.0.0.0:4001"
 
     $rqliteUrl = "rqlite-$Name-$projectNumber.$($config.GoogleCloud.Region).run.app"
-    Write-Host "🔁 Updating rqlite HTTP_ADV_ADDR=$rqliteUrl"
-    Write-Host "Resolved advertised address: $rqliteUrl`:443"
+    Write-Log "🔁 Updating rqlite HTTP_ADV_ADDR=$rqliteUrl"
+    Write-Log "Resolved advertised address: $rqliteUrl`:443"
     Invoke-NativeCommandWithoutReturn gcloud run services update "rqlite-$Name" `
         --region=$($config.GoogleCloud.Region) `
         --update-env-vars=HTTP_ADV_ADDR="$rqliteUrl`:443"
 
     ### Deploy mailpit-ui
 
-    Write-Host "✅ Deploying mailpit-ui"
+    Write-Log "✅ Deploying mailpit-ui"
     Invoke-NativeCommandWithoutReturn gcloud run deploy "mailpit-ui-$Name" `
         --image=axllent/mailpit:latest `
         --port=8025 `
@@ -441,7 +472,7 @@ function Deploy-GCloudEnvironment {
     ### Ensure GKE cluster
 
     $clusterName = "sandbox-cluster"
-    Write-Host "📦 Ensuring GKE cluster exists"
+    Write-Log "📦 Ensuring GKE cluster exists"
     $clusterExists = $null
     $null = gcloud container clusters describe $clusterName --zone=$($config.GoogleCloud.Zone) 2>$null
     if ($LASTEXITCODE -eq 0) {
@@ -461,12 +492,12 @@ function Deploy-GCloudEnvironment {
             --quiet
     }
 
-    Write-Host "🌐 Getting GKE credentials"
+    Write-Log "🌐 Getting GKE credentials"
     Invoke-NativeCommandWithoutReturn gcloud container clusters get-credentials $ClusterName --zone=$($config.GoogleCloud.Zone)
 
     ### Deploy mailpit-smtp to GKE
 
-    Write-Host "📦 Rendering and deploying mailpit-smtp to GKE"
+    Write-Log "📦 Rendering and deploying mailpit-smtp to GKE"
 
     $vars = @{
         ENV        = $Name
@@ -504,22 +535,22 @@ function Deploy-GCloudEnvironment {
             # Continue if the command fails
         }
 
-        Write-Host "Waiting for LoadBalancer IP for mailpit-smtp-$Name... ($elapsed / $timeout seconds)"
+        Write-Log "Waiting for LoadBalancer IP for mailpit-smtp-$Name... ($elapsed / $timeout seconds)"
         Start-Sleep -Seconds $interval
         $elapsed += $interval
         if ($elapsed -ge $timeout) {
-            Write-Host "❌ Timed out waiting for LoadBalancer IP for mailpit-smtp-$Name"
+            Write-Log "❌ Timed out waiting for LoadBalancer IP for mailpit-smtp-$Name"
             throw "❌ Timed out waiting for LoadBalancer IP for mailpit-smtp-$Name"
         }
     }
 
     ### Deploy MVC app
 
-    Write-Host "✅ Deploying .NET 9 MVC App"
+    Write-Log "✅ Deploying .NET 9 MVC App"
 
     # Check if the VPC connector already exists
     if (-not (& gcloud compute networks vpc-access connectors describe run-connector --region=$($config.GoogleCloud.Region) 2>$null)) {
-        Write-Host "🛠 Creating VPC connector..."
+        Write-Log "🛠 Creating VPC connector..."
         Invoke-NativeCommandWithoutReturn gcloud compute networks vpc-access connectors create run-connector `
             --region=$($config.GoogleCloud.Region) `
             --network=default `
@@ -528,23 +559,23 @@ function Deploy-GCloudEnvironment {
             --min-instances=2
     }
     else {
-        Write-Host "✅ VPC connector 'run-connector' already exists."
+        Write-Log "✅ VPC connector 'run-connector' already exists."
     }
 
     # Check if the Cloud Router exists
     if (-not (& gcloud compute routers describe nat-router --region=$($config.GoogleCloud.Region) 2>$null)) {
-        Write-Host "🛠 Creating Cloud Router..."
+        Write-Log "🛠 Creating Cloud Router..."
         Invoke-NativeCommandWithoutReturn gcloud compute routers create nat-router `
             --region=$($config.GoogleCloud.Region) `
             --network=default
     }
     else {
-        Write-Host "✅ Cloud Router 'nat-router' already exists."
+        Write-Log "✅ Cloud Router 'nat-router' already exists."
     }
 
     # Check if the Cloud NAT config exists
     if (-not (& gcloud compute routers nats describe nat-config --router=nat-router --region=$($config.GoogleCloud.Region) 2>$null)) {
-        Write-Host "🛠 Creating Cloud NAT configuration..."
+        Write-Log "🛠 Creating Cloud NAT configuration..."
         Invoke-NativeCommandWithoutReturn gcloud compute routers nats create nat-config `
             --router=nat-router `
             --region=$($config.GoogleCloud.Region) `
@@ -552,7 +583,7 @@ function Deploy-GCloudEnvironment {
             --auto-allocate-nat-external-ips
     }
     else {
-        Write-Host "✅ Cloud NAT 'nat-config' already exists."
+        Write-Log "✅ Cloud NAT 'nat-config' already exists."
     }
 
     Invoke-NativeCommandWithoutReturn gcloud run deploy "mvc-app-$Name" `
@@ -565,7 +596,7 @@ function Deploy-GCloudEnvironment {
         --set-env-vars="EmailSettings__SmtpServer=$smtpIp,AdminAccount__Email=$WebAdminAccount,AdminAccount__Password=$AdminPassword,EmailSettings__MailpitUrl=https://$mailpitUrl,IPInfo__Token=$IpInfoToken" `
         --startup-probe=httpGet.path=/health 
 
-    Write-Host "✅ Deployment complete"
+    Write-Log "✅ Deployment complete"
 
     $mailpitUrl = "https://mailpit-ui-$Name-$projectNumber.$($config.GoogleCloud.Region).run.app"
     $webAppUrl = "https://mvc-app-$Name-$projectNumber.$($config.GoogleCloud.Region).run.app"
@@ -635,6 +666,85 @@ function Remove-GCloudEnvironment {
     catch {
         Write-Log "⚠️ Failed to teardown GCloud $Name env: $_"
     }
+}
+
+function Publish-PreRelease{
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Version
+    )
+    $preReleaseVersion = New-SemanticVersion -Suffix "rc"
+    Write-Log "📦 Publishing pre-release version: $preReleaseVersion"
+    $config = Get-CICDConfig
+    Set-DockerImageTag -SourceImage "$($config.App.DockerImageName):$Version" -TargetTag "$($config.App.DockerImageName):$preReleaseVersion"
+    Push-DockerImage -Version $preReleaseVersion
+    Set-GitTag -CommitSha $Version -Tag $preReleaseVersion
+    Push-GitTag -Tag $preReleaseVersion
+}
+
+function New-SemanticVersion {
+    [OutputType([string])]
+    param(
+        [string]$Suffix = "rc"
+    )
+
+    Write-Log "🏷️ Generating semantic version..."
+    Write-Log ""
+    Write-Log "📋 Input Parameters:"
+    Write-Log "    Suffix: $-Suffix"
+    Write-Log ""
+
+    # Get the latest semantic version tag (including prerelease tags)
+    Write-Log "📋 Finding latest semantic version tag..."
+    $latestTag = & git tag -l "v*.*.*" --sort=-version:refname | Select-Object -First 1
+
+    if ([string]::IsNullOrEmpty($latestTag)) {
+        Write-Log "🆕 No existing semantic version tags found, starting with v0.0.0"
+        $latestTag = "v0.0.0"
+    }
+
+    Write-Log "📌 Latest tag: $latestTag"
+
+    # Parse current version - handle both stable and prerelease tags
+    $versionPart = $latestTag -replace "v", ""
+
+    # Check if it's a prerelease tag (contains hyphen)
+    if ($versionPart -match "^(\d+)\.(\d+)\.(\d+)(-.*)?$") {
+        $currentMajor = [int]$matches[1]
+        $currentMinor = [int]$matches[2]
+        $currentPatch = [int]$matches[3]
+        $prereleaseInfo = $matches[4]
+        
+        if ($prereleaseInfo) {
+            Write-Log "📊 Current version: $currentMajor.$currentMinor.$currentPatch (prerelease: $prereleaseInfo)"
+        } else {
+            Write-Log "📊 Current version: $currentMajor.$currentMinor.$currentPatch (stable)"
+        }
+    } else {
+        Write-Error "❌ Invalid semantic version format: $latestTag. Expected format: v1.2.3 or v1.2.3-suffix"
+        exit 1
+    }
+
+    # Always increment patch version
+    $newMajor = $currentMajor
+    $newMinor = $currentMinor
+    $newPatch = $currentPatch + 1
+
+    Write-Log "🐛 Patch version bump: $currentMajor.$currentMinor.$currentPatch -> $newMajor.$newMinor.$newPatch"
+
+    # Generate version strings
+    $nextVersion = "v$newMajor.$newMinor.$newPatch"
+    $suffixedVersion = "$nextVersion-$Suffix"
+
+    Write-Log "📦 Generated versions:"
+    Write-Log "   Next release: $nextVersion"
+    Write-Log "   suffixed Version: $suffixedVersion" 
+
+    Write-Log ""
+    Write-Log "🎉 Version generation completed successfully!"
+    Write-Log "Generated version: $suffixedVersion"
+
+    return $suffixedVersion
 }
 
 # Export functions and classes
