@@ -700,5 +700,40 @@ function Remove-GCloudEnvironment {
     }
 }
 
+function Invoke-TagAndPush {
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$Version
+    )
+
+    $tagName = $Version
+    
+    try {
+        Write-Log "🏷️  Creating local Git tag: $tagName"
+        Invoke-NativeCommandWithoutReturn git tag $tagName
+        
+        Write-Log "📤 Pushing tag to origin..."
+        Invoke-NativeCommandWithoutReturn git push origin $tagName
+
+        Write-Log "📤 Pushing Docker image to registry..."
+        Push-DockerImage -Version $Version
+        
+        Write-Log "✅ Successfully tagged and pushed version $Version"
+    }
+    catch {
+        Write-Log "❌ Failed to push. Rolling back operations..." -Level "Error"
+        
+        # Delete remote tag if it was pushed
+        Write-Log "🔄 Deleting remote tag: $tagName"
+        Invoke-NativeCommandWithoutReturn git push origin --delete $tagName 2>$null
+        
+        # Delete local tag
+        Write-Log "🔄 Deleting local tag: $tagName"
+        Invoke-NativeCommandWithoutReturn git tag -d $tagName
+
+        throw
+    }
+}
+
 # Export functions and classes
 Export-ModuleMember -Function *
