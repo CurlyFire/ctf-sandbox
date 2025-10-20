@@ -57,7 +57,7 @@ jobs:
           psArgs_push=()
           if [ "$GITHUB_EVENT_NAME" == "push" ]; then
             psArgs_push+=(
-              "-PushImage"
+              "-TagAndPush"
             )
           fi
 
