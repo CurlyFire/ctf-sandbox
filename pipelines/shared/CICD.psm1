@@ -219,6 +219,18 @@ function Push-DockerImage {
     Invoke-NativeCommandWithoutReturn docker push $versionedTag
 }
 
+function Get-DockerImage {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Version
+    )
+    [CICDConfig]$config = Get-CICDConfig
+    $versionedTag = "$($config.App.DockerImageName):$Version"
+
+    Write-Log "Pulling Docker image: $versionedTag"
+    Invoke-NativeCommandWithoutReturn docker pull $versionedTag
+}
+
 function Set-DockerImageTag {
     param(
         [Parameter(Mandatory = $true)]
@@ -676,6 +688,7 @@ function Publish-PreRelease{
     $preReleaseVersion = New-SemanticVersion -Suffix "rc"
     Write-Log "📦 Publishing pre-release version: $preReleaseVersion"
     $config = Get-CICDConfig
+    Get-DockerImage -Version $Version
     Set-DockerImageTag -SourceImage "$($config.App.DockerImageName):$Version" -TargetTag "$($config.App.DockerImageName):$preReleaseVersion"
     Push-DockerImage -Version $preReleaseVersion
     Set-GitTag -CommitSha $Version -Tag $preReleaseVersion
