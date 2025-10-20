@@ -1,6 +1,6 @@
 #!/usr/bin/env pwsh
 param(
-    [switch]$PushImage
+    [switch]$TagAndPush
 )
 
 $ErrorActionPreference = "Stop"
@@ -22,37 +22,32 @@ Publish-DotNetApp
 # 5. Build Docker image
 Build-DockerImage -Version $version
 
-# 6. Optionally push Docker image with Git tagging
-if ($PushImage.IsPresent) {
+# 6. Optionally create Git tag and push to remote
+if ($TagAndPush.IsPresent) {
     $tagName = $version
-    $tagCreated = $false
     
     try {
-        # Create and push Git tag
-        Write-Log "🏷️  Creating Git tag: $tagName"
+        Write-Log "🏷️  Creating local Git tag: $tagName"
         git tag $tagName
-        $tagCreated = $true
         
         Write-Log "📤 Pushing tag to origin..."
         git push origin $tagName
-        
-        # Push Docker image
+
+        Write-Log "📤 Pushing Docker image to registry..."
         Push-DockerImage -Version $version
         
         Write-Log "✅ Successfully tagged and pushed version $version"
     }
     catch {
-        Write-Log "❌ Failed to push Docker image. Rolling back Git tag..." -Level "Error"
+        Write-Log "❌ Failed to push. Rolling back operations..." -Level "Error"
         
-        if ($tagCreated) {
-            # Delete remote tag if it was pushed
-            Write-Log "🔄 Deleting remote tag: $tagName"
-            git push origin --delete $tagName 2>$null
-            
-            # Delete local tag
-            Write-Log "🔄 Deleting local tag: $tagName"
-            git tag -d $tagName
-        }
+        # Delete remote tag if it was pushed
+        Write-Log "🔄 Deleting remote tag: $tagName"
+        git push origin --delete $tagName 2>$null
+        
+        # Delete local tag
+        Write-Log "🔄 Deleting local tag: $tagName"
+        git tag -d $tagName
         
         throw
     }
