@@ -9,6 +9,9 @@ on:
       version:
         required: true
         type: string
+      valid_suffix:
+        required: true
+        type: string
 
 jobs:
   # This job resolves the URL of the MVC app based on the environment and project number
@@ -66,4 +69,5 @@ jobs:
             -AdminPassword ${{ secrets.ADMIN_PASSWORD }} \
             -IpInfoToken  ${{ secrets.IPINFO_TOKEN }} \
             -WebAdminAccount ${{ secrets.WEB_ADMIN_ACCOUNT }} \
-            -MailpitAdminAccount ${{ secrets.MAILPIT_ADMIN_ACCOUNT }}
+            -MailpitAdminAccount ${{ secrets.MAILPIT_ADMIN_ACCOUNT }} \
+            -ValidSuffix ${{ inputs.valid_suffix }}

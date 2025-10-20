@@ -89,9 +89,9 @@ C4Container
 | ctf-sandbox     | [![Commit stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/commit-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/commit-stage.yml) |
 
 ## System stages
-|        | Acceptance Stage | UAT Stage | Production Stage |
+|        | Acceptance Stage | QA Stage  | Production Stage |
 |--------|------------------|-----------|------------------|
-| System | [![Acceptance Stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/acceptance-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/acceptance-stage.yml)  |[![UAT Stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/uat-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/uat-stage.yml) | [![Production Stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/production-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/production-stage.yml) |
+| System | [![Acceptance Stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/acceptance-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/acceptance-stage.yml)  |[![QA Stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/qa-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/qa-stage.yml) | [![Production Stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/production-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/production-stage.yml) |
 
 # External systems
 Each environment has it's own external system docker container instances.  The test environments (acceptance, E2E, docker-compose) also have their own external test instances, however they are ephemeral and last only for the duration of the tests, so no links are provided here.
@@ -129,7 +129,7 @@ The contract used to get the current time is through the abstract class System.T
 ## Links to external systems
 | Environment | External system | Link |
 |-------------|-----------------|------|
-| UAT         | Mailpit | https://mailpit-ui-uat-663949819005.us-central1.run.app/ |
+| QA          | Mailpit | https://mailpit-ui-qa-663949819005.us-central1.run.app/ |
 | Production  | Mailpit | https://mailpit-ui-prod-663949819005.us-central1.run.app/ |
 
 ## Configuring external system connections
@@ -169,7 +169,7 @@ Mono-Repo
 # Environments
 | Environment | Status | Link |
 |-------------|--------|------|
-| UAT         | [![UAT](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/uat-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/uat-stage.yml) | https://mvc-app-uat-663949819005.us-central1.run.app
+| QA          | [![QA](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/qa-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/qa-stage.yml) | https://mvc-app-qa-663949819005.us-central1.run.app
 | Production  | [![Production](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/production-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/production-stage.yml) | https://mvc-app-prod-663949819005.us-central1.run.app
 
 The CTF competition UI has all the features mentionned in the Sytem use cases section.  Mailpit is used as a SMPT server for invitations and registrations, however, the emails all stay there and can be seen from the mailpit UI.  If you require access to it, ask me and I will create a user for you to view all emails.
