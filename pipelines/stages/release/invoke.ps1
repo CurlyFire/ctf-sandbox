@@ -17,12 +17,20 @@ param (
     [string]$AdminPassword,
 
     [Parameter(Mandatory = $true)]
-    [string]$IpInfoToken
+    [string]$IpInfoToken,
+
+    [Parameter(Mandatory = $true)]
+    [string]$ValidSuffix
 )
 
 $ErrorActionPreference = 'Stop'
 
 Import-Module (Join-Path $env:WORKSPACE_ROOT "pipelines/shared/CICD.psm1") -Force
+
+# Validate version suffix
+if (-not $Version.EndsWith($ValidSuffix)) {
+    throw "Version '$Version' must end with the valid suffix '$ValidSuffix'"
+}
 
 Write-Log "🚀 Starting release stage"
 

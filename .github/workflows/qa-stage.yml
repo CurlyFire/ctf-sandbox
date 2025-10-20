@@ -1,0 +1,20 @@
+# This workflow split is required to have badges available for the qa environment
+name: QA Stage
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release candidate version to deploy to QA environment"
+        required: true
+        type: string
+
+jobs:
+  call-release:
+    uses: ./.github/workflows/release.yml
+    secrets: 
+        inherit
+    with:
+      environment: qa
+      version: ${{ inputs.version }}
+      valid_suffix: "-rc"
