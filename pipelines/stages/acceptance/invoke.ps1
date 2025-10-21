@@ -29,7 +29,7 @@ Write-Log "🚀 Starting acceptance stage for version $CommitSha"
 if ($Force) {
     Write-Log "⚠️ Execution is forced, ignoring previous test results."
 }
-elseif (Test-IsShaAlreadyProcessed -Version $CommitSha) {
+elseif (Test-IsShaAlreadyProcessed -CommitSha $CommitSha) {
     Write-Log "⚠️ SHA $CommitSha already tested. Skipping."
     return
 }
