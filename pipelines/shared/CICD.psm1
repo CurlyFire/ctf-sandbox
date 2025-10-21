@@ -203,8 +203,8 @@ function Build-DockerImage {
     )
     [CICDConfig]$config = Get-CICDConfig
     $versionedTag = "$($config.App.DockerImageName):$Version"
-    $dockerfilePath = $config.App.GetDockerfilePath()
-    Write-Log "Building Docker image: $versionedTag from file $dockerfilePath"
+    $dockerFilePath = $config.App.GetDockerfilePath()
+    Write-Log "Building Docker image: $versionedTag from file $dockerFilePath"
     Invoke-NativeCommandWithoutReturn docker build -t $versionedTag -f $dockerFilePath .
 }
 
@@ -245,12 +245,12 @@ function Set-DockerImageTag {
 function Set-GitTag{
     param(
         [Parameter(Mandatory = $true)]
-        [string]$CommitSha,
+        [string]$Reference,
         [Parameter(Mandatory = $true)]
         [string]$Tag
     )
-    Write-Log "Setting Git tag: $Tag on commit $CommitSha"
-    Invoke-NativeCommandWithoutReturn git tag $Tag $CommitSha
+    Write-Log "Setting Git tag: $Tag on reference $Reference"
+    Invoke-NativeCommandWithoutReturn git tag $Tag $Reference
 }
 
 function Push-GitTag{
@@ -271,12 +271,12 @@ function Get-CICDConfig {
 function Test-IsShaAlreadyProcessed {
     param(
         [Parameter(Mandatory = $true)]
-        [string]$Version
+        [string]$CommitSha
     )
     [CICDConfig]$config = Get-CICDConfig
 
-    $objectPath = $config.GoogleCloud.GetTestedShaGcsPath($Version)
-    Write-Log "🔍 Checking if SHA already tested: $Version"
+    $objectPath = $config.GoogleCloud.GetTestedShaGcsPath($CommitSha)
+    Write-Log "🔍 Checking if SHA already tested: $CommitSha"
     $result = & gsutil ls $objectPath 2>$null
 
     return ($LASTEXITCODE -eq 0)
@@ -294,7 +294,7 @@ function Register-TestedSha {
 
     $tmpFile = New-TemporaryFile
     "Tested on $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')" | Set-Content $tmpFile
-    Invoke-NativeCommandWithoutReturn gsutil cp $tmpFile $bucketPath | Out-Null
+    Invoke-NativeCommandWithoutReturn gsutil cp $tmpFile $bucketPath
     Remove-Item $tmpFile -Force
 }
 
@@ -683,16 +683,40 @@ function Remove-GCloudEnvironment {
 function Publish-PreRelease{
     param(
         [Parameter(Mandatory = $true)]
-        [string]$Version
+        [string]$CommitSha
     )
     $preReleaseVersion = New-SemanticVersion -Suffix "rc"
-    Write-Log "📦 Publishing pre-release version: $preReleaseVersion"
+    Publish-Release -Reference $CommitSha -ReleaseVersion $preReleaseVersion
+}
+
+function Publish-StableRelease{
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Version
+    )
+    $validSuffix = "-rc"
+    # Validate version suffix
+    if (-not $Version.EndsWith($validSuffix)) {
+        throw "Version '$Version' must end with the valid suffix '$validSuffix'"
+    }
+    $stableReleaseVersion = $Version.Replace($validSuffix, "")
+    Publish-Release -Reference $Version -ReleaseVersion $stableReleaseVersion
+}
+
+function Publish-Release{
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Reference,
+        [Parameter(Mandatory = $true)]
+        [string]$ReleaseVersion
+    )
+    Write-Log "📦 Publishing version: $ReleaseVersion"
     $config = Get-CICDConfig
-    Get-DockerImage -Version $Version
-    Set-DockerImageTag -SourceImage "$($config.App.DockerImageName):$Version" -TargetTag "$($config.App.DockerImageName):$preReleaseVersion"
-    Push-DockerImage -Version $preReleaseVersion
-    Set-GitTag -CommitSha $Version -Tag $preReleaseVersion
-    Push-GitTag -Tag $preReleaseVersion
+    Get-DockerImage -Version $Reference
+    Set-DockerImageTag -SourceImage "$($config.App.DockerImageName):$Reference" -TargetTag "$($config.App.DockerImageName):$ReleaseVersion"
+    Push-DockerImage -Version $ReleaseVersion
+    Set-GitTag -Reference $Reference -Tag $ReleaseVersion
+    Push-GitTag -Tag $ReleaseVersion
 }
 
 function New-SemanticVersion {
