@@ -1,7 +1,7 @@
 #!/usr/bin/env pwsh
 param(
     [Parameter(Mandatory = $true)]
-    [string]$Version,
+    [string]$CommitSha,
 
     [Parameter(Mandatory = $true)]
     [string]$WebAdminAccount,
@@ -24,13 +24,13 @@ $ErrorActionPreference = "Stop"
 $workspace = $env:WORKSPACE_ROOT
 Import-Module (Join-Path $workspace "pipelines/shared/CICD.psm1") -Force
 
-Write-Log "🚀 Starting acceptance stage for version $Version"
+Write-Log "🚀 Starting acceptance stage for version $CommitSha"
 
 if ($Force) {
     Write-Log "⚠️ Execution is forced, ignoring previous test results."
 }
-elseif (Test-IsShaAlreadyProcessed -Version $Version) {
-    Write-Log "⚠️ SHA $Version already tested. Skipping."
+elseif (Test-IsShaAlreadyProcessed -Version $CommitSha) {
+    Write-Log "⚠️ SHA $CommitSha already tested. Skipping."
     return
 }
 
@@ -39,10 +39,10 @@ $deployedEnvironmentNames = @()
 try {
     foreach ($name in $environmentNamesToDeploy) {
         $deployedEnvironmentNames += $name
-        $environment = Deploy-GCloudEnvironment -Name $name -Version $Version -WebAdminAccount $WebAdminAccount -MailpitAdminAccount $MailpitAdminAccount -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
+        $environment = Deploy-GCloudEnvironment -Name $name -Version $CommitSha -WebAdminAccount $WebAdminAccount -MailpitAdminAccount $MailpitAdminAccount -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
         Invoke-Tests -Stage "acceptance" -EnvironmentName $environment.Name -GCloudEnvironment $environment
     }
-    Publish-PreRelease -Version $Version
+    Publish-PreRelease -CommitSha $CommitSha
     Write-Log "✅ Acceptance stage completed successfully"
 }
 finally {
@@ -57,8 +57,8 @@ finally {
 
 
     try {
-        Register-TestedSha -Version $Version
-        Write-Log "📌 SHA $Version has been registered as tested (regardless of outcome)"
+        Register-TestedSha -Version $CommitSha
+        Write-Log "📌 SHA $CommitSha has been registered as tested (regardless of outcome)"
     } catch {
         Write-Log "⚠️ Failed to register tested SHA: $_"
     }
