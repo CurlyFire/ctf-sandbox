@@ -242,26 +242,6 @@ function Set-DockerImageTag {
     Invoke-NativeCommandWithoutReturn docker tag $SourceImage $TargetTag
 }
 
-function Set-GitTag{
-    param(
-        [Parameter(Mandatory = $true)]
-        [string]$Reference,
-        [Parameter(Mandatory = $true)]
-        [string]$Tag
-    )
-    Write-Log "Setting Git tag: $Tag on reference $Reference"
-    Invoke-NativeCommandWithoutReturn git tag $Tag $Reference
-}
-
-function Push-GitTag{
-    param(
-        [Parameter(Mandatory = $true)]
-        [string]$Tag
-    )
-    Write-Log "Pushing Git tag: $Tag"
-    Invoke-NativeCommandWithoutReturn git push origin $Tag
-}
-
 function Get-CICDConfig {
     $configPath = Join-Path $env:WORKSPACE_ROOT "pipelines/shared/config.psd1"
     $rawConfig = Import-PowerShellDataFile $configPath
@@ -686,7 +666,7 @@ function Publish-PreRelease{
         [string]$CommitSha
     )
     $preReleaseVersion = New-SemanticVersion -Suffix "rc"
-    Publish-Release -Reference $CommitSha -ReleaseVersion $preReleaseVersion
+    Publish-Release -CommitSha $CommitSha -ReleaseVersion $preReleaseVersion -IsPreRelease
 }
 
 function Publish-StableRelease{
@@ -694,29 +674,38 @@ function Publish-StableRelease{
         [Parameter(Mandatory = $true)]
         [string]$Version
     )
+
+
     $validSuffix = "-rc"
     # Validate version suffix
     if (-not $Version.EndsWith($validSuffix)) {
         throw "Version '$Version' must end with the valid suffix '$validSuffix'"
     }
+    $commitSha = & git rev-parse $Version
     $stableReleaseVersion = $Version.Replace($validSuffix, "")
-    Publish-Release -Reference $Version -ReleaseVersion $stableReleaseVersion
+    Publish-Release -CommitSha $commitSha -ReleaseVersion $stableReleaseVersion
 }
 
 function Publish-Release{
     param(
         [Parameter(Mandatory = $true)]
-        [string]$Reference,
+        [string]$CommitSha,
         [Parameter(Mandatory = $true)]
-        [string]$ReleaseVersion
+        [string]$ReleaseVersion,
+        [Parameter(Mandatory = $false)]
+        [switch]$IsPreRelease
     )
     Write-Log "📦 Publishing version: $ReleaseVersion"
     $config = Get-CICDConfig
-    Get-DockerImage -Version $Reference
-    Set-DockerImageTag -SourceImage "$($config.App.DockerImageName):$Reference" -TargetTag "$($config.App.DockerImageName):$ReleaseVersion"
-    Push-DockerImage -Version $ReleaseVersion
-    Set-GitTag -Reference $Reference -Tag $ReleaseVersion
-    Push-GitTag -Tag $ReleaseVersion
+    Get-DockerImage -Version $CommitSha
+    Set-DockerImageTag -SourceImage "$($config.App.DockerImageName):$CommitSha" -TargetTag "$($config.App.DockerImageName):$ReleaseVersion"
+    # Create GitHub release
+    Write-Log "🚀 Creating GitHub release: $ReleaseVersion"
+    $ghArgs = @('release', 'create', $ReleaseVersion, '--target', $CommitSha, '--generate-notes')
+    if ($IsPreRelease) {
+        $ghArgs += '--prerelease'
+    }
+    Invoke-NativeCommandWithoutReturn gh @ghArgs
 }
 
 function New-SemanticVersion {

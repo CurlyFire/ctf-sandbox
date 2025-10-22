@@ -10,6 +10,8 @@ if ([string]::IsNullOrWhiteSpace($authStatus)) {
     gcloud config set project $config.GoogleCloud.ProjectId
     $dockerRepository = $config.App.DockerImageName.Split("/")[0]
     gcloud auth configure-docker "$dockerRepository" --quiet
+
+    gh auth login --web
 } else {
     Write-Host "Already authenticated with gcloud as: $authStatus" -ForegroundColor Green
 }
