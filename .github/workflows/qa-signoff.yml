@@ -5,6 +5,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 jobs:
   qa-signoff:
     runs-on: ubuntu-latest
