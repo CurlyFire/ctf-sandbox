@@ -714,8 +714,8 @@ function Publish-StableRelease{
     $stableReleaseVersion = $Version.Replace($validSuffix, "")
     $commitSha = & git rev-parse $Version
     Write-Log "Publishing stable release version: $stableReleaseVersion from tag: $Version (commit: $commitSha)"
-    git tag $Version $commitSha
-    git push origin $Version
+    git tag $stableReleaseVersion $commitSha
+    git push origin $stableReleaseVersion
 
     #Publish-Release -CommitSha $commitSha -ReleaseVersion $stableReleaseVersion
 }
