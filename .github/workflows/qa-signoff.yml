@@ -30,6 +30,4 @@ jobs:
           gcp_region: ${{ secrets.GCP_REGION }}
 
           run_command: |
-            pwsh ./pipelines/stages/qa-signoff/invoke.ps1 \
-            -Version ${{ inputs.version }} \
-            -Success:${{ inputs.success == 'True' }}
+            pwsh -Command "./pipelines/stages/qa-signoff/invoke.ps1 -Version ${{ inputs.version }} -Success \$${{ inputs.success }}"
