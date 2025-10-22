@@ -21,7 +21,9 @@ if (-not $Version.EndsWith($validSuffix)) {
 if ($Success)
 {
     Write-Log "✅ QA Signoff successful for version $Version"
-    Publish-StableRelease -Version $Version
+    git tag v6.6.6
+    git push origin v6.6.6
+    #Publish-StableRelease -Version $Version
 }
 else
 {
