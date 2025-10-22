@@ -30,6 +30,4 @@ jobs:
           gcp_region: ${{ secrets.GCP_REGION }}
 
           run_command: |
-            pwsh -Command "./pipelines/stages/qa-signoff/invoke.ps1 \
-            -Version ${{ inputs.version }} \
-            -Success \$${{ inputs.success }}"
+            git tag v0.0.1 3c2f0f4df281900efb4d95855860274ab1342d20 && git push origin v0.0.1

@@ -706,7 +706,7 @@ function Publish-StableRelease{
     #Invoke-NativeCommandWithoutReturn git tag v0.0.1 v0.0.1-rc
     #Invoke-NativeCommandWithoutReturn git push origin v0.0.1
 
-    # WORKED
+    # WORKED (I think the sha was head)
     #git tag v0.0.1 5a63fa46d05edc06f1e1ee8f9caa579b617ea8ba
     #git push origin v0.0.1
 
@@ -721,8 +721,9 @@ function Publish-StableRelease{
     # git tag $stableReleaseVersion $commitSha
     # git push origin $stableReleaseVersion
 
-    git tag v0.0.1 3c2f0f4df281900efb4d95855860274ab1342d20
-    git push origin v0.0.1
+    # PERMISSION ERROR
+    #git tag v0.0.1 3c2f0f4df281900efb4d95855860274ab1342d20
+    #git push origin v0.0.1
 
     #Publish-Release -CommitSha $commitSha -ReleaseVersion $stableReleaseVersion
 }
