@@ -245,12 +245,12 @@ function Set-DockerImageTag {
 function Set-GitTag{
     param(
         [Parameter(Mandatory = $true)]
-        [string]$Reference,
+        [string]$CommitSha,
         [Parameter(Mandatory = $true)]
         [string]$Tag
     )
-    Write-Log "Setting Git tag: $Tag on reference $Reference"
-    Invoke-NativeCommandWithoutReturn git tag $Tag $Reference
+    Write-Log "Setting Git tag: $Tag on commit $CommitSha"
+    Invoke-NativeCommandWithoutReturn git tag $Tag $CommitSha
 }
 
 function Push-GitTag{
@@ -702,31 +702,33 @@ function Publish-StableRelease{
     #git tag v0.0.1 5a63fa46d05edc06f1e1ee8f9caa579b617ea8ba
     #git push origin v0.0.1
 
-    git tag v0.0.1 v0.0.1-rc
-    git push origin v0.0.1
+    # PERMISSION ERROR
+    #git tag v0.0.1 v0.0.1-rc
+    #git push origin v0.0.1
 
-    # $validSuffix = "-rc"
-    # # Validate version suffix
-    # if (-not $Version.EndsWith($validSuffix)) {
-    #     throw "Version '$Version' must end with the valid suffix '$validSuffix'"
-    # }
-    # $stableReleaseVersion = $Version.Replace($validSuffix, "")
-    # Publish-Release -Reference $Version -ReleaseVersion $stableReleaseVersion
+    $validSuffix = "-rc"
+    # Validate version suffix
+    if (-not $Version.EndsWith($validSuffix)) {
+        throw "Version '$Version' must end with the valid suffix '$validSuffix'"
+    }
+    $stableReleaseVersion = $Version.Replace($validSuffix, "")
+    $commitSha = & git rev-parse $Version
+    Publish-Release -CommitSha $commitSha -ReleaseVersion $stableReleaseVersion
 }
 
 function Publish-Release{
     param(
         [Parameter(Mandatory = $true)]
-        [string]$Reference,
+        [string]$CommitSha,
         [Parameter(Mandatory = $true)]
         [string]$ReleaseVersion
     )
     Write-Log "📦 Publishing version: $ReleaseVersion"
     $config = Get-CICDConfig
-    Get-DockerImage -Version $Reference
-    Set-DockerImageTag -SourceImage "$($config.App.DockerImageName):$Reference" -TargetTag "$($config.App.DockerImageName):$ReleaseVersion"
+    Get-DockerImage -Version $CommitSha
+    Set-DockerImageTag -SourceImage "$($config.App.DockerImageName):$CommitSha" -TargetTag "$($config.App.DockerImageName):$ReleaseVersion"
     Push-DockerImage -Version $ReleaseVersion
-    Set-GitTag -Reference $Reference -Tag $ReleaseVersion
+    Set-GitTag -CommitSha $CommitSha -Tag $ReleaseVersion
     Push-GitTag -Tag $ReleaseVersion
 }
 
