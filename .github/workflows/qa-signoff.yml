@@ -11,7 +11,8 @@ on:
         description: 'Was QA testing successful? (true/false)'
         required: true
         type: boolean
-
+permissions:
+  contents: write
 jobs:
   qa-signoff:
     runs-on: ubuntu-latest

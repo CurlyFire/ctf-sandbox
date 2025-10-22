@@ -2,7 +2,9 @@
 [CmdletBinding()]
 param (
     [Parameter(Mandatory = $true)]
-    [string]$Version
+    [string]$Version,
+    [Parameter(Mandatory = $true)]
+    [bool]$Success
 )
 
 $ErrorActionPreference = 'Stop'
@@ -16,4 +18,12 @@ if (-not $Version.EndsWith($validSuffix)) {
     throw "Version '$Version' must end with the valid suffix '$validSuffix'"
 }
 
-Publish-StableRelease -Version $Version
+if ($Success)
+{
+    Write-Log "✅ QA Signoff successful for version $Version"
+    Publish-StableRelease -Version $Version
+}
+else
+{
+    Write-Log "❌ QA Signoff failed for version $Version"
+}

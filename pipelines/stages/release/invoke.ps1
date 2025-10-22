@@ -28,7 +28,12 @@ $ErrorActionPreference = 'Stop'
 Import-Module (Join-Path $env:WORKSPACE_ROOT "pipelines/shared/CICD.psm1") -Force
 
 # Validate version suffix
-if (-not $Version.EndsWith($ValidSuffix)) {
+if ($ValidSuffix -eq "") {
+    # When valid suffix is empty, ensure version has no suffix like -rc, -beta, -alpha, etc.
+    if ($Version -match '-') {
+        throw "Version '$Version' must not contain a suffix when ValidSuffix is empty"
+    }
+} elseif (-not $Version.EndsWith($ValidSuffix)) {
     throw "Version '$Version' must end with the valid suffix '$ValidSuffix'"
 }
 

@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Image SHA to deploy"
+        description: "Version to deploy to production environment"
         required: true
         type: string
 
@@ -17,3 +17,4 @@ jobs:
     with:
       environment: prod
       version: ${{ inputs.version }}
+      valid_suffix: ""
