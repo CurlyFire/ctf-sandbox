@@ -698,9 +698,12 @@ function Publish-StableRelease{
     #Invoke-NativeCommandWithoutReturn git tag v0.0.1 v0.0.1-rc
     #Invoke-NativeCommandWithoutReturn git push origin v0.0.1
 
-    git tag v0.0.1 5a63fa46d05edc06f1e1ee8f9caa579b617ea8ba
-    git push origin v0.0.1
+    # WORKED
+    #git tag v0.0.1 5a63fa46d05edc06f1e1ee8f9caa579b617ea8ba
+    #git push origin v0.0.1
 
+    git tag v0.0.1 v0.0.1-rc
+    git push origin v0.0.1
 
     # $validSuffix = "-rc"
     # # Validate version suffix
