@@ -694,8 +694,14 @@ function Publish-StableRelease{
         [Parameter(Mandatory = $true)]
         [string]$Version
     )
-    Invoke-NativeCommandWithoutReturn git tag v0.0.1 v0.0.1-rc
-    Invoke-NativeCommandWithoutReturn git push origin v0.0.1
+    # PERMISSION ERROR
+    #Invoke-NativeCommandWithoutReturn git tag v0.0.1 v0.0.1-rc
+    #Invoke-NativeCommandWithoutReturn git push origin v0.0.1
+
+    git tag v0.0.1 5a63fa46d05edc06f1e1ee8f9caa579b617ea8ba
+    git push origin v0.0.1
+
+
     # $validSuffix = "-rc"
     # # Validate version suffix
     # if (-not $Version.EndsWith($validSuffix)) {
