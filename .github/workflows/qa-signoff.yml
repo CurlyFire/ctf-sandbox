@@ -31,5 +31,5 @@ jobs:
 
           run_command: |
             pwsh ./pipelines/stages/qa-signoff/invoke.ps1 \
-            -Version ${{ inputs.version }}
+            -Version ${{ inputs.version }} \
             -Success ${{ inputs.success }}
