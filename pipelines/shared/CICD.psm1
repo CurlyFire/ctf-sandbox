@@ -706,9 +706,6 @@ function Publish-StableRelease{
     #git tag v0.0.1 v0.0.1-rc
     #git push origin v0.0.1
 
-    git tag $Version $commitSha
-    git push origin $Version
-
     $validSuffix = "-rc"
     # Validate version suffix
     if (-not $Version.EndsWith($validSuffix)) {
@@ -716,6 +713,7 @@ function Publish-StableRelease{
     }
     $stableReleaseVersion = $Version.Replace($validSuffix, "")
     $commitSha = & git rev-parse $Version
+    Write-Log "Publishing stable release version: $stableReleaseVersion from tag: $Version (commit: $commitSha)"
     git tag $Version $commitSha
     git push origin $Version
 
