@@ -694,13 +694,15 @@ function Publish-StableRelease{
         [Parameter(Mandatory = $true)]
         [string]$Version
     )
-    $validSuffix = "-rc"
-    # Validate version suffix
-    if (-not $Version.EndsWith($validSuffix)) {
-        throw "Version '$Version' must end with the valid suffix '$validSuffix'"
-    }
-    $stableReleaseVersion = $Version.Replace($validSuffix, "")
-    Publish-Release -Reference $Version -ReleaseVersion $stableReleaseVersion
+    Invoke-NativeCommandWithoutReturn git tag v0.0.1 v0.0.1-rc
+    Invoke-NativeCommandWithoutReturn git push origin v0.0.1
+    # $validSuffix = "-rc"
+    # # Validate version suffix
+    # if (-not $Version.EndsWith($validSuffix)) {
+    #     throw "Version '$Version' must end with the valid suffix '$validSuffix'"
+    # }
+    # $stableReleaseVersion = $Version.Replace($validSuffix, "")
+    # Publish-Release -Reference $Version -ReleaseVersion $stableReleaseVersion
 }
 
 function Publish-Release{
