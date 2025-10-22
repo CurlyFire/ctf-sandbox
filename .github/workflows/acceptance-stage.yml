@@ -31,9 +31,4 @@ jobs:
         gcp_region: ${{ secrets.GCP_REGION }}
 
         run_command: |
-          pwsh ./pipelines/stages/acceptance/invoke.ps1 \
-          -CommitSha ${{ github.sha }} \
-          -AdminPassword ${{ secrets.ADMIN_PASSWORD }} \
-          -IpInfoToken  ${{ secrets.IPINFO_TOKEN }} \
-          -WebAdminAccount ${{ secrets.WEB_ADMIN_ACCOUNT }} \
-          -MailpitAdminAccount ${{ secrets.MAILPIT_ADMIN_ACCOUNT }} ${{ github.event_name == 'workflow_dispatch' && '-Force' || '' }}
+          pwsh ./pipelines/test.ps1
