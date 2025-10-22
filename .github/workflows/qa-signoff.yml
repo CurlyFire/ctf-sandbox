@@ -32,4 +32,4 @@ jobs:
           run_command: |
             pwsh ./pipelines/stages/qa-signoff/invoke.ps1 \
             -Version ${{ inputs.version }} \
-            -Success ${{ inputs.success }}
+            -Success:${{ inputs.success == 'true' }}
