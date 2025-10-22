@@ -694,6 +694,14 @@ function Publish-StableRelease{
         [Parameter(Mandatory = $true)]
         [string]$Version
     )
+
+
+    $validSuffix = "-rc"
+    # Validate version suffix
+    if (-not $Version.EndsWith($validSuffix)) {
+        throw "Version '$Version' must end with the valid suffix '$validSuffix'"
+    }
+
     # PERMISSION ERROR
     #Invoke-NativeCommandWithoutReturn git tag v0.0.1 v0.0.1-rc
     #Invoke-NativeCommandWithoutReturn git push origin v0.0.1
@@ -706,16 +714,15 @@ function Publish-StableRelease{
     #git tag v0.0.1 v0.0.1-rc
     #git push origin v0.0.1
 
-    $validSuffix = "-rc"
-    # Validate version suffix
-    if (-not $Version.EndsWith($validSuffix)) {
-        throw "Version '$Version' must end with the valid suffix '$validSuffix'"
-    }
-    $stableReleaseVersion = $Version.Replace($validSuffix, "")
-    $commitSha = & git rev-parse $Version
-    Write-Log "Publishing stable release version: $stableReleaseVersion from tag: $Version (commit: $commitSha)"
-    git tag $stableReleaseVersion $commitSha
-    git push origin $stableReleaseVersion
+    # PERMISSION ERROR
+    # $stableReleaseVersion = $Version.Replace($validSuffix, "")
+    # $commitSha = & git rev-parse $Version
+    # Write-Log "Publishing stable release version: $stableReleaseVersion from tag: $Version (commit: $commitSha)"
+    # git tag $stableReleaseVersion $commitSha
+    # git push origin $stableReleaseVersion
+
+    git tag v0.0.1 3c2f0f4df281900efb4d95855860274ab1342d20
+    git push origin v0.0.1
 
     #Publish-Release -CommitSha $commitSha -ReleaseVersion $stableReleaseVersion
 }
