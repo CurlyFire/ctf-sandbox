@@ -690,7 +690,6 @@ function Publish-Release{
     param(
         [Parameter(Mandatory = $true)]
         [string]$CommitSha,
-        [string]$CommitSha,
         [Parameter(Mandatory = $true)]
         [string]$ReleaseVersion,
         [Parameter(Mandatory = $false)]
@@ -700,9 +699,6 @@ function Publish-Release{
     $config = Get-CICDConfig
     Get-DockerImage -Version $CommitSha
     Set-DockerImageTag -SourceImage "$($config.App.DockerImageName):$CommitSha" -TargetTag "$($config.App.DockerImageName):$ReleaseVersion"
-    Get-DockerImage -Version $CommitSha
-    Set-DockerImageTag -SourceImage "$($config.App.DockerImageName):$CommitSha" -TargetTag "$($config.App.DockerImageName):$ReleaseVersion"
-    Push-DockerImage -Version $ReleaseVersion
     # Create GitHub release
     Write-Log "🚀 Creating GitHub release: $ReleaseVersion"
     $ghArgs = @('release', 'create', $ReleaseVersion, '--target', $CommitSha, '--generate-notes')
