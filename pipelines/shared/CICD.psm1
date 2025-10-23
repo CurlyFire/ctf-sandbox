@@ -242,26 +242,6 @@ function Set-DockerImageTag {
     Invoke-NativeCommandWithoutReturn docker tag $SourceImage $TargetTag
 }
 
-function Set-GitTag{
-    param(
-        [Parameter(Mandatory = $true)]
-        [string]$CommitSha,
-        [Parameter(Mandatory = $true)]
-        [string]$Tag
-    )
-    Write-Log "Setting Git tag: $Tag on commit $CommitSha"
-    Invoke-NativeCommandWithoutReturn git tag $Tag $CommitSha
-}
-
-function Push-GitTag{
-    param(
-        [Parameter(Mandatory = $true)]
-        [string]$Tag
-    )
-    Write-Log "Pushing Git tag: $Tag"
-    Invoke-NativeCommandWithoutReturn git push origin $Tag
-}
-
 function Get-CICDConfig {
     $configPath = Join-Path $env:WORKSPACE_ROOT "pipelines/shared/config.psd1"
     $rawConfig = Import-PowerShellDataFile $configPath
@@ -686,7 +666,7 @@ function Publish-PreRelease{
         [string]$CommitSha
     )
     $preReleaseVersion = New-SemanticVersion -Suffix "rc"
-    Publish-Release -Reference $CommitSha -ReleaseVersion $preReleaseVersion
+    Publish-Release -CommitSha $CommitSha -ReleaseVersion $preReleaseVersion -IsPreRelease
 }
 
 function Publish-StableRelease{
@@ -701,47 +681,35 @@ function Publish-StableRelease{
     if (-not $Version.EndsWith($validSuffix)) {
         throw "Version '$Version' must end with the valid suffix '$validSuffix'"
     }
-
-    # PERMISSION ERROR
-    #Invoke-NativeCommandWithoutReturn git tag v0.0.1 v0.0.1-rc
-    #Invoke-NativeCommandWithoutReturn git push origin v0.0.1
-
-    # WORKED (I think the sha was head)
-    #git tag v0.0.1 5a63fa46d05edc06f1e1ee8f9caa579b617ea8ba
-    #git push origin v0.0.1
-
-    # PERMISSION ERROR
-    #git tag v0.0.1 v0.0.1-rc
-    #git push origin v0.0.1
-
-    # PERMISSION ERROR
-    # $stableReleaseVersion = $Version.Replace($validSuffix, "")
-    # $commitSha = & git rev-parse $Version
-    # Write-Log "Publishing stable release version: $stableReleaseVersion from tag: $Version (commit: $commitSha)"
-    # git tag $stableReleaseVersion $commitSha
-    # git push origin $stableReleaseVersion
-
-    # PERMISSION ERROR
-    #git tag v0.0.1 3c2f0f4df281900efb4d95855860274ab1342d20
-    #git push origin v0.0.1
-
-    #Publish-Release -CommitSha $commitSha -ReleaseVersion $stableReleaseVersion
+    $commitSha = & git rev-parse $Version
+    $stableReleaseVersion = $Version.Replace($validSuffix, "")
+    Publish-Release -CommitSha $commitSha -ReleaseVersion $stableReleaseVersion
 }
 
 function Publish-Release{
     param(
         [Parameter(Mandatory = $true)]
         [string]$CommitSha,
+        [string]$CommitSha,
         [Parameter(Mandatory = $true)]
-        [string]$ReleaseVersion
+        [string]$ReleaseVersion,
+        [Parameter(Mandatory = $false)]
+        [switch]$IsPreRelease
     )
     Write-Log "📦 Publishing version: $ReleaseVersion"
     $config = Get-CICDConfig
     Get-DockerImage -Version $CommitSha
     Set-DockerImageTag -SourceImage "$($config.App.DockerImageName):$CommitSha" -TargetTag "$($config.App.DockerImageName):$ReleaseVersion"
+    Get-DockerImage -Version $CommitSha
+    Set-DockerImageTag -SourceImage "$($config.App.DockerImageName):$CommitSha" -TargetTag "$($config.App.DockerImageName):$ReleaseVersion"
     Push-DockerImage -Version $ReleaseVersion
-    Set-GitTag -CommitSha $CommitSha -Tag $ReleaseVersion
-    Push-GitTag -Tag $ReleaseVersion
+    # Create GitHub release
+    Write-Log "🚀 Creating GitHub release: $ReleaseVersion"
+    $ghArgs = @('release', 'create', $ReleaseVersion, '--target', $CommitSha, '--generate-notes')
+    if ($IsPreRelease) {
+        $ghArgs += '--prerelease'
+    }
+    Invoke-NativeCommandWithoutReturn gh @ghArgs
 }
 
 function New-SemanticVersion {
