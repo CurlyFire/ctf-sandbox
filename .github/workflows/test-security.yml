@@ -22,9 +22,9 @@ jobs:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
 
           run_command: |
-            echo "Creating pre-release for version v6.6.6-rc"
-            gh release create --target fb2a955a24ffece43ed2867facf22ecf3bce2ece v6.6.6-rc --generate-notes --prerelease \
-            echo "Done creating pre-release" \
-            echo "Creating release for version v6.6.6" \
-            gh release create --target fb2a955a24ffece43ed2867facf22ecf3bce2ece v6.6.6 --generate-notes \
+            echo "Creating pre-release for version v6.6.6-rc" && \
+            gh release create --target fb2a955a24ffece43ed2867facf22ecf3bce2ece v6.6.6-rc --generate-notes --prerelease && \
+            echo "Done creating pre-release" && \
+            echo "Creating release for version v6.6.6" && \
+            gh release create --target fb2a955a24ffece43ed2867facf22ecf3bce2ece v6.6.6 --generate-notes && \
             echo "Done creating release"
