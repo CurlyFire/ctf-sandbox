@@ -71,4 +71,4 @@ jobs:
             -IpInfoToken  ${{ secrets.IPINFO_TOKEN }} \
             -WebAdminAccount ${{ secrets.WEB_ADMIN_ACCOUNT }} \
             -MailpitAdminAccount ${{ secrets.MAILPIT_ADMIN_ACCOUNT }} \
-            -ValidSuffix ${{ inputs.valid_suffix }}
+            -ValidSuffix "${{ inputs.valid_suffix }}"
