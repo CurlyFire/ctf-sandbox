@@ -37,8 +37,7 @@ runs:
           gcloud auth configure-docker "${{ inputs.gcp_region }}-docker.pkg.dev" --quiet
 
           # Login to github
-          gh auth login --with-token << "${{ inputs.gh_token }}"
+          echo ${{ inputs.gh_token }} | gh auth login --with-token
 
           # Execute the unique command passed from the workflow
           ${{ inputs.run_command }}
-
