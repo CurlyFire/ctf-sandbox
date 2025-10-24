@@ -20,6 +20,7 @@ param (
     [string]$IpInfoToken,
 
     [Parameter(Mandatory = $true)]
+    [AllowEmptyString()]
     [string]$ValidSuffix
 )
 
