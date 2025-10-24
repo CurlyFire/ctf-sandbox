@@ -2,10 +2,17 @@ name: QA Signoff
 
 on:
   workflow_dispatch:
-
+    inputs:
+      version:
+        description: 'Version that was tested in QA (e.g., v1.0.4-rc)'
+        required: true
+        type: string
+      success:
+        description: 'QA testing was successful (check if it was)'
+        required: true
+        type: boolean
 permissions:
   contents: write
-  actions: write
 jobs:
   qa-signoff:
     runs-on: ubuntu-latest
@@ -15,5 +22,15 @@ jobs:
         with:
           fetch-depth: 0  # Fetch all history and tags
           
-      - name: Test
-        run: git tag v0.0.1 3c2f0f4df281900efb4d95855860274ab1342d20 && git push origin v0.0.1
+      - name: Run qa-signoff Stage Script in dev container
+        uses: ./.github/actions/run-in-gcloud-authenticated-devcontainer
+        with:
+          gcp_project_id: ${{ secrets.GCP_PROJECT_ID }}
+          gcp_sa_key_base64: ${{ secrets.GCP_SA_KEY_BASE64 }}
+          gcp_region: ${{ secrets.GCP_REGION }}
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+
+          run_command: |
+            pwsh ./pipelines/stages/qa-signoff/invoke.ps1 \
+            -Version ${{ inputs.version }} \
+            -Success \$${{ inputs.success }}

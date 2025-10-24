@@ -43,6 +43,7 @@ jobs:
         gcp_project_id: ${{ secrets.GCP_PROJECT_ID }}
         gcp_sa_key_base64: ${{ secrets.GCP_SA_KEY_BASE64 }}
         gcp_region: ${{ secrets.GCP_REGION }}
+        gh_token: ${{ secrets.GITHUB_TOKEN }}
 
         run_command: |
           VERSION="${{ github.sha }}"

@@ -14,6 +14,9 @@ inputs:
   gcp_region:
     description: 'Google Cloud Region for Docker registry'
     required: true
+  gh_token:
+    description: 'Github token'
+    required: true
 
 runs:
   using: "composite"
@@ -33,5 +36,9 @@ runs:
           # Configure Docker auth non-interactively
           gcloud auth configure-docker "${{ inputs.gcp_region }}-docker.pkg.dev" --quiet
 
+          # Login to github
+          gh auth login --with-token << "${{ inputs.gh_token }}"
+
           # Execute the unique command passed from the workflow
           ${{ inputs.run_command }}
+
