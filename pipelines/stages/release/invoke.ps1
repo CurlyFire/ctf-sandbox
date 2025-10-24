@@ -41,4 +41,5 @@ if ($ValidSuffix -eq "") {
 Write-Log "🚀 Starting release stage"
 
 $environment = Deploy-GCloudEnvironment -Name $Env -Version $Version -WebAdminAccount $WebAdminAccount -MailpitAdminAccount $MailpitAdminAccount -AdminPassword $AdminPassword -IpInfoToken $IpInfoToken
+Register-DeployedVersion -Version $Version -Env $Env
 Invoke-Tests -Stage "release" -EnvironmentName $Env -GCloudEnvironment $environment

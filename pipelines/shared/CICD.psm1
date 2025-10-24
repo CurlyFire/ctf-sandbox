@@ -26,6 +26,18 @@ class GoogleCloudConfig {
 
     return "gs://$($this.Bucket)/tested-shas/$version"
     }
+
+    [string] GetDeployedGcsPath([string]$version, [string]$env) {
+        if (-not $version) {
+            throw "Version must be specified to get the GCS path."
+        }
+        
+        if (-not $this.Bucket) {
+            throw "Google Cloud Bucket is not configured."
+        }
+
+    return "gs://$($this.Bucket)/$env-deployed-versions/$version"
+    }    
 }
 
 class AppConfig : WorkspaceBoundConfig {
@@ -274,6 +286,39 @@ function Register-TestedSha {
 
     $tmpFile = New-TemporaryFile
     "Tested on $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')" | Set-Content $tmpFile
+    Invoke-NativeCommandWithoutReturn gsutil cp $tmpFile $bucketPath
+    Remove-Item $tmpFile -Force
+}
+
+function Test-IsVersionAlreadyDeployed {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Version,
+        [Parameter(Mandatory = $true)]
+        [string]$Env
+    )
+    [CICDConfig]$config = Get-CICDConfig
+
+    $objectPath = $config.GoogleCloud.GetDeployedGcsPath($Version, $Env)
+    Write-Log "🔍 Checking if Version $Version is already deployed to $Env"
+    $result = & gsutil ls $objectPath 2>$null
+
+    return ($LASTEXITCODE -eq 0)
+}
+
+function Register-DeployedVersion {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Version,
+        [Parameter(Mandatory = $true)]
+        [string]$Env
+    )
+    [CICDConfig]$config = Get-CICDConfig
+    $bucketPath = $config.GoogleCloud.GetDeployedGcsPath($Version, $Env)
+    Write-Log "📦 Registering $Version as deployed to $Env"
+
+    $tmpFile = New-TemporaryFile
+    "Deployed to $Env on $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')" | Set-Content $tmpFile
     Invoke-NativeCommandWithoutReturn gsutil cp $tmpFile $bucketPath
     Remove-Item $tmpFile -Force
 }

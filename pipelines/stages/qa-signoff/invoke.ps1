@@ -19,8 +19,15 @@ if (-not $Version.EndsWith($validSuffix)) {
 
 if ($Success)
 {
-    Write-Log "✅ QA Signoff successful for version $Version"
-    Publish-StableRelease -Version $Version
+    if (Test-IsVersionAlreadyDeployed -Version $Version -Env "qa")
+    {
+        Publish-StableRelease -Version $Version
+        Write-Log "✅ QA Signoff successful for version $Version"
+    }
+    else
+    {
+        throw "Version '$Version' has not been deployed to QA environment, cannot sign off"
+    }
 }
 else
 {
