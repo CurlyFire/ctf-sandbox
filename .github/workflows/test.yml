@@ -1,0 +1,13 @@
+name: Test
+
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  test-auth:
+    runs-on: ubuntu-latest
+    steps:
+    - name: test
+      run: |
+        gh auth login --with-token << "${{ secrets.GITHUB_TOKEN }}"
