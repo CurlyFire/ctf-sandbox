@@ -13,15 +13,21 @@ jobs:
         with:
           fetch-depth: 0  # Fetch all history and tags
           
-      - name: Run test security inside dev-container
-        uses: ./.github/actions/run-in-gcloud-authenticated-devcontainer
-        with:
-          gcp_project_id: ${{ secrets.GCP_PROJECT_ID }}
-          gcp_sa_key_base64: ${{ secrets.GCP_SA_KEY_BASE64 }}
-          gcp_region: ${{ secrets.GCP_REGION }}
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
+    #   - name: Run test security inside dev-container
+    #     uses: ./.github/actions/run-in-gcloud-authenticated-devcontainer
+    #     with:
+    #       gcp_project_id: ${{ secrets.GCP_PROJECT_ID }}
+    #       gcp_sa_key_base64: ${{ secrets.GCP_SA_KEY_BASE64 }}
+    #       gcp_region: ${{ secrets.GCP_REGION }}
+    #       gh_token: ${{ secrets.GITHUB_TOKEN }}
 
-          run_command: |
+    #       run_command: |
+    #         echo "Creating release for version v6.6.6" && \
+    #         gh release create --target b7c3bfc053117ba7ba1bc1831ca456c0be7f9a50 v6.6.6 --generate-notes && \
+    #         echo "Done creating release"
+
+      - name: Run test security outside
+        run: |
             echo "Creating release for version v6.6.6" && \
             gh release create --target b7c3bfc053117ba7ba1bc1831ca456c0be7f9a50 v6.6.6 --generate-notes && \
             echo "Done creating release"
