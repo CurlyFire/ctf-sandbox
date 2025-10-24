@@ -3,8 +3,7 @@
 param (
     [Parameter(Mandatory = $true)]
     [string]$Version,
-    [Parameter(Mandatory = $true)]
-    [bool]$Success
+    [switch]$Success
 )
 
 $ErrorActionPreference = 'Stop'
