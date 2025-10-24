@@ -27,6 +27,8 @@ jobs:
     #         echo "Done creating release"
 
       - name: Run test security outside
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
             echo "Creating release for version v6.6.6" && \
             gh release create --target b7c3bfc053117ba7ba1bc1831ca456c0be7f9a50 v6.6.6 --generate-notes && \
