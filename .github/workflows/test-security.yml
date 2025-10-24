@@ -1,0 +1,30 @@
+name: Test security
+
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  qa-signoff:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history and tags
+          
+      - name: Run test security inside dev-container
+        uses: ./.github/actions/run-in-gcloud-authenticated-devcontainer
+        with:
+          gcp_project_id: ${{ secrets.GCP_PROJECT_ID }}
+          gcp_sa_key_base64: ${{ secrets.GCP_SA_KEY_BASE64 }}
+          gcp_region: ${{ secrets.GCP_REGION }}
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+
+          run_command: |
+            echo "Creating pre-release for version v6.6.6-rc"
+            gh release create --target fb2a955a24ffece43ed2867facf22ecf3bce2ece v6.6.6-rc --generate-notes --prerelease \
+            echo "Done creating pre-release" \
+            echo "Creating release for version v6.6.6" \
+            gh release create --target fb2a955a24ffece43ed2867facf22ecf3bce2ece v6.6.6 --generate-notes \
+            echo "Done creating release"
