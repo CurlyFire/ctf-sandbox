@@ -2,6 +2,11 @@ name: Test security
 
 on:
   workflow_dispatch:
+    inputs:
+      commitSha:
+        description: "commit SHA to create the release for"
+        required: true
+        type: string
 permissions: write-all
 jobs:
   qa-signoff:
@@ -30,5 +35,5 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
             echo "Creating release for version v6.6.6" && \
-            gh release create --target b7c3bfc053117ba7ba1bc1831ca456c0be7f9a50 v6.6.6 --generate-notes && \
+            gh release create --target ${{ inputs.commitSha }} v6.6.6 --generate-notes && \
             echo "Done creating release"
