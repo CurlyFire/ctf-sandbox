@@ -2,8 +2,7 @@ name: Test security
 
 on:
   workflow_dispatch:
-permissions:
-  contents: write
+permissions: write-all
 jobs:
   qa-signoff:
     runs-on: ubuntu-latest
