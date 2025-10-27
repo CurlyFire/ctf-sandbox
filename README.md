@@ -1,12 +1,12 @@
 # 🚦 Pipeline Dashboard
 
-| Pipeline        |Status |
-|-----------------|-------|
-| Commit          | [![Commit stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/commit-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/commit-stage.yml) |
-| Acceptance      | [![Acceptance Stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/acceptance-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/acceptance-stage.yml) |
-| QA              | |[![QA Stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/qa-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/qa-stage.yml) |
-| QA Signoff      | |[![QA Signoff](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/qa-signoff.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/qa-signoff.yml) |
-| Production      | [![Production Stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/production-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/production-stage.yml) |
+| Pipeline        |
+|-----------------|
+[![Commit stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/commit-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/commit-stage.yml) |
+[![Acceptance Stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/acceptance-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/acceptance-stage.yml) |
+[![QA Stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/qa-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/qa-stage.yml) |
+[![QA Signoff](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/qa-signoff.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/qa-signoff.yml) |
+[![Production Stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/production-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/production-stage.yml) |
 
 # System Name
 ctf-sandbox
