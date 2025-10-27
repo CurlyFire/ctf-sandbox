@@ -8,6 +8,12 @@
 [![QA Signoff](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/qa-signoff.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/qa-signoff.yml) |
 [![Production Stage](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/production-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/production-stage.yml) |
 
+# Environments
+| Environment | Status | Link |
+|-------------|--------|------|
+| QA          | [![QA](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/qa-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/qa-stage.yml) | https://mvc-app-qa-663949819005.us-central1.run.app
+| Production  | [![Production](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/production-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/production-stage.yml) | https://mvc-app-prod-663949819005.us-central1.run.app
+
 # System Name
 ctf-sandbox
 
@@ -90,12 +96,6 @@ C4Container
 
     }
 ```
-# Environments
-| Environment | Status | Link |
-|-------------|--------|------|
-| QA          | [![QA](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/qa-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/qa-stage.yml) | https://mvc-app-qa-663949819005.us-central1.run.app
-| Production  | [![Production](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/production-stage.yml/badge.svg)](https://github.com/CurlyFire/ctf-sandbox/actions/workflows/production-stage.yml) | https://mvc-app-prod-663949819005.us-central1.run.app
-
 The CTF competition UI has all the features mentionned in the Sytem use cases section.  Mailpit is used as a SMPT server for invitations and registrations, however, the emails all stay there and can be seen from the mailpit UI.  If you require access to it, ask me and I will create a user for you to view all emails.
 
 # External systems
