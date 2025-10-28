@@ -1,0 +1,1 @@
+dotnet test $env:WORKSPACE_ROOT/tests/ctf-sandbox.tests

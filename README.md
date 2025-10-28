@@ -189,14 +189,35 @@ Responsible for writing addditional E2E tests.
 - [Visual Studio Code](https://code.visualstudio.com/)
     - [Dev containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
 
-## Local system startup
-- Make sure you have installed the software requirements
-- Clone the repository
-- Open the cloned folder
-- Reopen the folder inside a devcontainer (Visual Studio's Dev container extension should detect the devcontainer configuration)
-- Everything needed to build and run is configured inside the devcontainer with docker compose.  Just press F5 and the debug task will start the application
-- If you wish to work on pipelines locally, make sure to run dev-scripts/authenticate.ps1, as this will authenticate you to gcloud and github
+### Linux
+- Docker
+- [Visual Studio Code](https://code.visualstudio.com/)
+    - [Dev containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
 
-## Local system shutdown
-- Close Visual Studio code
-- Stop the containers in Docker desktop or close Docker desktop
+## Build, run and test the application
+### Prerequisites
+- Make sure you have installed the [software requirements](#software-requirements)
+- Clone the repository
+- Open the cloned folder within Visual Studio Code
+- Reopen the folder inside a devcontainer (Visual Studio's Dev container extension should detect the devcontainer configuration)
+- **(optional)** If you wish to work on pipelines locally, make sure to run dev-scripts/authenticate.ps1, as this will authenticate you to gcloud and github
+
+### Build and run the application
+- Make sure you have completed the [Prerequisites](#Prerequisites)
+#### From Visual Studio Code
+- Just press F5 and the debug task will start the application and a browser on the server address
+#### From the terminal
+- Open up a terminal from within Visual Studio Code
+- Execute ./dev-scripts/run.ps1
+- Open a browser to the listening url (usually http://localhost:5191)
+
+### Build and run the tests
+- Make sure you have completed the [Prerequisites](#Prerequisites)
+#### From Visual Studio Code
+- Nagivate to the test explorer
+- Refresh the tests by pressing the refresh button
+- Run the tests by pressing the play button
+#### From the terminal
+- Open up a terminal from within Visual Studio Code
+- Execute ./dev-scripts/run-tests.ps1
+

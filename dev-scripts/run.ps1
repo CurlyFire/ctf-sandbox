@@ -1,0 +1,1 @@
+dotnet run --project $env:WORKSPACE_ROOT/src/ctf-sandbox/ctf-sandbox.csproj
