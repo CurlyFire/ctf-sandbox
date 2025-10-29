@@ -4,10 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using ctf_sandbox.Data;
-using ctf_sandbox.Models;
+using ctf_sandbox.Areas.CTF.Models;
 
-namespace ctf_sandbox.Controllers;
+namespace ctf_sandbox.Areas.CTF.Controllers;
 
+[Area("CTF")]
 [Authorize]
 public class TeamsController : Controller
 {

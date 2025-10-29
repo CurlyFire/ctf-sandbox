@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
-namespace ctf_sandbox.Models;
+namespace ctf_sandbox.Areas.CTF.Models;
 
 public class Competition
 {

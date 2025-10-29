@@ -3,8 +3,9 @@ using ctf_sandbox.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ctf_sandbox.Controllers;
+namespace ctf_sandbox.Areas.CTF.Controllers;
 
+[Area("CTF")]
 [Authorize] // Ensures only logged-in users can access
 public class IpLookupController : Controller
 {

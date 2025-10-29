@@ -1,4 +1,4 @@
-namespace ctf_sandbox.Models;
+namespace ctf_sandbox.Areas.CTF.Models;
 
 public class HomeViewModel
 {

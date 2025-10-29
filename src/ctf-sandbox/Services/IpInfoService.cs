@@ -1,5 +1,5 @@
 using System.Text.Json;
-using ctf_sandbox.Models;
+using ctf_sandbox.Areas.CTF.Models;
 using Microsoft.Extensions.Options;
 
 namespace ctf_sandbox.Services;

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using ctf_sandbox.Models;
+using ctf_sandbox.Areas.CTF.Models;
 
 namespace ctf_sandbox.Data;
 

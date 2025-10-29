@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
 
-namespace ctf_sandbox.Models;
+namespace ctf_sandbox.Areas.CTF.Models;
 
 public abstract class Challenge
 {

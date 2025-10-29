@@ -74,6 +74,8 @@ public class Startup
         services.AddScoped<IRoleService, RoleService>();
         services.AddTransient<IEmailSender, EmailSender>();
         services.AddTimeProviderBasedOn(Configuration);
+        services.AddHttpClient();
+        services.AddScoped<IIpInfoService, IpInfoService>();
 
         services.AddControllersWithViews();
         services.AddHealthChecks()
@@ -186,7 +188,8 @@ public class Startup
 
             endpoints.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
+                pattern: "{controller=Home}/{action=Index}/{id?}",
+                defaults: new { area = "CTF", controller = "Home", action = "Index" });
 
             endpoints.MapRazorPages();
 

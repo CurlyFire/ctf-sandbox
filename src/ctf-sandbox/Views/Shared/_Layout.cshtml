@@ -27,7 +27,7 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between" id="navbarSupportedContent">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index" 
+                            <a class="nav-link" asp-area="CTF" asp-controller="Home" asp-action="Index" 
                                aria-label="View Dashboard" 
                                aria-current="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" ? "page" : null)">
                                 Dashboard
@@ -36,21 +36,21 @@
                         @if (User.Identity?.IsAuthenticated ?? false)
                         {
                             <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Teams" asp-action="Index" 
+                                <a class="nav-link" asp-area="CTF" asp-controller="Teams" asp-action="Index" 
                                    aria-label="Manage Teams"
                                    aria-current="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "Teams" ? "page" : null)">
                                     Teams
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Challenges" asp-action="Index" 
+                                <a class="nav-link" asp-area="CTF" asp-controller="Challenges" asp-action="Index" 
                                    aria-label="Manage Challenges"
                                    aria-current="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "Challenges" ? "page" : null)">
                                     Challenges
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="IpLookup" asp-action="Index" 
+                                <a class="nav-link" asp-area="CTF" asp-controller="IpLookup" asp-action="Index" 
                                    aria-label="IP Address Lookup"
                                    aria-current="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "IpLookup" ? "page" : null)">
                                     IP Lookup
