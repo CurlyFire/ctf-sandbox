@@ -70,7 +70,8 @@ public class Startup
             options.AddPolicy("RequireAdminRole",
                 policy => policy.RequireRole("Admin"));
         });
-
+        
+        services.AddScoped<IRegistrationService, RegistrationService>();
         services.AddScoped<IRoleService, RoleService>();
         services.AddTransient<IEmailSender, EmailSender>();
         services.AddTimeProviderBasedOn(Configuration);
