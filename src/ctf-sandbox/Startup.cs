@@ -7,6 +7,10 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using ctf_sandbox.Time;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.OpenApi.Models;
+using System.Reflection;
 
 namespace ctf_sandbox;
 
@@ -27,6 +31,11 @@ public class Startup
             options.UseSqlite(connectionString));
         services.AddDatabaseDeveloperPageExceptionFilter();
 
+        // Configure JWT Authentication
+        var jwtSettings = Configuration.GetSection("JwtSettings");
+        var secretKey = jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey not found in configuration.");
+        var key = Encoding.ASCII.GetBytes(secretKey);
+
         services.AddDefaultIdentity<IdentityUser>(options =>
         {
             options.SignIn.RequireConfirmedAccount = true;
@@ -36,12 +45,25 @@ public class Startup
             options.Password.RequireNonAlphanumeric = false;
             options.Password.RequiredLength = 6;
         })
-            .AddRoles<IdentityRole>()
-            .AddEntityFrameworkStores<ApplicationDbContext>();
-
-        services.AddScoped<IRoleService, RoleService>();
-        services.AddTransient<IEmailSender, EmailSender>();
-        services.AddTimeProviderBasedOn(Configuration);
+        .AddRoles<IdentityRole>()
+        .AddEntityFrameworkStores<ApplicationDbContext>();
+        services.AddAuthentication()
+        .AddJwtBearer(options =>
+        {
+            options.RequireHttpsMetadata = false; // Set to true in production
+            options.SaveToken = true;
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                ValidateIssuer = true,
+                ValidIssuer = jwtSettings["Issuer"],
+                ValidateAudience = true,
+                ValidAudience = jwtSettings["Audience"],
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero
+            };
+        });
 
         services.AddAuthorization(options =>
         {
@@ -49,11 +71,64 @@ public class Startup
                 policy => policy.RequireRole("Admin"));
         });
 
+        services.AddScoped<IRoleService, RoleService>();
+        services.AddTransient<IEmailSender, EmailSender>();
+        services.AddTimeProviderBasedOn(Configuration);
+
         services.AddControllersWithViews();
         services.AddHealthChecks()
         .AddCheck("self", () => HealthCheckResult.Healthy())
         .AddCheck<SqliteHealthCheck>("database")
         .AddCheck<SmtpHealthCheck>("smtp");
+
+        // Add Swagger/OpenAPI
+        services.AddEndpointsApiExplorer();
+        services.AddSwaggerGen(options =>
+        {
+            options.SwaggerDoc("v1", new OpenApiInfo
+            {
+                Version = "v1",
+                Title = "CTF Sandbox API",
+                Description = "API for CTF Sandbox authentication and operations",
+                Contact = new OpenApiContact
+                {
+                    Name = "CTF Sandbox",
+                }
+            });
+
+            // Add JWT Authentication to Swagger
+            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token in the text input below.",
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.ApiKey,
+                Scheme = "Bearer"
+            });
+
+            options.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    },
+                    Array.Empty<string>()
+                }
+            });
+
+            // Include XML comments
+            var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFilename);
+            if (File.Exists(xmlPath))
+            {
+                options.IncludeXmlComments(xmlPath);
+            }
+        });
     }
 
     public void Configure(IApplicationBuilder app, IHostEnvironment env)
@@ -62,6 +137,14 @@ public class Startup
         if (env.IsDevelopment())
         {
             app.UseMigrationsEndPoint();
+            
+            // Enable Swagger in development
+            app.UseSwagger();
+            app.UseSwaggerUI(options =>
+            {
+                options.SwaggerEndpoint("/swagger/v1/swagger.json", "CTF Sandbox API v1");
+                options.RoutePrefix = "api/swagger"; // Access at /api/swagger
+            });
         }
         else
         {
