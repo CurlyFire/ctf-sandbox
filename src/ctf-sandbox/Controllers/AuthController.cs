@@ -36,7 +36,7 @@ public class AuthController : ControllerBase
     /// <response code="400">If the request model is invalid</response>
     /// <response code="401">If the credentials are invalid, email is not confirmed, or account is locked</response>
     [AllowAnonymous]
-    [HttpPost("login")]
+    [HttpPost()]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -48,7 +48,7 @@ public class AuthController : ControllerBase
         }
 
         // Find user by username or email
-        var user = await _userManager.FindByNameAsync(request.Username) 
+        var user = await _userManager.FindByNameAsync(request.Username)
                    ?? await _userManager.FindByEmailAsync(request.Username);
 
         if (user == null)
