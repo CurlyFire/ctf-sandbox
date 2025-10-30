@@ -624,7 +624,7 @@ function Deploy-GCloudEnvironment {
     }
 
     Invoke-NativeCommandWithoutReturn gcloud run deploy "mvc-app-$Name" `
-        --image="us-central1-docker.pkg.dev/$($config.GoogleCloud.ProjectId)/ctf-sandbox-repo/ctf-sandbox:$Version" `
+        --image="$($config.App.DockerImageName):$Version" `
         --region=$($config.GoogleCloud.Region) `
         --ingress=all `
         --allow-unauthenticated `
