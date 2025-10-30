@@ -36,10 +36,8 @@ runs:
           # Login to github
           echo ${{ inputs.gh_token }} | gh auth login --with-token
 
-          gh auth status
-
           # Configure Docker auth non-interactively
-          #echo ${{ inputs.gh_token }} | docker login ghcr.io --username $(gh api user --jq '.login') --password-stdin
+          echo ${{ inputs.gh_token }} | docker login ghcr.io --username ${{ github.actor }} --password-stdin
 
           # Execute the unique command passed from the workflow
-          #${{ inputs.run_command }}
+          ${{ inputs.run_command }}
