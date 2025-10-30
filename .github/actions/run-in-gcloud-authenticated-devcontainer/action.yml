@@ -33,11 +33,11 @@ runs:
             --key-file=- \
             --project "${{ inputs.gcp_project_id }}"
 
-          # Configure Docker auth non-interactively
-          gcloud auth configure-docker "${{ inputs.gcp_region }}-docker.pkg.dev" --quiet
-
           # Login to github
           echo ${{ inputs.gh_token }} | gh auth login --with-token
+
+          # Configure Docker auth non-interactively
+          gh auth token | docker login ghcr.io --username $(gh api user --jq '.login') --password-stdin
 
           # Execute the unique command passed from the workflow
           ${{ inputs.run_command }}

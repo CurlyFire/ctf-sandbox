@@ -13,7 +13,7 @@
         DevAppSettingsFile        = "src/ctf-sandbox/appsettings.web.dev.json"
         DatabaseFile              = "src/ctf-sandbox/app.db"
         PublishDir                = ".artifacts/publish"
-        DockerImageName           = "us-central1-docker.pkg.dev/fifth-compiler-458221-c9/ctf-sandbox-repo/ctf-sandbox"
+        DockerImageName           = "ghcr.io/curlyfire/ctf-sandbox"
     }
     DockerCompose = @{
         File                      = ".devcontainer/docker-compose.yml"
