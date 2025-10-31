@@ -1,10 +1,11 @@
 @{
     GoogleCloud = @{
-        ProjectId     = "fifth-compiler-458221-c9"
-        ProjectNumber = "663949819005"
-        Region        = "us-central1"
-        Zone          = "us-central1-a"
-        Bucket        = "ctf-sandbox"
+        ProjectId              = "fifth-compiler-458221-c9"
+        ProjectNumber          = "663949819005"
+        Region                 = "us-central1"
+        Zone                   = "us-central1-a"
+        Bucket                 = "ctf-sandbox"
+        ProxiedDockerImageName = "us-central1-docker.pkg.dev/fifth-compiler-458221-c9/github/curlyfire/ctf-sandbox"
     }
     App = @{
         DotnetSolution            = "src/ctf-sandbox/ctf-sandbox.sln"

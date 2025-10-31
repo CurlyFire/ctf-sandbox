@@ -14,6 +14,7 @@ class GoogleCloudConfig {
     [string]$Zone
     [string]$Bucket
     [string]$ProjectNumber
+    [string]$ProxiedDockerImageName
 
     [string] GetTestedShaGcsPath([string]$version) {
         if (-not $version) {
@@ -96,6 +97,7 @@ class CICDConfig {
         $gcloud.Zone      = $rawConfig.GoogleCloud.Zone
         $gcloud.Bucket    = $rawConfig.GoogleCloud.Bucket
         $gcloud.ProjectNumber = $rawConfig.GoogleCloud.ProjectNumber
+        $gcloud.ProxiedDockerImageName = $rawConfig.GoogleCloud.ProxiedDockerImageName
         $this.GoogleCloud = $gcloud
 
         $appCfg = [AppConfig]::new()
@@ -624,7 +626,7 @@ function Deploy-GCloudEnvironment {
     }
 
     Invoke-NativeCommandWithoutReturn gcloud run deploy "mvc-app-$Name" `
-        --image="$($config.App.DockerImageName):$Version" `
+        --image="$($config.GoogleCloud.ProxiedDockerImageName):$Version" `
         --region=$($config.GoogleCloud.Region) `
         --ingress=all `
         --allow-unauthenticated `
