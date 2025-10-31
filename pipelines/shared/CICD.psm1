@@ -831,8 +831,8 @@ function Test-VersionSuffix {
         [string]$ValidSuffix = ""
     )
 
-    # First validate semantic version format
-    $semVerPattern = "^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$"
+    # First validate semantic version format (allows optional 'v' prefix)
+    $semVerPattern = "^v?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$"
     if (-not ($Version -match $semVerPattern)) {
         throw "Version '$Version' is not a valid semantic version"
     }
@@ -846,9 +846,6 @@ function Test-VersionSuffix {
     } elseif (-not $Version.EndsWith($ValidSuffix)) {
         throw "Version '$Version' must end with the valid suffix '$ValidSuffix'"
     }
-
-    # If we get here, all validations passed
-    return $true
 }
 
 # Export functions and classes
