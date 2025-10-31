@@ -6,6 +6,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: write
+  packages: write
 jobs:
   run-acceptance:
     runs-on: ubuntu-latest
