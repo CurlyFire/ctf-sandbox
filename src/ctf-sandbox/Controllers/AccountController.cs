@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using ctf_sandbox.Models;
 using Microsoft.AspNetCore.Authorization;
 using ctf_sandbox.Services;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace ctf_sandbox.Controllers;
 

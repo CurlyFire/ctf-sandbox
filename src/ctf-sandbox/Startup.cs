@@ -76,6 +76,7 @@ public class Startup
         services.AddTransient<IEmailSender, EmailSender>();
         services.AddTimeProviderBasedOn(Configuration);
         services.AddHttpClient();
+        services.Configure<IpInfoOptions>(Configuration.GetSection("IpInfo"));
         services.AddScoped<IIpInfoService, IpInfoService>();
 
         services.AddControllersWithViews();
