@@ -11,6 +11,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace ctf_sandbox;
 
@@ -73,6 +74,7 @@ public class Startup
         
         services.AddScoped<IRegistrationService, RegistrationService>();
         services.AddScoped<IRoleService, RoleService>();
+        services.AddScoped<ITeamsService, TeamsService>();
         services.AddTransient<IEmailSender, EmailSender>();
         services.AddTimeProviderBasedOn(Configuration);
         services.AddHttpClient();
@@ -103,11 +105,12 @@ public class Startup
             // Add JWT Authentication to Swagger
             options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
-                Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token in the text input below.",
+                Description = "JWT Authorization header using the Bearer scheme. Enter your token in the text input below (without 'Bearer' prefix).",
                 Name = "Authorization",
                 In = ParameterLocation.Header,
-                Type = SecuritySchemeType.ApiKey,
-                Scheme = "Bearer"
+                Type = SecuritySchemeType.Http,
+                Scheme = "bearer",
+                BearerFormat = "JWT"
             });
 
             options.AddSecurityRequirement(new OpenApiSecurityRequirement

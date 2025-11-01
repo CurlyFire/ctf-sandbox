@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using ctf_sandbox.Data;
 using ctf_sandbox.Areas.CTF.Models;
+using ctf_sandbox.Services;
 
 namespace ctf_sandbox.Areas.CTF.Controllers;
 
@@ -16,29 +17,27 @@ public class TeamsController : Controller
     private readonly UserManager<IdentityUser> _userManager;
     private readonly IEmailSender _emailSender;
     private readonly TimeProvider _timeProvider;
+    private readonly ITeamsService _teamsService;
 
     public TeamsController(
         ApplicationDbContext context, 
         UserManager<IdentityUser> userManager,
         IEmailSender emailSender,
-        TimeProvider timeProvider)
+        TimeProvider timeProvider,
+        ITeamsService teamsService)
     {
         _context = context;
         _userManager = userManager;
         _emailSender = emailSender;
         _timeProvider = timeProvider;
+        _teamsService = teamsService;
     }
 
     // GET: Teams
     public async Task<IActionResult> Index()
     {
         var currentUser = await _userManager.GetUserAsync(User);
-        var teams = await _context.Teams
-            .Include(t => t.Owner)
-            .Include(t => t.Members)
-                .ThenInclude(m => m.User)
-            .Where(t => t.OwnerId == currentUser!.Id || t.Members.Any(m => m.UserId == currentUser.Id && !m.IsInvitePending))
-            .ToListAsync();
+        var teams = await _teamsService.GetTeamsForUserAsync(currentUser!.Id);
         return View(teams);
     }
 
