@@ -8,11 +8,11 @@ using ctf_sandbox.Data;
 
 #nullable disable
 
-namespace ctf_sandbox.Data.Migrations
+namespace ctf_sandbox.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250416132050_AddCompetitions")]
-    partial class AddCompetitions
+    [Migration("20251101201554_ctf")]
+    partial class ctf
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -216,146 +216,7 @@ namespace ctf_sandbox.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("ctf_sandbox.Models.Challenge", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ChallengeType")
-                        .IsRequired()
-                        .HasMaxLength(13)
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("CreatorId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Flag")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("Points")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatorId");
-
-                    b.ToTable("Challenges");
-
-                    b.HasDiscriminator<string>("ChallengeType").HasValue("Challenge");
-
-                    b.UseTphMappingStrategy();
-                });
-
-            modelBuilder.Entity("ctf_sandbox.Models.Competition", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("CreatorId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(2000)
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatorId");
-
-                    b.ToTable("Competitions");
-                });
-
-            modelBuilder.Entity("ctf_sandbox.Models.CompetitionChallenge", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("AddedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("ChallengeId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("CompetitionId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Points")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ChallengeId");
-
-                    b.HasIndex("CompetitionId");
-
-                    b.ToTable("CompetitionChallenges");
-                });
-
-            modelBuilder.Entity("ctf_sandbox.Models.CompetitionTeam", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("CompetitionId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("JoinedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("Score")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("TeamId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CompetitionId");
-
-                    b.HasIndex("TeamId");
-
-                    b.ToTable("CompetitionTeams");
-                });
-
-            modelBuilder.Entity("ctf_sandbox.Models.Team", b =>
+            modelBuilder.Entity("ctf_sandbox.Areas.CTF.Models.Team", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -384,7 +245,7 @@ namespace ctf_sandbox.Data.Migrations
                     b.ToTable("Teams");
                 });
 
-            modelBuilder.Entity("ctf_sandbox.Models.TeamMember", b =>
+            modelBuilder.Entity("ctf_sandbox.Areas.CTF.Models.TeamMember", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -410,17 +271,6 @@ namespace ctf_sandbox.Data.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("TeamMembers");
-                });
-
-            modelBuilder.Entity("ctf_sandbox.Models.PlaintextChallenge", b =>
-                {
-                    b.HasBaseType("ctf_sandbox.Models.Challenge");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasDiscriminator().HasValue("Plaintext");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -474,67 +324,7 @@ namespace ctf_sandbox.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("ctf_sandbox.Models.Challenge", b =>
-                {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "Creator")
-                        .WithMany()
-                        .HasForeignKey("CreatorId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Creator");
-                });
-
-            modelBuilder.Entity("ctf_sandbox.Models.Competition", b =>
-                {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "Creator")
-                        .WithMany()
-                        .HasForeignKey("CreatorId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Creator");
-                });
-
-            modelBuilder.Entity("ctf_sandbox.Models.CompetitionChallenge", b =>
-                {
-                    b.HasOne("ctf_sandbox.Models.Challenge", "Challenge")
-                        .WithMany()
-                        .HasForeignKey("ChallengeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ctf_sandbox.Models.Competition", "Competition")
-                        .WithMany("Challenges")
-                        .HasForeignKey("CompetitionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Challenge");
-
-                    b.Navigation("Competition");
-                });
-
-            modelBuilder.Entity("ctf_sandbox.Models.CompetitionTeam", b =>
-                {
-                    b.HasOne("ctf_sandbox.Models.Competition", "Competition")
-                        .WithMany("Teams")
-                        .HasForeignKey("CompetitionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ctf_sandbox.Models.Team", "Team")
-                        .WithMany()
-                        .HasForeignKey("TeamId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Competition");
-
-                    b.Navigation("Team");
-                });
-
-            modelBuilder.Entity("ctf_sandbox.Models.Team", b =>
+            modelBuilder.Entity("ctf_sandbox.Areas.CTF.Models.Team", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "Owner")
                         .WithMany()
@@ -545,9 +335,9 @@ namespace ctf_sandbox.Data.Migrations
                     b.Navigation("Owner");
                 });
 
-            modelBuilder.Entity("ctf_sandbox.Models.TeamMember", b =>
+            modelBuilder.Entity("ctf_sandbox.Areas.CTF.Models.TeamMember", b =>
                 {
-                    b.HasOne("ctf_sandbox.Models.Team", "Team")
+                    b.HasOne("ctf_sandbox.Areas.CTF.Models.Team", "Team")
                         .WithMany("Members")
                         .HasForeignKey("TeamId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -564,14 +354,7 @@ namespace ctf_sandbox.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ctf_sandbox.Models.Competition", b =>
-                {
-                    b.Navigation("Challenges");
-
-                    b.Navigation("Teams");
-                });
-
-            modelBuilder.Entity("ctf_sandbox.Models.Team", b =>
+            modelBuilder.Entity("ctf_sandbox.Areas.CTF.Models.Team", b =>
                 {
                     b.Navigation("Members");
                 });

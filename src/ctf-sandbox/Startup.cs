@@ -76,6 +76,7 @@ public class Startup
         services.AddScoped<IRoleService, RoleService>();
         services.AddScoped<ITeamsService, TeamsService>();
         services.AddTransient<IEmailSender, EmailSender>();
+        services.AddHttpContextAccessor();
         services.AddTimeProviderBasedOn(Configuration);
         services.AddHttpClient();
         services.Configure<IpInfoOptions>(Configuration.GetSection("IpInfo"));

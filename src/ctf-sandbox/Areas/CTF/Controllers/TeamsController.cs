@@ -61,11 +61,7 @@ public class TeamsController : Controller
         if (ModelState.IsValid)
         {
             var currentUser = await _userManager.GetUserAsync(User);
-            team.OwnerId = currentUser!.Id;
-            team.CreatedAt = _timeProvider.GetUtcNow().UtcDateTime;
-            
-            _context.Add(team);
-            await _context.SaveChangesAsync();
+            await _teamsService.CreateTeamAsync(currentUser!.Id, team.Name, team.Description);
             return RedirectToAction(nameof(Index));
         }
 
@@ -104,56 +100,23 @@ public class TeamsController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Invite(int id, string email)
     {
-        var team = await _context.Teams
-            .Include(t => t.Owner)
-            .FirstOrDefaultAsync(t => t.Id == id);
-            
-        if (team == null)
-        {
-            return NotFound();
-        }
-
         var currentUser = await _userManager.GetUserAsync(User);
-        if (team.OwnerId != currentUser!.Id)
-        {
-            return Forbid();
-        }
+        var (success, errorMessage) = await _teamsService.InviteUserToTeamAsync(id, currentUser!.Id, email);
 
-        var invitedUser = await _userManager.FindByEmailAsync(email);
-        if (invitedUser == null)
+        if (!success)
         {
-            ModelState.AddModelError("", "User not found");
+            var team = await _context.Teams
+                .Include(t => t.Owner)
+                .FirstOrDefaultAsync(t => t.Id == id);
+            
+            if (team == null)
+            {
+                return NotFound();
+            }
+
+            ModelState.AddModelError("", errorMessage ?? "An error occurred");
             return View(team);
         }
-
-        var existingMember = await _context.TeamMembers
-            .FirstOrDefaultAsync(tm => tm.TeamId == id && tm.UserId == invitedUser.Id);
-
-        if (existingMember != null)
-        {
-            ModelState.AddModelError("", "User is already a member or has a pending invitation");
-            return View(team);
-        }
-
-        var teamMember = new TeamMember
-        {
-            TeamId = id,
-            UserId = invitedUser.Id,
-            JoinedAt = _timeProvider.GetUtcNow().UtcDateTime,
-            IsInvitePending = true
-        };
-
-        _context.TeamMembers.Add(teamMember);
-        await _context.SaveChangesAsync();
-
-        // Send invitation email
-        var subject = $"Invitation to join team {team.Name}";
-        var message = $@"
-            <h2>Team Invitation</h2>
-            <p>You have been invited to join the team {team.Name} by {currentUser.Email}.</p>
-            <p>To accept or decline this invitation, please visit your <a href='{Url.Action("Invitations", "Teams", null, Request.Scheme)}'>team invitations page</a>.</p>";
-        
-        await _emailSender.SendEmailAsync(email, subject, message);
 
         return RedirectToAction(nameof(Index));
     }
@@ -162,12 +125,7 @@ public class TeamsController : Controller
     public async Task<IActionResult> Invitations()
     {
         var currentUser = await _userManager.GetUserAsync(User);
-        var pendingInvitations = await _context.TeamMembers
-            .Include(tm => tm.Team)
-            .Include(tm => tm.Team.Owner)
-            .Where(tm => tm.UserId == currentUser!.Id && tm.IsInvitePending)
-            .ToListAsync();
-
+        var pendingInvitations = await _teamsService.GetPendingInvitationsAsync(currentUser!.Id);
         return View(pendingInvitations);
     }
 
@@ -177,17 +135,12 @@ public class TeamsController : Controller
     public async Task<IActionResult> AcceptInvite(int id)
     {
         var currentUser = await _userManager.GetUserAsync(User);
-        var invitation = await _context.TeamMembers
-            .FirstOrDefaultAsync(tm => tm.Id == id && tm.UserId == currentUser!.Id && tm.IsInvitePending);
+        var result = await _teamsService.AcceptInvitationAsync(id, currentUser!.Id);
 
-        if (invitation == null)
+        if (!result)
         {
             return NotFound();
         }
-
-        invitation.IsInvitePending = false;
-        invitation.JoinedAt = _timeProvider.GetUtcNow().UtcDateTime;
-        await _context.SaveChangesAsync();
 
         return RedirectToAction(nameof(Index));
     }
@@ -198,16 +151,12 @@ public class TeamsController : Controller
     public async Task<IActionResult> DeclineInvite(int id)
     {
         var currentUser = await _userManager.GetUserAsync(User);
-        var invitation = await _context.TeamMembers
-            .FirstOrDefaultAsync(tm => tm.Id == id && tm.UserId == currentUser!.Id && tm.IsInvitePending);
+        var result = await _teamsService.DeclineInvitationAsync(id, currentUser!.Id);
 
-        if (invitation == null)
+        if (!result)
         {
             return NotFound();
         }
-
-        _context.TeamMembers.Remove(invitation);
-        await _context.SaveChangesAsync();
 
         return RedirectToAction(nameof(Invitations));
     }

@@ -30,74 +30,7 @@ public class HomeController : Controller
 
     public async Task<IActionResult> Index()
     {
-        var now = DateTime.UtcNow;
-        var userId = _userManager.GetUserId(User);
-
-        var userTeamIds = await _context.TeamMembers
-            .Where(tm => tm.UserId == userId && !tm.IsInvitePending)
-            .Select(tm => tm.TeamId)
-            .ToListAsync();
-
-        var activeCompetitions = await _context.Competitions
-            .Include(c => c.Teams)
-                .ThenInclude(ct => ct.Team)
-            .Where(c => c.StartDate <= now && c.EndDate >= now)
-            .OrderBy(c => c.EndDate)
-            .ToListAsync();
-
-        // Separate competitions into those the user can participate in and others
-        var viewModel = new HomeViewModel
-        {
-            ParticipatingCompetitions = activeCompetitions
-                .Where(c => c.Teams.Any(ct => userTeamIds.Contains(ct.TeamId)))
-                .ToList(),
-            OtherCompetitions = activeCompetitions
-                .Where(c => !c.Teams.Any(ct => userTeamIds.Contains(ct.TeamId)))
-                .ToList()
-        };
-
-        return View(viewModel);
-    }
-
-    public async Task<IActionResult> Competition(int? id)
-    {
-        if (id == null)
-        {
-            return NotFound();
-        }
-
-        var now = _timeProvider.GetUtcNow().UtcDateTime;
-        var userId = _userManager.GetUserId(User);
-
-        var userTeamIds = await _context.TeamMembers
-            .Where(tm => tm.UserId == userId && !tm.IsInvitePending)
-            .Select(tm => tm.TeamId)
-            .ToListAsync();
-
-        var competition = await _context.Competitions
-            .Include(c => c.Teams)
-                .ThenInclude(ct => ct.Team)
-            .Include(c => c.Challenges)
-                .ThenInclude(cc => cc.Challenge)
-            .FirstOrDefaultAsync(c => c.Id == id);
-
-        if (competition == null)
-        {
-            return NotFound();
-        }
-
-        // Check if the competition is active and the user's team is participating
-        if (now < competition.StartDate || now > competition.EndDate)
-        {
-            return RedirectToAction(nameof(Index));
-        }
-
-        if (!competition.Teams.Any(ct => userTeamIds.Contains(ct.TeamId)))
-        {
-            return RedirectToAction(nameof(Index));
-        }
-
-        return View(competition);
+        return View();
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
