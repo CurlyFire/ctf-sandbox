@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Json;
+using ctf_sandbox.Areas.CTF.Models;
 using ctf_sandbox.Models;
 using ctf_sandbox.tests.Dsl;
 
@@ -35,20 +36,22 @@ public class APICTFDriver : ICTFDriver
         return response.IsSuccessStatusCode;
     }
 
-    public Task CreateTeam(string teamName)
+    public async Task CreateTeam(string teamName)
     {
-        throw new NotImplementedException();
+        EnsureAuthenticatedAndSetAuthorizationHeader();
+
+        var response = await _httpClient.PostAsJsonAsync("teams",
+            new CreateTeamRequest()
+            {
+                Name = teamName
+            });
+
+        response.EnsureSuccessStatusCode();
     }
 
     public async Task<IpInfo> GetIpInfo(string ipAddress)
     {
-        if (string.IsNullOrEmpty(_jwt))
-        {
-            throw new InvalidOperationException("User must be signed in to get IP info");
-        }
-
-        _httpClient.DefaultRequestHeaders.Authorization = 
-            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _jwt);
+        EnsureAuthenticatedAndSetAuthorizationHeader();
 
         var response = await _httpClient.GetAsync($"ipinfo/{ipAddress}");
         response.EnsureSuccessStatusCode();
@@ -57,9 +60,16 @@ public class APICTFDriver : ICTFDriver
         return ipInfo ?? throw new InvalidOperationException("Failed to deserialize IP info response");
     }
 
-    public Task<bool> IsTeamVisible(string teamName)
+    public async Task<bool> IsTeamAvailable(string teamName)
     {
-        throw new NotImplementedException();
+        EnsureAuthenticatedAndSetAuthorizationHeader();
+
+        var response = await _httpClient.GetAsync("teams");
+        response.EnsureSuccessStatusCode();
+
+        var teams = await response.Content.ReadFromJsonAsync<List<Team>>();
+        
+        return teams?.Any(t => t.Name == teamName) ?? false;
     }
 
     public Task<bool> IsUserSignedIn(string email)
@@ -79,5 +89,16 @@ public class APICTFDriver : ICTFDriver
 
         result.EnsureSuccessStatusCode();
         _jwt = await result.Content.ReadAsStringAsync();
+    }
+
+    private void EnsureAuthenticatedAndSetAuthorizationHeader()
+    {
+        if (string.IsNullOrEmpty(_jwt))
+        {
+            throw new InvalidOperationException("User must be signed in to perform this action");
+        }
+
+        _httpClient.DefaultRequestHeaders.Authorization = 
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _jwt);
     }
 }

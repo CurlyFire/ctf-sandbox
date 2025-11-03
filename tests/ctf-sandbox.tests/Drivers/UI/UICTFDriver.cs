@@ -42,7 +42,7 @@ public class UICTFDriver : ICTFDriver
         await createNewTeamPage.CreateTeam(teamName);
     }
 
-    public async Task<bool> IsTeamVisible(string teamName)
+    public async Task<bool> IsTeamAvailable(string teamName)
     {
         var manageTeamsPage = await _homePage.GoToManageTeamsPage();
         return await manageTeamsPage.IsTeamVisible(teamName);

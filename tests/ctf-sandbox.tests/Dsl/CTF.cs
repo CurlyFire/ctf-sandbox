@@ -52,7 +52,7 @@ public class CTF
 
     public async Task ConfirmTeamIsAvailable(string randomTeamName)
     {
-        Assert.True(await _driver.IsTeamVisible(randomTeamName));
+        Assert.True(await _driver.IsTeamAvailable(randomTeamName));
     }
 
     public async Task ConfirmUserIsSignedIn(string email)
