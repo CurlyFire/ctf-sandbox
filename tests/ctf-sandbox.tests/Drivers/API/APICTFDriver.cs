@@ -1,3 +1,4 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Json;
 using ctf_sandbox.Models;
 using ctf_sandbox.tests.Dsl;
@@ -7,22 +8,31 @@ namespace ctf_sandbox.tests.Drivers.API;
 public class APICTFDriver : ICTFDriver
 {
     private readonly HttpClient _httpClient;
+    private APIEmailsDriver _apiEmailsDriver;
     private string? _jwt;
 
-    public APICTFDriver(HttpClient httpClient)
+    public APICTFDriver(HttpClient httpClient,APIEmailsDriver apiEmailsDriver)
     {
         _httpClient = httpClient;
+        _apiEmailsDriver = apiEmailsDriver;
         _jwt = null;
     }
 
     public Task<Emails> CheckEmails()
     {
-        throw new NotImplementedException();
+        return Task.FromResult(new Emails(_apiEmailsDriver));
     }
 
-    public Task<bool> CreateAccount(string email, string password)
+    public async Task<bool> CreateAccount(string email, string password)
     {
-        throw new NotImplementedException();
+        var response = await _httpClient.PostAsJsonAsync("account",
+            new RegisterAccountRequest()
+            {
+                Email = email,
+                Password = password
+            });
+
+        return response.IsSuccessStatusCode;
     }
 
     public Task CreateTeam(string teamName)
@@ -54,7 +64,8 @@ public class APICTFDriver : ICTFDriver
 
     public Task<bool> IsUserSignedIn(string email)
     {
-        throw new NotImplementedException();
+        var decodedJwt = new JwtSecurityTokenHandler().ReadJwtToken(_jwt);
+        return Task.FromResult(decodedJwt.Claims.Any(c => c.Type == "email" && c.Value == email));
     }
 
     public async Task SignIn(string email, string password)

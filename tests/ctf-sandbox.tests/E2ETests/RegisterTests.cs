@@ -12,7 +12,7 @@ public class RegisterTests : CTFTests
 
     [Trait("Category", "E2E")]
     [Theory]
-    [Channel(Channel.UI)]
+    [Channel(Channel.UI, Channel.API)]
     public async Task ShouldBeAbleToRegister(Channel channel)
     {
         var ctf = InteractWithCTFThrough(channel);

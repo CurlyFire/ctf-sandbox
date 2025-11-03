@@ -21,8 +21,8 @@ public class CTFTests : PageObjectModelTests
         base.ConfigureServices(services);
         services.AddSingleton<CTFDriverFactory>();
         services.AddSingleton<UICTFDriver>();
-        services.AddSingleton<APICTFDriver>();
-        services.AddHttpClient();
+        services.AddHttpClient<APICTFDriver>(ConfigureCTFHttpClient);
+        services.AddHttpClient<APIEmailsDriver>(ConfigureEmailsHttpClient);
     }
 
     override public void Configure(IServiceProvider serviceProvider)
