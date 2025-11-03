@@ -32,7 +32,7 @@ public class AuthController : ControllerBase
     /// </summary>
     /// <param name="request">Login credentials containing username/email and password</param>
     /// <returns>JWT token string containing user details, roles, and expiration in claims</returns>
-    /// <response code="200">Returns the JWT token as a JSON object with a 'token' property</response>
+    /// <response code="200">Returns the JWT token as a string</response>
     /// <response code="400">If the request model is invalid</response>
     /// <response code="401">If the credentials are invalid, email is not confirmed, or account is locked</response>
     [AllowAnonymous]
@@ -82,7 +82,7 @@ public class AuthController : ControllerBase
         var token = GenerateJwtToken(user, roles);
 
         // Return just the token - all info is in the claims
-        return Ok(new { token });
+        return Ok(token);
     }
 
     private string GenerateJwtToken(IdentityUser user, IList<string> roles)

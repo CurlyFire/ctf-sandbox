@@ -12,16 +12,25 @@ public abstract class EnvironmentTests : IDisposable
     {
         EnvironmentFixture = fixture;
         var services = new ServiceCollection();
-        ConfigureServices(services);
+        ConfigureServicesInternal(services);
         var serviceProvider = services.BuildServiceProvider();
         _scope = serviceProvider.CreateScope();
-        Configure(_scope.ServiceProvider);
+        ConfigureInternal(_scope.ServiceProvider);
     }
 
-
-    public virtual void ConfigureServices(IServiceCollection services)
+    private void ConfigureServicesInternal(IServiceCollection services)
     {
         services.AddSingleton(EnvironmentFixture.Configuration);
+        ConfigureServices(services);
+    }
+
+    private void ConfigureInternal(IServiceProvider serviceProvider)
+    {
+        Configure(serviceProvider);
+    }
+
+    public virtual void ConfigureServices(IServiceCollection services)
+    {        
     }
 
     public virtual void Configure(IServiceProvider serviceProvider)

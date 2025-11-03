@@ -1,3 +1,4 @@
+using ctf_sandbox.Models;
 using ctf_sandbox.tests.Drivers;
 using ctf_sandbox.tests.Fixtures;
 
@@ -57,5 +58,10 @@ public class CTF
     public async Task ConfirmUserIsSignedIn(string email)
     {
         Assert.True(await _driver.IsUserSignedIn(email));
+    }
+
+    public async Task<IpInfo> GetIpInfo(string ipAddress)
+    {
+        return await _driver.GetIpInfo(ipAddress);
     }
 }

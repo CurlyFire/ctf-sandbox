@@ -12,8 +12,18 @@ public class IpInfoTests : CTFTests
 
     [Trait("Category", "E2E")]
     [Theory]
-    [Channel(Channel.API)]
+    [Channel(Channel.UI, Channel.API)]
     public async Task ShouldBeAbleToGetIpInfo(Channel channel)
     {
+        var ctf = InteractWithCTFThrough(channel);
+        await ctf.SignIn();
+
+        var ipInfo = await ctf.GetIpInfo("8.8.8.8");
+
+        Assert.Equal("8.8.8.8", ipInfo.Ip);
+        Assert.Equal("dns.google", ipInfo.Hostname);
+        Assert.Equal("Mountain View", ipInfo.City);
+        Assert.Equal("California", ipInfo.Region);
+        Assert.Equal("US", ipInfo.Country);
     }
 }

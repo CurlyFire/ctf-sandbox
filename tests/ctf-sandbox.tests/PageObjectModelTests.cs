@@ -4,15 +4,15 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ctf_sandbox.tests;
 
-public class HomePageTests : EnvironmentTests
+public class PageObjectModelTests : HttpTests
 {
     private HomePage? _homePage;
 
-    public HomePageTests(EnvironmentFixture fixture) : base(fixture)
+    public PageObjectModelTests(EnvironmentFixture fixture) : base(fixture)
     {
     }
 
-    override public void ConfigureServices(IServiceCollection services)
+    public override void ConfigureServices(IServiceCollection services)
     {
         base.ConfigureServices(services);
         services.AddSingleton<HomePageFactory>();
@@ -36,5 +36,5 @@ public class HomePageTests : EnvironmentTests
             throw new InvalidOperationException("HomePage is not initialized. Ensure that the fixture is properly configured.");
         }
         return _homePage;
-    }
+    }  
 }

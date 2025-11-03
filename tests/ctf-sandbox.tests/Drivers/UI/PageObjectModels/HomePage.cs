@@ -79,4 +79,9 @@ public class HomePage
         return new ManageTeamsPage(_page);
     }
 
+    internal async Task<IpInfoPage> GoToIpInfoPage()
+    {
+        await _page.GetByRole(AriaRole.Link, new() { Name = "IP Address Lookup" }).ClickAsync();
+        return new IpInfoPage(_page);
+    }
 }

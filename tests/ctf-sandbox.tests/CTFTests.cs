@@ -8,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ctf_sandbox.tests;
 
-public class CTFTests : HomePageTests
+public class CTFTests : PageObjectModelTests
 {
     private CTFDriverFactory? _CTFDriverFactory;
 
@@ -22,6 +22,7 @@ public class CTFTests : HomePageTests
         services.AddSingleton<CTFDriverFactory>();
         services.AddSingleton<UICTFDriver>();
         services.AddSingleton<APICTFDriver>();
+        services.AddHttpClient();
     }
 
     override public void Configure(IServiceProvider serviceProvider)

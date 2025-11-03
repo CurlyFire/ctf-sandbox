@@ -4,7 +4,7 @@ using ctf_sandbox.tests.Fixtures;
 namespace ctf_sandbox.tests.SmokeTests;
 
 [Collection(RealExternalSystemsTestCollection.Name)]
-public class UITests : HomePageTests
+public class UITests : PageObjectModelTests
 {
     private HomePage _homePage;
 

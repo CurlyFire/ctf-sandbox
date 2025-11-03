@@ -1,3 +1,4 @@
+using ctf_sandbox.Models;
 using ctf_sandbox.tests.Dsl;
 
 namespace ctf_sandbox.tests.Drivers;
@@ -10,4 +11,5 @@ public interface ICTFDriver
     Task CreateTeam(string teamName);
     Task<bool> IsTeamVisible(string teamName);
     Task<bool> IsUserSignedIn(string email);
+    Task<IpInfo> GetIpInfo(string ipAddress);
 }

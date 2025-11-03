@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace ctf_sandbox.Areas.CTF.Models;
+namespace ctf_sandbox.Models;
 
 public class IpInfo
 {
