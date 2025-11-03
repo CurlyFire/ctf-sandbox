@@ -11,13 +11,13 @@ Primary Actors:
 Use Cases:
 - Sign up
 - Create teams
-- Assign competitors to teams
-- Participate in competition
-- Create challenges
-- Create upcoming competition
-- Assign challenges to upcoming competition
-- Assign teams to upcoming competition
 - Analyse ip info
+- Assign competitors to teams
+- Participate in competition (upcoming)
+- Create challenges (upcoming)
+- Create upcoming competition (upcoming)
+- Assign challenges to upcoming competition (upcoming)
+- Assign teams to upcoming competition (upcoming)
 
 Secondary Actors:
 - Mailpit (Email)
