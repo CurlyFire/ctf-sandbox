@@ -15,9 +15,4 @@ public class Emails
     {
         await _driver.ActivateRegistrationSentTo(email);
     }
-
-    public async Task ConfirmInboxIsAvailable()
-    {
-        Assert.True(await _driver.IsInboxAvailable());
-    }
 }

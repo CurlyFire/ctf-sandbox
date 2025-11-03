@@ -1,3 +1,4 @@
+using ctf_sandbox.Models;
 using ctf_sandbox.tests.Drivers.UI.PageObjectModels;
 using ctf_sandbox.tests.Dsl;
 
@@ -41,7 +42,7 @@ public class UICTFDriver : ICTFDriver
         await createNewTeamPage.CreateTeam(teamName);
     }
 
-    public async Task<bool> IsTeamVisible(string teamName)
+    public async Task<bool> IsTeamAvailable(string teamName)
     {
         var manageTeamsPage = await _homePage.GoToManageTeamsPage();
         return await manageTeamsPage.IsTeamVisible(teamName);
@@ -50,5 +51,11 @@ public class UICTFDriver : ICTFDriver
     public async Task<bool> IsUserSignedIn(string email)
     {
         return await _homePage.IsUserLoggedIn(email);
+    }
+
+    public async Task<IpInfo> GetIpInfo(string ipAddress)
+    {
+        var ipInfoPage = await _homePage.GoToIpInfoPage();
+        return await ipInfoPage.GetIpInfo(ipAddress);
     }
 }

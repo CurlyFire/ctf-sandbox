@@ -11,11 +11,6 @@ public class EmailsPage
         _page = page;
     }
 
-    public async Task<bool> IsInboxVisible()
-    {
-        return await _page.GetByRole(AriaRole.Button, new() { Name = "Inbox" }).IsVisibleAsync();
-    }
-
     public async Task<ConfirmEmailPage> OpenLatestEmailSentToAndOpenConfirmationLink(string email)
     {
         await _page.GetByRole(AriaRole.Button, new() { Name = "Inbox" }).ClickAsync();

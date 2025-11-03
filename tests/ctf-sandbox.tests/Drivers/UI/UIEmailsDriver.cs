@@ -11,11 +11,6 @@ public class UIEmailsDriver : IEmailsDriver
         _page = page;
     }
 
-    public async Task<bool> IsInboxAvailable()
-    {
-        return await _page.IsInboxVisible();
-    }
-
     public async Task ActivateRegistrationSentTo(string email)
     {
         var confirmEmailPage = await _page.OpenLatestEmailSentToAndOpenConfirmationLink(email);

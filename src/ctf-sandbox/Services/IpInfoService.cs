@@ -14,12 +14,6 @@ public class IpInfoService : IIpInfoService
     private readonly HttpClient _httpClient;
     private readonly IpInfoOptions _options;
 
-    public class IpInfoOptions
-    {
-        public string Token { get; set; } = string.Empty;
-        public string BaseUrl { get; set; } = string.Empty;
-    }
-
     public IpInfoService(HttpClient httpClient, IOptions<IpInfoOptions> options)
     {
         _httpClient = httpClient;

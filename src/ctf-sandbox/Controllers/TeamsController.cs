@@ -1,214 +1,202 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity.UI.Services;
-using ctf_sandbox.Data;
+using ctf_sandbox.Services;
+using ctf_sandbox.Areas.CTF.Models;
 using ctf_sandbox.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace ctf_sandbox.Controllers;
 
-[Authorize]
-public class TeamsController : Controller
+[ApiController]
+[Route("api/[controller]")]
+[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+public class TeamsController : ControllerBase
 {
-    private readonly ApplicationDbContext _context;
     private readonly UserManager<IdentityUser> _userManager;
-    private readonly IEmailSender _emailSender;
-    private readonly TimeProvider _timeProvider;
+    private readonly ITeamsService _teamsService;
+    private readonly ILogger<TeamsController> _logger;
 
     public TeamsController(
-        ApplicationDbContext context, 
         UserManager<IdentityUser> userManager,
-        IEmailSender emailSender,
-        TimeProvider timeProvider)
+        ITeamsService teamsService,
+        ILogger<TeamsController> logger)
     {
-        _context = context;
         _userManager = userManager;
-        _emailSender = emailSender;
-        _timeProvider = timeProvider;
+        _teamsService = teamsService;
+        _logger = logger;
     }
 
-    // GET: Teams
-    public async Task<IActionResult> Index()
+    /// <summary>
+    /// Gets all teams for the authenticated user (owned or member of).
+    /// </summary>
+    /// <returns>List of teams with owner and member details</returns>
+    /// <response code="200">Returns the list of teams</response>
+    /// <response code="401">If the user is not authenticated</response>
+    [HttpGet]
+    [ProducesResponseType(typeof(IEnumerable<Team>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> GetTeams()
     {
         var currentUser = await _userManager.GetUserAsync(User);
-        var teams = await _context.Teams
-            .Include(t => t.Owner)
-            .Include(t => t.Members)
-                .ThenInclude(m => m.User)
-            .Where(t => t.OwnerId == currentUser!.Id || t.Members.Any(m => m.UserId == currentUser.Id && !m.IsInvitePending))
-            .ToListAsync();
-        return View(teams);
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+
+        var teams = await _teamsService.GetTeamsForUserAsync(currentUser.Id);
+        return Ok(teams);
     }
 
-    // GET: Teams/Create
-    public IActionResult Create()
-    {
-        return View(new Team());
-    }
-
-    // POST: Teams/Create
+    /// <summary>
+    /// Creates a new team with the authenticated user as the owner.
+    /// </summary>
+    /// <param name="request">Team creation request containing name and optional description</param>
+    /// <returns>The newly created team</returns>
+    /// <response code="201">Returns the newly created team</response>
+    /// <response code="400">If the request is invalid</response>
+    /// <response code="401">If the user is not authenticated</response>
     [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(Team team)
+    [ProducesResponseType(typeof(Team), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> CreateTeam([FromBody] CreateTeamRequest request)
     {
-        // Remove properties that shouldn't be bound
-        ModelState.Remove("OwnerId");
-        ModelState.Remove("CreatedAt");
-        ModelState.Remove("Owner");
-        ModelState.Remove("Members");
-
-        if (ModelState.IsValid)
+        if (!ModelState.IsValid)
         {
-            var currentUser = await _userManager.GetUserAsync(User);
-            team.OwnerId = currentUser!.Id;
-            team.CreatedAt = _timeProvider.GetUtcNow().UtcDateTime;
-            
-            _context.Add(team);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return BadRequest(ModelState);
         }
 
-        // If we got this far, something failed, redisplay form with validation messages
-        return View(team);
+        var currentUser = await _userManager.GetUserAsync(User);
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+
+        var team = await _teamsService.CreateTeamAsync(currentUser.Id, request.Name, request.Description);
+        return CreatedAtAction(nameof(GetTeams), new { id = team.Id }, team);
     }
 
-    // GET: Teams/Invite/5
-    public async Task<IActionResult> Invite(int? id)
+    /// <summary>
+    /// Invites a user to join a team by email. Only the team owner can invite members.
+    /// </summary>
+    /// <param name="teamId">The ID of the team</param>
+    /// <param name="request">Invitation request containing the user's email</param>
+    /// <returns>Success status</returns>
+    /// <response code="204">If the invitation was sent successfully</response>
+    /// <response code="400">If the request is invalid or the invitation failed</response>
+    /// <response code="401">If the user is not authenticated</response>
+    /// <response code="404">If the team was not found</response>
+    [HttpPost("{teamId}/invite")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> InviteTeamMember(int teamId, [FromBody] InviteTeamMemberRequest request)
     {
-        if (id == null)
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var currentUser = await _userManager.GetUserAsync(User);
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+
+        var (success, errorMessage) = await _teamsService.InviteUserToTeamAsync(teamId, currentUser.Id, request.Email);
+
+        if (!success)
+        {
+            if (errorMessage == "Team not found")
+            {
+                return NotFound(new { message = errorMessage });
+            }
+            return BadRequest(new { message = errorMessage });
+        }
+
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Gets all pending team invitations for the authenticated user.
+    /// </summary>
+    /// <returns>List of pending invitations</returns>
+    /// <response code="200">Returns the list of pending invitations</response>
+    /// <response code="401">If the user is not authenticated</response>
+    [HttpGet("invitations")]
+    [ProducesResponseType(typeof(IEnumerable<TeamMember>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> GetPendingInvitations()
+    {
+        var currentUser = await _userManager.GetUserAsync(User);
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+
+        var invitations = await _teamsService.GetPendingInvitationsAsync(currentUser.Id);
+        return Ok(invitations);
+    }
+
+    /// <summary>
+    /// Accepts a team invitation.
+    /// </summary>
+    /// <param name="invitationId">The ID of the invitation</param>
+    /// <returns>Success status</returns>
+    /// <response code="204">If the invitation was accepted successfully</response>
+    /// <response code="401">If the user is not authenticated</response>
+    /// <response code="404">If the invitation was not found</response>
+    [HttpPost("invitations/{invitationId}/accept")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> AcceptInvitation(int invitationId)
+    {
+        var currentUser = await _userManager.GetUserAsync(User);
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+
+        var result = await _teamsService.AcceptInvitationAsync(invitationId, currentUser.Id);
+
+        if (!result)
         {
             return NotFound();
         }
 
-        var team = await _context.Teams
-            .Include(t => t.Owner)
-            .FirstOrDefaultAsync(t => t.Id == id);
+        return NoContent();
+    }
 
-        if (team == null)
+    /// <summary>
+    /// Declines a team invitation.
+    /// </summary>
+    /// <param name="invitationId">The ID of the invitation</param>
+    /// <returns>Success status</returns>
+    /// <response code="204">If the invitation was declined successfully</response>
+    /// <response code="401">If the user is not authenticated</response>
+    /// <response code="404">If the invitation was not found</response>
+    [HttpPost("invitations/{invitationId}/decline")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DeclineInvitation(int invitationId)
+    {
+        var currentUser = await _userManager.GetUserAsync(User);
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+
+        var result = await _teamsService.DeclineInvitationAsync(invitationId, currentUser.Id);
+
+        if (!result)
         {
             return NotFound();
         }
 
-        var currentUser = await _userManager.GetUserAsync(User);
-        if (team.OwnerId != currentUser!.Id)
-        {
-            return Forbid();
-        }
-
-        return View(team);
-    }
-
-    // POST: Teams/Invite/5
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Invite(int id, string email)
-    {
-        var team = await _context.Teams
-            .Include(t => t.Owner)
-            .FirstOrDefaultAsync(t => t.Id == id);
-            
-        if (team == null)
-        {
-            return NotFound();
-        }
-
-        var currentUser = await _userManager.GetUserAsync(User);
-        if (team.OwnerId != currentUser!.Id)
-        {
-            return Forbid();
-        }
-
-        var invitedUser = await _userManager.FindByEmailAsync(email);
-        if (invitedUser == null)
-        {
-            ModelState.AddModelError("", "User not found");
-            return View(team);
-        }
-
-        var existingMember = await _context.TeamMembers
-            .FirstOrDefaultAsync(tm => tm.TeamId == id && tm.UserId == invitedUser.Id);
-
-        if (existingMember != null)
-        {
-            ModelState.AddModelError("", "User is already a member or has a pending invitation");
-            return View(team);
-        }
-
-        var teamMember = new TeamMember
-        {
-            TeamId = id,
-            UserId = invitedUser.Id,
-            JoinedAt = _timeProvider.GetUtcNow().UtcDateTime,
-            IsInvitePending = true
-        };
-
-        _context.TeamMembers.Add(teamMember);
-        await _context.SaveChangesAsync();
-
-        // Send invitation email
-        var subject = $"Invitation to join team {team.Name}";
-        var message = $@"
-            <h2>Team Invitation</h2>
-            <p>You have been invited to join the team {team.Name} by {currentUser.Email}.</p>
-            <p>To accept or decline this invitation, please visit your <a href='{Url.Action("Invitations", "Teams", null, Request.Scheme)}'>team invitations page</a>.</p>";
-        
-        await _emailSender.SendEmailAsync(email, subject, message);
-
-        return RedirectToAction(nameof(Index));
-    }
-
-    // GET: Teams/Invitations
-    public async Task<IActionResult> Invitations()
-    {
-        var currentUser = await _userManager.GetUserAsync(User);
-        var pendingInvitations = await _context.TeamMembers
-            .Include(tm => tm.Team)
-            .Include(tm => tm.Team.Owner)
-            .Where(tm => tm.UserId == currentUser!.Id && tm.IsInvitePending)
-            .ToListAsync();
-
-        return View(pendingInvitations);
-    }
-
-    // POST: Teams/AcceptInvite/5
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> AcceptInvite(int id)
-    {
-        var currentUser = await _userManager.GetUserAsync(User);
-        var invitation = await _context.TeamMembers
-            .FirstOrDefaultAsync(tm => tm.Id == id && tm.UserId == currentUser!.Id && tm.IsInvitePending);
-
-        if (invitation == null)
-        {
-            return NotFound();
-        }
-
-        invitation.IsInvitePending = false;
-        invitation.JoinedAt = _timeProvider.GetUtcNow().UtcDateTime;
-        await _context.SaveChangesAsync();
-
-        return RedirectToAction(nameof(Index));
-    }
-
-    // POST: Teams/DeclineInvite/5
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeclineInvite(int id)
-    {
-        var currentUser = await _userManager.GetUserAsync(User);
-        var invitation = await _context.TeamMembers
-            .FirstOrDefaultAsync(tm => tm.Id == id && tm.UserId == currentUser!.Id && tm.IsInvitePending);
-
-        if (invitation == null)
-        {
-            return NotFound();
-        }
-
-        _context.TeamMembers.Remove(invitation);
-        await _context.SaveChangesAsync();
-
-        return RedirectToAction(nameof(Invitations));
+        return NoContent();
     }
 }

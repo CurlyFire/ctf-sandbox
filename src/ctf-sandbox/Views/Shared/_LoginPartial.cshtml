@@ -14,13 +14,6 @@
                 <span class="text-success">[</span>Admin Panel<span class="text-success">]</span>
             </a>
         </li>
-        <li class="nav-item">
-            <a class="nav-link font-monospace" asp-area="Admin" asp-controller="Competitions" asp-action="Index" 
-               aria-label="Manage Competitions"
-               aria-current="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "Competitions" && ViewContext.RouteData.Values["Area"]?.ToString() == "Admin" ? "page" : null)">
-                <span class="text-success">[</span>Competitions<span class="text-success">]</span>
-            </a>
-        </li>
     }
     <li class="nav-item">
         <a class="nav-link font-monospace" asp-area="Identity" asp-page="/Account/Manage/Index" 
