@@ -24,7 +24,7 @@ public class HttpTests : EnvironmentTests
     public override void Configure(IServiceProvider serviceProvider)
     {
         base.Configure(serviceProvider);
-        _httpClient = serviceProvider.GetRequiredService<HttpClient>();
+        _httpClient = serviceProvider.GetRequiredService<IHttpClientFactory>().CreateClient(CTFHttpClientName);
     }
 
     protected void ConfigureCTFHttpClient(HttpClient httpClient)
