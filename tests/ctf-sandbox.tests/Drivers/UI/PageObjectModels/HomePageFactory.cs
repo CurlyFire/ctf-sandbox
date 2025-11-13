@@ -22,10 +22,7 @@ public class HomePageFactory : IDisposable
         if (_browser == null)
         {
             var browserType = _playwright[PlaywrightSettingsProvider.BrowserName];
-            _browser = browserType.LaunchAsync(new BrowserTypeLaunchOptions()
-            {
-                Headless = false
-            }).Result;
+            _browser = browserType.LaunchAsync().Result;
         }
 
         var context = _browser.NewContextAsync().Result;
