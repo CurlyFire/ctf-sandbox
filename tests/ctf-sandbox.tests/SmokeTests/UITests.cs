@@ -4,42 +4,44 @@ using ctf_sandbox.tests.Fixtures;
 namespace ctf_sandbox.tests.SmokeTests;
 
 [Collection(RealExternalSystemsTestCollection.Name)]
-public class UITests : PageObjectModelTests
+public class UITests
 {
-    private HomePage _homePage;
+    private readonly RealExternalSystemsCTFFixture _fixture;
 
-    public UITests(RealExternalSystemsEnvironmentFixture fixture) : base(fixture)
+    public UITests(RealExternalSystemsCTFFixture fixture)
     {
-        _homePage = GetHomePage();
+        _fixture = fixture;
     }
 
     [Trait("Category", "Smoke_UI")]
     [Fact]
     public async Task ShouldLoadMainPage()
     {
+        var homePage = _fixture.GetNewHomePage();
 
         // Check if the page title is correct
-        var title = await _homePage.GetPageTitle();
+        var title = await homePage.GetPageTitle();
         Assert.Equal("Home Page - CTF Arena", title);
 
         // Verify each main layout component individually
-        Assert.True(await _homePage.IsBannerVisible(), "Header banner should be visible on the home page");
-        Assert.True(await _homePage.IsMainNavigationVisible(), "Main navigation menu should be visible on the home page");
-        Assert.True(await _homePage.IsDashboardLinkVisible(), "Dashboard link should be visible on the home page");
-        Assert.True(await _homePage.IsMainContentAreaVisible(), "Main content area should be visible on the home page");
-        Assert.True(await _homePage.IsFooterVisible(), "Footer should be visible on the home page");
-        Assert.True(await _homePage.IsBrandLogoVisible(), "CTF Arena logo should be visible on the home page");
+        Assert.True(await homePage.IsBannerVisible(), "Header banner should be visible on the home page");
+        Assert.True(await homePage.IsMainNavigationVisible(), "Main navigation menu should be visible on the home page");
+        Assert.True(await homePage.IsDashboardLinkVisible(), "Dashboard link should be visible on the home page");
+        Assert.True(await homePage.IsMainContentAreaVisible(), "Main content area should be visible on the home page");
+        Assert.True(await homePage.IsFooterVisible(), "Footer should be visible on the home page");
+        Assert.True(await homePage.IsBrandLogoVisible(), "CTF Arena logo should be visible on the home page");
     }
 
     [Trait("Category", "Smoke_UI")]
     [Fact]
     public async Task ShouldLoginWithValidCredentials()
     {
+        var homePage = _fixture.GetNewHomePage();
         // Navigate to sign in page and login
-        var signInPage = await _homePage.GoToSignInPage();
-        _homePage = await signInPage.SignIn(EnvironmentFixture.Configuration.WebServerCredentials.Username, EnvironmentFixture.Configuration.WebServerCredentials.Password);
+        var signInPage = await homePage.GoToSignInPage();
+        homePage = await signInPage.SignIn(_fixture.Configuration.WebServerCredentials.Username, _fixture.Configuration.WebServerCredentials.Password);
 
         // Verify that the user's email is displayed in the navigation
-        await _homePage.IsUserLoggedIn(EnvironmentFixture.Configuration.WebServerCredentials.Username);
+        await homePage.IsUserLoggedIn(_fixture.Configuration.WebServerCredentials.Username);
     }
 }

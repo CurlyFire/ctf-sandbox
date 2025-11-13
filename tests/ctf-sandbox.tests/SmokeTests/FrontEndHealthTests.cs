@@ -3,17 +3,20 @@ using ctf_sandbox.tests.Fixtures;
 namespace ctf_sandbox.tests.SmokeTests;
 
 [Collection(RealExternalSystemsTestCollection.Name)]
-public class FrontEndHealthTests : EnvironmentTests
+public class FrontEndHealthTests
 {
-    public FrontEndHealthTests(RealExternalSystemsEnvironmentFixture fixture) : base(fixture)
+    private readonly RealExternalSystemsCTFFixture _fixture;
+
+    public FrontEndHealthTests(RealExternalSystemsCTFFixture fixture)
     {
+        _fixture = fixture;
     }
 
     [Trait("Category", "Smoke_FrontEndHealth")]
     [Fact]
     public async Task FrontEnd_ShouldBeUpAndRunning()
     {
-        var config = EnvironmentFixture.Configuration;
+        var config = _fixture.Configuration;
         using var client = new HttpClient()
         {
             BaseAddress = new Uri(config.WebServerUrl!)

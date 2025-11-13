@@ -5,24 +5,25 @@ using ctf_sandbox.tests.Fixtures;
 namespace ctf_sandbox.tests.SmokeTests;
 
 [Collection(RealExternalSystemsTestCollection.Name)]
-public class APITests : HttpTests
+public class APITests
 {
-    private HttpClient _httpClient;
+    private readonly RealExternalSystemsCTFFixture _fixture;
 
-    public APITests(RealExternalSystemsEnvironmentFixture fixture) : base(fixture)
+    public APITests(RealExternalSystemsCTFFixture fixture)
     {
-        _httpClient = GetCTFHttpClient();
+        _fixture = fixture;
     }
 
     [Trait("Category", "Smoke_API")]
     [Fact]
     public async Task ShouldLoginWithValidCredentials()
     {
-        var response = await _httpClient.PostAsJsonAsync("auth",
+        var client = _fixture.GetCTFHttpClient();
+        var response = await client.PostAsJsonAsync("auth",
             new LoginRequest()
             {
-                Username = EnvironmentFixture.Configuration.WebServerCredentials.Username,
-                Password = EnvironmentFixture.Configuration.WebServerCredentials.Password
+                Username = _fixture.Configuration.WebServerCredentials.Username,
+                Password = _fixture.Configuration.WebServerCredentials.Password
             });
 
         response.EnsureSuccessStatusCode();

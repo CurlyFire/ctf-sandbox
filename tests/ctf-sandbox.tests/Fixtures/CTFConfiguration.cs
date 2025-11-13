@@ -1,7 +1,7 @@
 
 namespace ctf_sandbox.tests.Fixtures;
 
-public class EnvironmentConfiguration
+public class CTFConfiguration
 {
     public string WebServerUrl { get; private set; }
 
@@ -15,7 +15,7 @@ public class EnvironmentConfiguration
 
     public Credentials MailpitCredentials { get; private set; }
 
-    public EnvironmentConfiguration(
+    public CTFConfiguration(
         string webServerUrl,
         string mailpitUrl,
         string ipInfoUrl,

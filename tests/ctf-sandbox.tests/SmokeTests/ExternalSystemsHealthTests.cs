@@ -6,10 +6,13 @@ using ctf_sandbox.tests.Fixtures;
 namespace ctf_sandbox.tests.SmokeTests;
 
 [Collection(RealExternalSystemsTestCollection.Name)]
-public class ExternalSystemsHealthTests : EnvironmentTests
+public class ExternalSystemsHealthTests
 {
-    public ExternalSystemsHealthTests(RealExternalSystemsEnvironmentFixture fixture) : base(fixture)
+    private readonly RealExternalSystemsCTFFixture _fixture;
+
+    public ExternalSystemsHealthTests(RealExternalSystemsCTFFixture fixture)
     {
+        _fixture = fixture;
     }
 
     [Trait("Category", "Smoke_ExternalSystemsHealth")]
@@ -20,16 +23,16 @@ public class ExternalSystemsHealthTests : EnvironmentTests
         HttpResponseMessage response;
         using (var client = new HttpClient())
         {
-            if (!EnvironmentFixture.Configuration.MailpitCredentials.IsEmpty())
+            if (!_fixture.Configuration.MailpitCredentials.IsEmpty())
             {
-                var byteArray = Encoding.ASCII.GetBytes($"{EnvironmentFixture.Configuration.MailpitCredentials.Username}:{EnvironmentFixture.Configuration.MailpitCredentials.Password}");
+                var byteArray = Encoding.ASCII.GetBytes($"{_fixture.Configuration.MailpitCredentials.Username}:{_fixture.Configuration.MailpitCredentials.Password}");
                 client.DefaultRequestHeaders.Authorization =
                     new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
             }
-            response = await client.GetAsync(EnvironmentFixture.Configuration.MailpitUrl);
+            response = await client.GetAsync(_fixture.Configuration.MailpitUrl);
         }
         // Check if the response is successful
-        Assert.True(response.IsSuccessStatusCode, $"Failed to connect to Mailpit at {EnvironmentFixture.Configuration.MailpitUrl}, status code: {response.StatusCode}");
+        Assert.True(response.IsSuccessStatusCode, $"Failed to connect to Mailpit at {_fixture.Configuration.MailpitUrl}, status code: {response.StatusCode}");
     }
 
     [Fact]
@@ -37,10 +40,10 @@ public class ExternalSystemsHealthTests : EnvironmentTests
     public async Task IpInfo_ShouldBeUpAndRunning()
     {
         // Ensure we have a URL configured
-        Assert.NotNull(EnvironmentFixture.Configuration.IpInfoUrl);
+        Assert.NotNull(_fixture.Configuration.IpInfoUrl);
 
         // Parse the URL to get host and port
-        var uri = new Uri(EnvironmentFixture.Configuration.IpInfoUrl);
+        var uri = new Uri(_fixture.Configuration.IpInfoUrl);
         var port = uri.Port == -1 ? (uri.Scheme == "https" ? 443 : 80) : uri.Port;
 
         using var client = new TcpClient();

@@ -1,4 +1,10 @@
+using ctf_sandbox.tests.Drivers;
+using ctf_sandbox.tests.Drivers.API;
+using ctf_sandbox.tests.Drivers.UI;
+using ctf_sandbox.tests.Drivers.UI.PageObjectModels;
+using ctf_sandbox.tests.Dsl;
 using ctf_sandbox.tests.Extensions;
+using ctf_sandbox.tests.Utils;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.EnvironmentVariables;
@@ -7,13 +13,16 @@ using Microsoft.Extensions.Hosting;
 
 namespace ctf_sandbox.tests.Fixtures;
 
-public abstract class EnvironmentFixture : IDisposable
+public abstract class CTFFixture
 {
     private IHost? _host;
+    public CTFConfiguration Configuration { get; private set; }
+    private IServiceScope _scope;
     private bool disposedValue;
-    public EnvironmentConfiguration Configuration { get; }
+    private const string CTFHttpClientName = "ctf";
+    private const string EmailsHttpClientName = "emails";
 
-    public EnvironmentFixture()
+    public CTFFixture()
     {
         var configBuilder = new ConfigurationBuilder();
         configBuilder.Sources.Clear();
@@ -60,7 +69,7 @@ public abstract class EnvironmentFixture : IDisposable
         {
             throw new InvalidOperationException("Web server URL is not configured.");
         }
-        Configuration = new EnvironmentConfiguration(
+        Configuration = new CTFConfiguration(
             webServerUrl,
             configuration.GetRequiredValue<string>("EmailSettings:MailpitUrl"),
             configuration.GetRequiredValue<string>("IPInfo:BaseUrl"),
@@ -72,11 +81,13 @@ public abstract class EnvironmentFixture : IDisposable
             new Credentials(
                 configuration.GetValue<string>("EmailSettings:Username") ?? string.Empty,
                 configuration.GetValue<string>("EmailSettings:Password") ?? string.Empty
-            ));            
-    }
-
-    protected virtual void ConfigureAppConfiguration(IConfigurationBuilder configBuilder)
-    {
+            ));     
+        
+        var services = new ServiceCollection();
+        ConfigureServicesInternal(services);
+        var serviceProvider = services.BuildServiceProvider();
+        _scope = serviceProvider.CreateScope();
+        ConfigureInternal(_scope.ServiceProvider);        
     }
 
     protected virtual void Dispose(bool disposing)
@@ -85,13 +96,14 @@ public abstract class EnvironmentFixture : IDisposable
         {
             if (disposing)
             {
+                _scope.Dispose();
+                
                 if (_host != null)
                 {
-                    _host.StopAsync().GetAwaiter().GetResult();
+                    _host.StopAsync().Wait();
                     _host.Dispose();
-                }
+                }                
             }
-
             disposedValue = true;
         }
     }
@@ -100,5 +112,73 @@ public abstract class EnvironmentFixture : IDisposable
     {
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
+    }
+    
+    private void ConfigureServicesInternal(IServiceCollection services)
+    {
+        services.AddSingleton(Configuration);
+        services.AddHttpClient(CTFHttpClientName, ConfigureCTFHttpClient);
+        services.AddHttpClient(EmailsHttpClientName, ConfigureEmailsHttpClient);
+        services.AddSingleton<HomePageFactory>();
+        services.AddTransient(sp =>
+        {
+            var factory = sp.GetRequiredService<HomePageFactory>();
+            return factory.CreateHomePage();
+        });
+        services.AddTransient<UICTFDriver>();
+        services.AddHttpClient<APICTFDriver>(ConfigureCTFHttpClient);
+        services.AddHttpClient<APIEmailsDriver>(ConfigureEmailsHttpClient);        
+        ConfigureServices(services);
+    }
+
+    private void ConfigureInternal(IServiceProvider serviceProvider)
+    {
+        Configure(serviceProvider);
+    }
+
+    public virtual void ConfigureServices(IServiceCollection services)
+    {        
+    }
+
+    public virtual void Configure(IServiceProvider serviceProvider)
+    {
+    }
+    private void ConfigureCTFHttpClient(HttpClient httpClient)
+    {
+        httpClient.BaseAddress = new Uri(Configuration.WebServerUrl + "/api/");
+    }
+
+    private void ConfigureEmailsHttpClient(HttpClient httpClient)
+    {
+        httpClient.BaseAddress = new Uri(Configuration.MailpitUrl + "/api/v1/");
+    }
+
+    protected virtual void ConfigureAppConfiguration(IConfigurationBuilder configBuilder)
+    {
+    }
+
+    public HttpClient GetCTFHttpClient()
+    {
+        return _scope.ServiceProvider.GetRequiredService<IHttpClientFactory>().CreateClient(CTFHttpClientName);
+    }
+
+    public HttpClient GetEmailsHttpClient()
+    {
+        return _scope.ServiceProvider.GetRequiredService<IHttpClientFactory>().CreateClient(EmailsHttpClientName);
+    }
+
+    public HomePage GetNewHomePage()
+    {
+        return _scope.ServiceProvider.GetRequiredService<HomePage>();
+    }
+    public CTF InteractWithCTFThrough(Channel channel)
+    {
+        ICTFDriver driver = channel switch
+        {
+            Channel.UI => _scope.ServiceProvider.GetRequiredService<UICTFDriver>(),
+            Channel.API => _scope.ServiceProvider.GetRequiredService<APICTFDriver>(),
+            _ => throw new ArgumentOutOfRangeException(nameof(channel), channel, null)
+        };
+        return new CTF(driver, Configuration);
     }
 }
