@@ -7,11 +7,11 @@ namespace ctf_sandbox.tests.Drivers.UI.PageObjectModels;
 public class HomePageFactory : IDisposable
 {
     private IPlaywright _playwright;
-    private EnvironmentConfiguration _environmentConfiguration;
-    private HomePage? _homePage;
+    private IBrowser? _browser;
+    private CTFConfiguration _environmentConfiguration;
     private bool disposedValue;
 
-    public HomePageFactory(EnvironmentConfiguration environmentConfiguration)
+    public HomePageFactory(CTFConfiguration environmentConfiguration)
     {
         _environmentConfiguration = environmentConfiguration;
         _playwright = Playwright.CreateAsync().Result;
@@ -19,19 +19,30 @@ public class HomePageFactory : IDisposable
 
     public HomePage CreateHomePage()
     {
-        if (_homePage == null)
+        if (_browser == null)
         {
             var browserType = _playwright[PlaywrightSettingsProvider.BrowserName];
-            var browser = browserType.LaunchAsync().Result;
+            _browser = browserType.LaunchAsync(new BrowserTypeLaunchOptions()
+            {
+                Headless = false
+            }).Result;
+        }
+
+        var context = _browser.NewContextAsync().Result;
+        if (context != null && context.Browser != null)
+        {
             var options = new BrowserNewPageOptions
             {
                 BaseURL = _environmentConfiguration.WebServerUrl
             };
-            var page = browser.NewPageAsync(options).Result;
+            var page = context.Browser.NewPageAsync(options).Result;
             page.GotoAsync(string.Empty).Wait();
-            _homePage = new HomePage(page);
+            return new HomePage(page);
         }
-        return _homePage;
+        else
+        {
+            throw new InvalidOperationException("Failed to create browser context or browser.");
+        }
     }
 
     protected virtual void Dispose(bool disposing)

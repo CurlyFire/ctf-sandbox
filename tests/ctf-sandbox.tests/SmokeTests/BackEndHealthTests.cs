@@ -7,9 +7,9 @@ namespace ctf_sandbox.tests.SmokeTests;
 [Collection(RealExternalSystemsTestCollection.Name)]
 public class BackEndHealthTests
 {
-    private readonly EnvironmentFixture _environmentFixture;
+    private readonly CTFFixture _environmentFixture;
 
-    public BackEndHealthTests(RealExternalSystemsEnvironmentFixture environmentFixture)
+    public BackEndHealthTests(RealExternalSystemsCTFFixture environmentFixture)
     {
         _environmentFixture = environmentFixture;
     }

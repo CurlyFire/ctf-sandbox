@@ -7,10 +7,10 @@ namespace ctf_sandbox.tests.Dsl;
 public class CTF
 {
     private readonly ICTFDriver _driver;
-    private readonly EnvironmentConfiguration _configuration;
+    private readonly CTFConfiguration _configuration;
     private Action<SignInParameters> _noConfiguration;
 
-    public CTF(ICTFDriver driver, EnvironmentConfiguration configuration)
+    public CTF(ICTFDriver driver, CTFConfiguration configuration)
     {
         _driver = driver;
         _configuration = configuration;

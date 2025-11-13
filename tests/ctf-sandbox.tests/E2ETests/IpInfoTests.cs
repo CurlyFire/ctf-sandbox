@@ -4,10 +4,13 @@ using ctf_sandbox.tests.Utils;
 namespace ctf_sandbox.tests.E2ETests;
 
 [Collection(RealExternalSystemsTestCollection.Name)]
-public class IpInfoTests : CTFTests
+public class IpInfoTests
 {
-    public IpInfoTests(RealExternalSystemsEnvironmentFixture fixture) : base(fixture)
+    private readonly RealExternalSystemsCTFFixture _fixture;
+
+    public IpInfoTests(RealExternalSystemsCTFFixture fixture)
     {
+        _fixture = fixture;
     }
 
     [Trait("Category", "E2E")]
@@ -15,7 +18,7 @@ public class IpInfoTests : CTFTests
     [Channel(Channel.UI, Channel.API)]
     public async Task ShouldBeAbleToGetIpInfo(Channel channel)
     {
-        var ctf = InteractWithCTFThrough(channel);
+        var ctf = _fixture.InteractWithCTFThrough(channel);
         await ctf.SignIn();
 
         var ipInfo = await ctf.GetIpInfo("8.8.8.8");

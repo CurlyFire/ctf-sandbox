@@ -4,10 +4,13 @@ using ctf_sandbox.tests.Utils;
 namespace ctf_sandbox.tests.E2ETests;
 
 [Collection(RealExternalSystemsTestCollection.Name)]
-public class RegisterTests : CTFTests
+public class RegisterTests
 {
-    public RegisterTests(RealExternalSystemsEnvironmentFixture fixture) : base(fixture)
+    private readonly RealExternalSystemsCTFFixture _fixture;
+
+    public RegisterTests(RealExternalSystemsCTFFixture fixture)
     {
+        _fixture = fixture;
     }
 
     [Trait("Category", "E2E")]
@@ -15,7 +18,7 @@ public class RegisterTests : CTFTests
     [Channel(Channel.UI, Channel.API)]
     public async Task ShouldBeAbleToRegister(Channel channel)
     {
-        var ctf = InteractWithCTFThrough(channel);
+        var ctf = _fixture.InteractWithCTFThrough(channel);
         var randomEmail = $"registertest_{Guid.NewGuid()}@test.com";
         var password = "RegisterTest123!";
 

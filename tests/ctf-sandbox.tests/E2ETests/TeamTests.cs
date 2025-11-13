@@ -4,10 +4,13 @@ using ctf_sandbox.tests.Utils;
 namespace ctf_sandbox.tests.E2ETests;
 
 [Collection(RealExternalSystemsTestCollection.Name)]
-public class TeamTests : CTFTests
+public class TeamTests
 {
-    public TeamTests(RealExternalSystemsEnvironmentFixture fixture) : base(fixture)
+    private readonly RealExternalSystemsCTFFixture _fixture;
+
+    public TeamTests(RealExternalSystemsCTFFixture fixture)
     {
+        _fixture = fixture;
     }
 
     [Trait("Category", "E2E")]
@@ -15,7 +18,7 @@ public class TeamTests : CTFTests
     [Channel(Channel.UI, Channel.API)]
     public async Task ShouldBeAbleToCreateTeam(Channel channel)
     {
-        var ctf = InteractWithCTFThrough(channel);
+        var ctf = _fixture.InteractWithCTFThrough(channel);
         await ctf.SignIn();
         var randomTeamName = $"team_{Guid.NewGuid()}";
 

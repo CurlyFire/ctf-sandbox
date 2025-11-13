@@ -11,7 +11,7 @@ public record SignInParameters
     {
     }
     
-    public static SignInParameters CreateWithDefaults(EnvironmentConfiguration config)
+    public static SignInParameters CreateWithDefaults(CTFConfiguration config)
     {
         return new SignInParameters
         {
