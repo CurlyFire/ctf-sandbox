@@ -22,8 +22,9 @@ public class TeamTests
         await ctf.SignIn();
         var randomTeamName = $"team_{Guid.NewGuid()}";
 
-        await ctf.CreateTeam(randomTeamName);
+        var error = await ctf.CreateTeam(randomTeamName);
 
+        Assert.Null(error);
         await ctf.ConfirmTeamIsAvailable(randomTeamName);
     }
 
@@ -39,7 +40,8 @@ public class TeamTests
         var updatedDescription = "This is an updated team description";
 
         // Arrange: Create a team
-        await ctf.CreateTeam(originalTeamName);
+        var createError = await ctf.CreateTeam(originalTeamName);
+        Assert.Null(createError);
         await ctf.ConfirmTeamIsAvailable(originalTeamName);
 
         // Act: Update the team
@@ -48,5 +50,37 @@ public class TeamTests
         // Assert: Verify the updated team is available and old name is gone
         await ctf.ConfirmTeamIsAvailable(updatedTeamName);
         await ctf.ConfirmTeamIsNotAvailable(originalTeamName);
+    }
+
+    [Trait("Category", "E2E")]
+    [Theory]
+    [Channel(Channel.UI, Channel.API)]
+    public async Task ShouldFailToCreateTeamWithNameTooLong(Channel channel)
+    {
+        var ctf = _fixture.InteractWithCTFThrough(channel);
+        await ctf.SignIn();
+        // Create a team name with 101 characters (exceeds max of 100)
+        var tooLongTeamName = new string('A', 101);
+
+        // Act: Attempt to create team
+        var error = await ctf.CreateTeam(tooLongTeamName);
+
+        // Assert: Creation should fail with validation error about length
+        Assert.Contains("The Name must be between 2 and 100 characters long", error, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Trait("Category", "E2E")]
+    [Theory]
+    [Channel(Channel.UI, Channel.API)]
+    public async Task ShouldFailToCreateTeamWithMissingName(Channel channel)
+    {
+        var ctf = _fixture.InteractWithCTFThrough(channel);
+        await ctf.SignIn();
+
+        // Act: Attempt to create team with null/empty name
+        var error = await ctf.CreateTeam(null);
+
+        // Assert: Creation should fail with validation error about required field
+        Assert.Contains("Name field is required", error, StringComparison.OrdinalIgnoreCase);
     }
 }

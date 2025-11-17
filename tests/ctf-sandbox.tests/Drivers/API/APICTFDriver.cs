@@ -36,17 +36,24 @@ public class APICTFDriver : ICTFDriver
         return response.IsSuccessStatusCode;
     }
 
-    public async Task CreateTeam(string teamName)
+    public async Task<string?> CreateTeam(string? teamName)
     {
         EnsureAuthenticatedAndSetAuthorizationHeader();
 
         var response = await _httpClient.PostAsJsonAsync("teams",
             new CreateTeamRequest()
             {
-                Name = teamName
+                Name = teamName ?? string.Empty
             });
 
-        response.EnsureSuccessStatusCode();
+        if (response.IsSuccessStatusCode)
+        {
+            return null; // Success, no error
+        }
+
+        // Return error message from response
+        var errorContent = await response.Content.ReadAsStringAsync();
+        return errorContent;
     }
 
     public async Task UpdateTeam(string oldTeamName, string newTeamName, string? newDescription = null)

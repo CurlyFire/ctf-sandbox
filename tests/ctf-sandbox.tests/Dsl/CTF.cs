@@ -45,9 +45,9 @@ public class CTF
         return this;
     }
 
-    public async Task CreateTeam(string teamName)
+    public async Task<string?> CreateTeam(string? teamName)
     {
-        await _driver.CreateTeam(teamName);
+        return await _driver.CreateTeam(teamName);
     }
 
     public async Task UpdateTeam(string oldTeamName, string newTeamName, string? newDescription = null)
