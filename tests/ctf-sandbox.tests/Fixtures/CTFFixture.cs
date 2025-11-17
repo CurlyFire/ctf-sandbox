@@ -15,79 +15,60 @@ namespace ctf_sandbox.tests.Fixtures;
 
 public abstract class CTFFixture
 {
-    private IHost? _host;
-    public CTFConfiguration Configuration { get; private set; }
-    private IServiceScope _scope;
-    private bool disposedValue;
     private const string CTFHttpClientName = "ctf";
-    private const string EmailsHttpClientName = "emails";
+    private IHost? _host;
+    private IServiceScope _scope = null!;
+    private bool disposedValue;
+
+    public CTFConfiguration? Configuration { get; private set; }
 
     public CTFFixture()
     {
-        var configBuilder = new ConfigurationBuilder();
-        configBuilder.Sources.Clear();
-        configBuilder.AddJsonFile("appsettings.tests.json", optional: false)
-        .AddJsonFile("appsettings.tests.dev.json", optional: true)
-        .AddEnvironmentVariables();
-        var config = configBuilder.Build();
-        var externalWebServerUrl = config.GetValue<string>("ExternalWebServerUrl");
-        IConfiguration configuration;
-        string webServerUrl;
-        if (string.IsNullOrWhiteSpace(externalWebServerUrl))
-        {
-            var hostBuilder = Program.CreateHostBuilder(Array.Empty<string>());
-            hostBuilder.UseEnvironment(Environments.Development);
-            hostBuilder.ConfigureAppConfiguration(ConfigureAppConfiguration);
-            hostBuilder.ConfigureWebHost(webHostBuilder =>
-            {
-                // Configure the web host to use a random port
-                webHostBuilder.UseUrls("http://127.0.0.1:0");
-            });
-            _host = hostBuilder.Build();
-            _host.Start();
-            webServerUrl = _host.GetWebServerUrl();
-            configuration = _host.Services.GetRequiredService<IConfiguration>();
-        }
-        else
-        {
-            configBuilder = new ConfigurationBuilder();
-            Program.ConfigureAppConfiguration(configBuilder);
-            var envVariableSources = configBuilder.Sources.Where(s => s is EnvironmentVariablesConfigurationSource);
-            foreach (var source in envVariableSources)
-            {
-                configBuilder.Sources.Remove(source);
-            }
-            ConfigureAppConfiguration(configBuilder);
-            configBuilder.AddEnvironmentVariables();
+        InitializeWebServer();
+        InitializeServiceProvider();
+    }
 
-            webServerUrl = externalWebServerUrl;
-            configuration = configBuilder.Build();
-        }
+    public void Dispose()
+    {
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
 
+    public HttpClient InteractWithCTFThroughHttpClient()
+    {
+        return _scope.ServiceProvider.GetRequiredService<IHttpClientFactory>().CreateClient(CTFHttpClientName);
+    }
 
-        if (string.IsNullOrWhiteSpace(webServerUrl))
+    public HomePage InteractWithCTFThroughHomePage()
+    {
+        return _scope.ServiceProvider.GetRequiredService<HomePage>();
+    }
+
+    public CTF InteractWithCTFThrough(Channel channel)
+    {
+        ICTFDriver driver = channel switch
         {
-            throw new InvalidOperationException("Web server URL is not configured.");
-        }
-        Configuration = new CTFConfiguration(
-            webServerUrl,
-            configuration.GetRequiredValue<string>("EmailSettings:MailpitUrl"),
-            configuration.GetRequiredValue<string>("IPInfo:BaseUrl"),
-            configuration.GetRequiredValue<string>("ConnectionStrings:DefaultConnection"),
-            new Credentials(
-                configuration.GetRequiredValue<string>("AdminAccount:Email"),
-                configuration.GetRequiredValue<string>("AdminAccount:Password")
-            ),
-            new Credentials(
-                configuration.GetValue<string>("EmailSettings:Username") ?? string.Empty,
-                configuration.GetValue<string>("EmailSettings:Password") ?? string.Empty
-            ));     
-        
-        var services = new ServiceCollection();
-        ConfigureServicesInternal(services);
-        var serviceProvider = services.BuildServiceProvider();
-        _scope = serviceProvider.CreateScope();
-        ConfigureInternal(_scope.ServiceProvider);        
+            Channel.UI => _scope.ServiceProvider.GetRequiredService<UICTFDriver>(),
+            Channel.API => _scope.ServiceProvider.GetRequiredService<APICTFDriver>(),
+            _ => throw new ArgumentOutOfRangeException(nameof(channel), channel, null)
+        };
+        return new CTF(driver, Configuration!);
+    }
+
+    /// <summary>
+    /// Override to configure additional services.
+    /// </summary>
+    /// <param name="services">The service collection to configure.</param>
+    protected virtual void ConfigureServices(IServiceCollection services)
+    {
+    }
+
+    /// <summary>
+    /// Override to configure from the service provider.
+    /// </summary>
+    /// <param name="serviceProvider">The service provider to configure.</param>
+    protected virtual void Configure(IServiceProvider serviceProvider)
+    {
     }
 
     protected virtual void Dispose(bool disposing)
@@ -97,28 +78,132 @@ public abstract class CTFFixture
             if (disposing)
             {
                 _scope.Dispose();
-                
                 if (_host != null)
                 {
                     _host.StopAsync().Wait();
                     _host.Dispose();
-                }                
+                }
             }
             disposedValue = true;
         }
     }
 
-    public void Dispose()
+    /// <summary>
+    /// Override to add additional configuration sources to the CTF web host to override certain settings.
+    /// </summary>
+    /// <example>
+    /// protected override void ConfigureAppConfiguration(IConfigurationBuilder configBuilder)
+    /// {
+    ///    configBuilder.AddJsonFile("appsettings.tests.ctf.json", optional: true
+    /// }
+    /// </example>
+    /// <param name="configBuilder">The configuration builder to configure.</param>
+    protected virtual void ConfigureAppConfiguration(IConfigurationBuilder configBuilder)
     {
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
     }
-    
+
+    private void InitializeWebServer()
+    {
+        var testsConfiguration = GetTestsConfiguration();
+        var externalWebServerUrl = testsConfiguration.GetValue<string>("ExternalWebServerUrl");
+        string webServerUrl;
+        IConfiguration ctfWebHostConfiguration;
+
+        if (string.IsNullOrWhiteSpace(externalWebServerUrl))
+        {
+            _host = StartCTFWebHostInTestProcess();
+            webServerUrl = _host.GetWebServerUrl();
+            ctfWebHostConfiguration = _host.Services.GetRequiredService<IConfiguration>();
+        }
+        else
+        {
+            ctfWebHostConfiguration = GetExternalCTFWebHostConfiguration();
+            webServerUrl = externalWebServerUrl;
+        }
+        Configuration = CreateConfiguration(webServerUrl, ctfWebHostConfiguration);
+    }
+
+    private void InitializeServiceProvider()
+    {
+        var services = new ServiceCollection();
+        ConfigureServicesInternal(services);
+        var serviceProvider = services.BuildServiceProvider();
+        _scope = serviceProvider.CreateScope();
+        Configure(_scope.ServiceProvider);
+    }
+
+    private IConfiguration GetTestsConfiguration()
+    {
+        var configBuilder = new ConfigurationBuilder();
+        configBuilder.Sources.Clear();
+        configBuilder.AddJsonFile("appsettings.tests.json", optional: false)
+        .AddJsonFile("appsettings.tests.dev.json", optional: true)
+        .AddEnvironmentVariables();
+        return configBuilder.Build();
+    }
+
+    private IHost StartCTFWebHostInTestProcess()
+    {
+        var hostBuilder = Program.CreateHostBuilder(Array.Empty<string>());
+        hostBuilder.UseEnvironment(Environments.Development);
+        // Apply any additional configuration
+        hostBuilder.ConfigureAppConfiguration(ConfigureAppConfiguration);
+        hostBuilder.ConfigureWebHost(webHostBuilder =>
+        {
+            // Configure the web host to use a random port
+            webHostBuilder.UseUrls("http://127.0.0.1:0");
+        });
+        var host = hostBuilder.Build();
+        host.Start();
+        return host;
+    }
+
+    private IConfiguration GetExternalCTFWebHostConfiguration()
+    {
+        var configBuilder = new ConfigurationBuilder();
+        // Extract base configuration from Program
+        Program.ConfigureAppConfiguration(configBuilder);
+        // Remove existing environment variable sources to avoid duplication
+        var envVariableSources = configBuilder.Sources.Where(s => s is EnvironmentVariablesConfigurationSource);
+        foreach (var source in envVariableSources)
+        {
+            configBuilder.Sources.Remove(source);
+        }
+        // Apply any additional configuration
+        ConfigureAppConfiguration(configBuilder);
+        // Re-add environment variables at the end to ensure they have the highest priority
+        configBuilder.AddEnvironmentVariables();
+
+        var configuration = configBuilder.Build();
+        return configuration;
+    }
+
+    private CTFConfiguration CreateConfiguration(string webServerUrl, IConfiguration ctfWebHostConfiguration)
+    {
+        if (string.IsNullOrWhiteSpace(webServerUrl))
+        {
+            throw new InvalidOperationException("Web server URL is not configured.");
+        }
+        var configuration = new CTFConfiguration(
+            webServerUrl,
+            ctfWebHostConfiguration.GetRequiredValue<string>("EmailSettings:MailpitUrl"),
+            ctfWebHostConfiguration.GetRequiredValue<string>("IPInfo:BaseUrl"),
+            ctfWebHostConfiguration.GetRequiredValue<string>("ConnectionStrings:DefaultConnection"),
+            new Credentials(
+                ctfWebHostConfiguration.GetRequiredValue<string>("AdminAccount:Email"),
+                ctfWebHostConfiguration.GetRequiredValue<string>("AdminAccount:Password")
+            ),
+            new Credentials(
+                ctfWebHostConfiguration.GetValue<string>("EmailSettings:Username") ?? string.Empty,
+                ctfWebHostConfiguration.GetValue<string>("EmailSettings:Password") ?? string.Empty
+            ));
+        return configuration;
+    }
+
     private void ConfigureServicesInternal(IServiceCollection services)
     {
-        services.AddSingleton(Configuration);
+        services.AddSingleton(Configuration!);
         services.AddHttpClient(CTFHttpClientName, ConfigureCTFHttpClient);
-        services.AddHttpClient(EmailsHttpClientName, ConfigureEmailsHttpClient);
         services.AddSingleton<HomePageFactory>();
         services.AddTransient(sp =>
         {
@@ -127,58 +212,17 @@ public abstract class CTFFixture
         });
         services.AddTransient<UICTFDriver>();
         services.AddHttpClient<APICTFDriver>(ConfigureCTFHttpClient);
-        services.AddHttpClient<APIEmailsDriver>(ConfigureEmailsHttpClient);        
+        services.AddHttpClient<APIEmailsDriver>(ConfigureEmailsHttpClient);
         ConfigureServices(services);
     }
 
-    private void ConfigureInternal(IServiceProvider serviceProvider)
-    {
-        Configure(serviceProvider);
-    }
-
-    public virtual void ConfigureServices(IServiceCollection services)
-    {        
-    }
-
-    public virtual void Configure(IServiceProvider serviceProvider)
-    {
-    }
     private void ConfigureCTFHttpClient(HttpClient httpClient)
     {
-        httpClient.BaseAddress = new Uri(Configuration.WebServerUrl + "/api/");
+        httpClient.BaseAddress = new Uri(Configuration!.WebServerUrl + "/api/");
     }
 
     private void ConfigureEmailsHttpClient(HttpClient httpClient)
     {
-        httpClient.BaseAddress = new Uri(Configuration.MailpitUrl + "/api/v1/");
-    }
-
-    protected virtual void ConfigureAppConfiguration(IConfigurationBuilder configBuilder)
-    {
-    }
-
-    public HttpClient GetCTFHttpClient()
-    {
-        return _scope.ServiceProvider.GetRequiredService<IHttpClientFactory>().CreateClient(CTFHttpClientName);
-    }
-
-    public HttpClient GetEmailsHttpClient()
-    {
-        return _scope.ServiceProvider.GetRequiredService<IHttpClientFactory>().CreateClient(EmailsHttpClientName);
-    }
-
-    public HomePage GetNewHomePage()
-    {
-        return _scope.ServiceProvider.GetRequiredService<HomePage>();
-    }
-    public CTF InteractWithCTFThrough(Channel channel)
-    {
-        ICTFDriver driver = channel switch
-        {
-            Channel.UI => _scope.ServiceProvider.GetRequiredService<UICTFDriver>(),
-            Channel.API => _scope.ServiceProvider.GetRequiredService<APICTFDriver>(),
-            _ => throw new ArgumentOutOfRangeException(nameof(channel), channel, null)
-        };
-        return new CTF(driver, Configuration);
+        httpClient.BaseAddress = new Uri(Configuration!.MailpitUrl + "/api/v1/");
     }
 }

@@ -18,7 +18,7 @@ public class APITests
     [Fact]
     public async Task ShouldLoginWithValidCredentials()
     {
-        var client = _fixture.GetCTFHttpClient();
+        var client = _fixture.InteractWithCTFThroughHttpClient();
         var response = await client.PostAsJsonAsync("auth",
             new LoginRequest()
             {
