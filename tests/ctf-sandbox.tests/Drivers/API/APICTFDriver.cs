@@ -49,6 +49,33 @@ public class APICTFDriver : ICTFDriver
         response.EnsureSuccessStatusCode();
     }
 
+    public async Task UpdateTeam(string oldTeamName, string newTeamName, string? newDescription = null)
+    {
+        EnsureAuthenticatedAndSetAuthorizationHeader();
+
+        // First, get the team ID by finding the team with the old name
+        var getResponse = await _httpClient.GetAsync("teams");
+        getResponse.EnsureSuccessStatusCode();
+
+        var teams = await getResponse.Content.ReadFromJsonAsync<List<Team>>();
+        var team = teams?.FirstOrDefault(t => t.Name == oldTeamName);
+        
+        if (team == null)
+        {
+            throw new InvalidOperationException($"Team '{oldTeamName}' not found");
+        }
+
+        // Update the team
+        var response = await _httpClient.PutAsJsonAsync($"teams/{team.Id}",
+            new UpdateTeamRequest()
+            {
+                Name = newTeamName,
+                Description = newDescription
+            });
+
+        response.EnsureSuccessStatusCode();
+    }
+
     public async Task<IpInfo> GetIpInfo(string ipAddress)
     {
         EnsureAuthenticatedAndSetAuthorizationHeader();

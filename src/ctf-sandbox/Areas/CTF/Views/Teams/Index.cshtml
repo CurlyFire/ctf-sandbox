@@ -27,6 +27,7 @@
                     
                     @if (team.OwnerId == User.FindFirstValue(ClaimTypes.NameIdentifier))
                     {
+                        <a asp-action="Edit" asp-route-id="@team.Id" class="btn btn-outline-secondary">Edit</a>
                         <a asp-action="Invite" asp-route-id="@team.Id" class="btn btn-outline-primary">Invite Members</a>
                     }
 

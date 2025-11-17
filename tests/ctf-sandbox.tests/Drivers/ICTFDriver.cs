@@ -9,6 +9,7 @@ public interface ICTFDriver
     Task<bool> CreateAccount(string email, string password);
     Task SignIn(string email, string password);
     Task CreateTeam(string teamName);
+    Task UpdateTeam(string oldTeamName, string newTeamName, string? newDescription = null);
     Task<bool> IsTeamAvailable(string teamName);
     Task<bool> IsUserSignedIn(string email);
     Task<IpInfo> GetIpInfo(string ipAddress);

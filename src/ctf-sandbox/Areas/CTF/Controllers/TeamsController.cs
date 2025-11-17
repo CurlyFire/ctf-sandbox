@@ -69,6 +69,65 @@ public class TeamsController : Controller
         return View(team);
     }
 
+    // GET: Teams/Edit/5
+    public async Task<IActionResult> Edit(int? id)
+    {
+        if (id == null)
+        {
+            return NotFound();
+        }
+
+        var team = await _context.Teams
+            .Include(t => t.Owner)
+            .FirstOrDefaultAsync(t => t.Id == id);
+
+        if (team == null)
+        {
+            return NotFound();
+        }
+
+        var currentUser = await _userManager.GetUserAsync(User);
+        if (team.OwnerId != currentUser!.Id)
+        {
+            return Forbid();
+        }
+
+        return View(team);
+    }
+
+    // POST: Teams/Edit/5
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(int id, Team team)
+    {
+        if (id != team.Id)
+        {
+            return NotFound();
+        }
+
+        // Remove properties that shouldn't be bound
+        ModelState.Remove("OwnerId");
+        ModelState.Remove("CreatedAt");
+        ModelState.Remove("Owner");
+        ModelState.Remove("Members");
+
+        if (ModelState.IsValid)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            var (success, errorMessage) = await _teamsService.UpdateTeamAsync(id, currentUser!.Id, team.Name, team.Description);
+
+            if (!success)
+            {
+                ModelState.AddModelError("", errorMessage ?? "An error occurred");
+                return View(team);
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        return View(team);
+    }
+
     // GET: Teams/Invite/5
     public async Task<IActionResult> Invite(int? id)
     {

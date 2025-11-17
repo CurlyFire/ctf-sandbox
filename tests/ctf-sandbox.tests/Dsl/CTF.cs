@@ -50,9 +50,19 @@ public class CTF
         await _driver.CreateTeam(teamName);
     }
 
+    public async Task UpdateTeam(string oldTeamName, string newTeamName, string? newDescription = null)
+    {
+        await _driver.UpdateTeam(oldTeamName, newTeamName, newDescription);
+    }
+
     public async Task ConfirmTeamIsAvailable(string randomTeamName)
     {
         Assert.True(await _driver.IsTeamAvailable(randomTeamName));
+    }
+
+    public async Task ConfirmTeamIsNotAvailable(string teamName)
+    {
+        Assert.False(await _driver.IsTeamAvailable(teamName));
     }
 
     public async Task ConfirmUserIsSignedIn(string email)

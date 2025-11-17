@@ -17,6 +17,14 @@ public class ManageTeamsPage
         return new CreateNewTeamPage(_page);
     }
 
+    public async Task<EditTeamPage> GoToEditTeamPage(string teamName)
+    {
+        // Find the card containing the team name and click the Edit button
+        var teamCard = _page.Locator(".card").Filter(new() { HasText = teamName });
+        await teamCard.GetByRole(AriaRole.Link, new() { Name = "Edit" }).ClickAsync();
+        return new EditTeamPage(_page);
+    }
+
     public async Task<bool> IsTeamVisible(string teamName)
     {
         return await _page.GetByText(teamName).IsVisibleAsync();

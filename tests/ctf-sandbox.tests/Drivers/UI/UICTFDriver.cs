@@ -42,6 +42,13 @@ public class UICTFDriver : ICTFDriver
         await createNewTeamPage.CreateTeam(teamName);
     }
 
+    public async Task UpdateTeam(string oldTeamName, string newTeamName, string? newDescription = null)
+    {
+        var manageTeamsPage = await _homePage.GoToManageTeamsPage();
+        var editTeamPage = await manageTeamsPage.GoToEditTeamPage(oldTeamName);
+        await editTeamPage.UpdateTeam(newTeamName, newDescription);
+    }
+
     public async Task<bool> IsTeamAvailable(string teamName)
     {
         var manageTeamsPage = await _homePage.GoToManageTeamsPage();
