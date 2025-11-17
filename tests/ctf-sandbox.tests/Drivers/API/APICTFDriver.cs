@@ -51,9 +51,37 @@ public class APICTFDriver : ICTFDriver
             return null; // Success, no error
         }
 
-        // Return error message from response
-        var errorContent = await response.Content.ReadAsStringAsync();
-        return errorContent;
+        // Parse error response and extract validation errors
+        try
+        {
+            var problemDetails = await response.Content.ReadFromJsonAsync<System.Text.Json.JsonElement>();
+            var errors = new List<string>();
+
+            if (problemDetails.TryGetProperty("errors", out var errorsProperty))
+            {
+                foreach (var errorProperty in errorsProperty.EnumerateObject())
+                {
+                    if (errorProperty.Value.ValueKind == System.Text.Json.JsonValueKind.Array)
+                    {
+                        foreach (var errorMessage in errorProperty.Value.EnumerateArray())
+                        {
+                            errors.Add(errorMessage.GetString() ?? string.Empty);
+                        }
+                    }
+                }
+            }
+            else if (problemDetails.TryGetProperty("title", out var titleProperty))
+            {
+                errors.Add(titleProperty.GetString() ?? "Validation failed");
+            }
+
+            return errors.Any() ? string.Join("; ", errors) : "Validation failed";
+        }
+        catch
+        {
+            // Fallback to raw content if JSON parsing fails
+            return await response.Content.ReadAsStringAsync();
+        }
     }
 
     public async Task UpdateTeam(string oldTeamName, string newTeamName, string? newDescription = null)
