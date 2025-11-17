@@ -78,6 +78,54 @@ public class TeamsController : ControllerBase
     }
 
     /// <summary>
+    /// Updates an existing team. Only the team owner can update the team.
+    /// </summary>
+    /// <param name="teamId">The ID of the team to update</param>
+    /// <param name="request">Team update request containing name and optional description</param>
+    /// <returns>Success status</returns>
+    /// <response code="204">If the team was updated successfully</response>
+    /// <response code="400">If the request is invalid</response>
+    /// <response code="401">If the user is not authenticated</response>
+    /// <response code="403">If the user is not the team owner</response>
+    /// <response code="404">If the team was not found</response>
+    [HttpPut("{teamId}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateTeam(int teamId, [FromBody] UpdateTeamRequest request)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var currentUser = await _userManager.GetUserAsync(User);
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+
+        var (success, errorMessage) = await _teamsService.UpdateTeamAsync(teamId, currentUser.Id, request.Name, request.Description);
+
+        if (!success)
+        {
+            if (errorMessage == "Team not found")
+            {
+                return NotFound(new { message = errorMessage });
+            }
+            if (errorMessage == "Only the team owner can update the team")
+            {
+                return Forbid();
+            }
+            return BadRequest(new { message = errorMessage });
+        }
+
+        return NoContent();
+    }
+
+    /// <summary>
     /// Invites a user to join a team by email. Only the team owner can invite members.
     /// </summary>
     /// <param name="teamId">The ID of the team</param>

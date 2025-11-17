@@ -59,6 +59,28 @@ public class TeamsService : ITeamsService
         return team;
     }
 
+    public async Task<(bool Success, string? ErrorMessage)> UpdateTeamAsync(int teamId, string userId, string name, string? description)
+    {
+        var team = await _context.Teams
+            .FirstOrDefaultAsync(t => t.Id == teamId);
+
+        if (team == null)
+        {
+            return (false, "Team not found");
+        }
+
+        if (team.OwnerId != userId)
+        {
+            return (false, "Only the team owner can update the team");
+        }
+
+        team.Name = name;
+        team.Description = description;
+        await _context.SaveChangesAsync();
+
+        return (true, null);
+    }
+
     public async Task<(bool Success, string? ErrorMessage)> InviteUserToTeamAsync(int teamId, string invitingUserId, string invitedUserEmail)
     {
         var team = await _context.Teams

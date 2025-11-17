@@ -36,14 +36,76 @@ public class APICTFDriver : ICTFDriver
         return response.IsSuccessStatusCode;
     }
 
-    public async Task CreateTeam(string teamName)
+    public async Task<string?> CreateTeam(string? teamName)
     {
         EnsureAuthenticatedAndSetAuthorizationHeader();
 
         var response = await _httpClient.PostAsJsonAsync("teams",
             new CreateTeamRequest()
             {
-                Name = teamName
+                Name = teamName ?? string.Empty
+            });
+
+        if (response.IsSuccessStatusCode)
+        {
+            return null; // Success, no error
+        }
+
+        // Parse error response and extract validation errors
+        try
+        {
+            var problemDetails = await response.Content.ReadFromJsonAsync<System.Text.Json.JsonElement>();
+            var errors = new List<string>();
+
+            if (problemDetails.TryGetProperty("errors", out var errorsProperty))
+            {
+                foreach (var errorProperty in errorsProperty.EnumerateObject())
+                {
+                    if (errorProperty.Value.ValueKind == System.Text.Json.JsonValueKind.Array)
+                    {
+                        foreach (var errorMessage in errorProperty.Value.EnumerateArray())
+                        {
+                            errors.Add(errorMessage.GetString() ?? string.Empty);
+                        }
+                    }
+                }
+            }
+            else if (problemDetails.TryGetProperty("title", out var titleProperty))
+            {
+                errors.Add(titleProperty.GetString() ?? "Validation failed");
+            }
+
+            return errors.Any() ? string.Join("; ", errors) : "Validation failed";
+        }
+        catch
+        {
+            // Fallback to raw content if JSON parsing fails
+            return await response.Content.ReadAsStringAsync();
+        }
+    }
+
+    public async Task UpdateTeam(string oldTeamName, string newTeamName, string? newDescription = null)
+    {
+        EnsureAuthenticatedAndSetAuthorizationHeader();
+
+        // First, get the team ID by finding the team with the old name
+        var getResponse = await _httpClient.GetAsync("teams");
+        getResponse.EnsureSuccessStatusCode();
+
+        var teams = await getResponse.Content.ReadFromJsonAsync<List<Team>>();
+        var team = teams?.FirstOrDefault(t => t.Name == oldTeamName);
+        
+        if (team == null)
+        {
+            throw new InvalidOperationException($"Team '{oldTeamName}' not found");
+        }
+
+        // Update the team
+        var response = await _httpClient.PutAsJsonAsync($"teams/{team.Id}",
+            new UpdateTeamRequest()
+            {
+                Name = newTeamName,
+                Description = newDescription
             });
 
         response.EnsureSuccessStatusCode();
