@@ -73,8 +73,14 @@ public class TeamsController : ControllerBase
             return Unauthorized();
         }
 
-        var team = await _teamsService.CreateTeamAsync(currentUser.Id, request.Name, request.Description);
-        return CreatedAtAction(nameof(GetTeams), new { id = team.Id }, team);
+        var (success, errorMessage, team) = await _teamsService.CreateTeamAsync(currentUser.Id, request.Name, request.Description);
+
+        if (!success)
+        {
+            return BadRequest(new { message = errorMessage });
+        }
+
+        return CreatedAtAction(nameof(GetTeams), new { id = team!.Id }, team);
     }
 
     /// <summary>

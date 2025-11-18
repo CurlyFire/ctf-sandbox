@@ -70,6 +70,10 @@ public class APICTFDriver : ICTFDriver
                     }
                 }
             }
+            else if (problemDetails.TryGetProperty("message", out var messageProperty))
+            {
+                errors.Add(messageProperty.GetString() ?? "An error occurred");
+            }
             else if (problemDetails.TryGetProperty("title", out var titleProperty))
             {
                 errors.Add(titleProperty.GetString() ?? "Validation failed");
