@@ -1,9 +1,7 @@
-using System;
 using System.Net.Http.Json;
-using System.Text.Json;
 using System.Text.RegularExpressions;
 
-namespace ctf_sandbox.tests.Drivers.API;
+namespace ctf_sandbox.tests.Drivers.ExternalSystems;
 
 public class APIEmailsDriver : IEmailsDriver
 {

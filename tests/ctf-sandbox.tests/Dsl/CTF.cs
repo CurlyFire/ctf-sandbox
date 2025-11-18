@@ -1,5 +1,5 @@
 using ctf_sandbox.Models;
-using ctf_sandbox.tests.Drivers;
+using ctf_sandbox.tests.Drivers.CTF;
 using ctf_sandbox.tests.Fixtures;
 
 namespace ctf_sandbox.tests.Dsl;
@@ -10,16 +10,12 @@ public class CTF
     private readonly CTFConfiguration _configuration;
     private Action<SignInParameters> _noConfiguration;
 
+
     public CTF(ICTFDriver driver, CTFConfiguration configuration)
     {
         _driver = driver;
         _configuration = configuration;
         _noConfiguration = _ => { };
-    }
-
-    public async Task<Emails> CheckEmails()
-    {
-        return await _driver.CheckEmails();
     }
 
     public async Task<bool> CreateAccount(string email, string password)

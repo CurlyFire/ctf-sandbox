@@ -1,4 +1,3 @@
-using ctf_sandbox.tests.Drivers.UI.PageObjectModels;
 using ctf_sandbox.tests.Fixtures;
 
 namespace ctf_sandbox.tests.SmokeTests;
