@@ -32,18 +32,18 @@ public class BannedWordsService : IBannedWordsService
             response.EnsureSuccessStatusCode();
             
             var content = await response.Content.ReadAsStringAsync();
-            var bannedWords = JsonSerializer.Deserialize<string[]>(content, new JsonSerializerOptions
+            var bannedWordObjects = JsonSerializer.Deserialize<List<BannedWordDto>>(content, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             });
 
-            if (bannedWords == null || bannedWords.Length == 0)
+            if (bannedWordObjects == null || bannedWordObjects.Count == 0)
             {
                 return false;
             }
 
             var lowerText = text.ToLowerInvariant();
-            return bannedWords.Any(word => lowerText.Contains(word.ToLowerInvariant()));
+            return bannedWordObjects.Any(bw => lowerText.Contains(bw.Word.ToLowerInvariant()));
         }
         catch (HttpRequestException ex)
         {
@@ -55,5 +55,11 @@ public class BannedWordsService : IBannedWordsService
             _logger.LogError(ex, "Failed to parse banned words response");
             return false;
         }
+    }
+
+    private class BannedWordDto
+    {
+        public int Id { get; set; }
+        public string Word { get; set; } = string.Empty;
     }
 }

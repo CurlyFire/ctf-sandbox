@@ -59,4 +59,24 @@ public class ExternalSystemsHealthTests
         Assert.True(client.Connected,
             $"TCP connection to {uri.Host}:{port} was not established successfully");
     }
+
+    [Fact]
+    [Trait("Category", "Smoke_ExternalSystemsHealth")]
+    public async Task BannedWordsApi_ShouldBeUpAndRunning()
+    {
+        // Ensure we have a URL configured
+        Assert.NotNull(_fixture.Configuration.BannedWordsUrl);
+
+        // Test connection to the banned words API
+        HttpResponseMessage response;
+        using (var client = new HttpClient())
+        {
+            client.BaseAddress = new Uri(_fixture.Configuration.BannedWordsUrl);
+            response = await client.GetAsync(string.Empty);
+        }
+
+        // Check if the response is successful
+        Assert.True(response.IsSuccessStatusCode, 
+            $"Failed to connect to Banned Words API at {_fixture.Configuration.BannedWordsUrl}, status code: {response.StatusCode}");
+    }
 }

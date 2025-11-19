@@ -9,6 +9,8 @@ public class CTFConfiguration
 
     public string IpInfoUrl { get; private set; }
 
+    public string BannedWordsUrl { get; private set; }
+
     public string DatabaseConnectionString { get; private set; }
 
     public Credentials WebServerCredentials { get; private set; }
@@ -19,6 +21,7 @@ public class CTFConfiguration
         string webServerUrl,
         string mailpitUrl,
         string ipInfoUrl,
+        string bannedWordsUrl,
         string databaseConnectionString,
         Credentials webServerCredentials,
         Credentials mailpitCredentials)
@@ -26,6 +29,7 @@ public class CTFConfiguration
         WebServerUrl = webServerUrl;
         MailpitUrl = mailpitUrl;
         IpInfoUrl = ipInfoUrl;
+        BannedWordsUrl = bannedWordsUrl;
         DatabaseConnectionString = databaseConnectionString;
         WebServerCredentials = webServerCredentials;
         MailpitCredentials = mailpitCredentials;

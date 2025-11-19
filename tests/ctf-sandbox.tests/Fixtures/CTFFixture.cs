@@ -187,6 +187,7 @@ public abstract class CTFFixture
             webServerUrl,
             ctfWebHostConfiguration.GetRequiredValue<string>("EmailSettings:MailpitUrl"),
             ctfWebHostConfiguration.GetRequiredValue<string>("IPInfo:BaseUrl"),
+            ctfWebHostConfiguration.GetRequiredValue<string>("BannedWords:BaseUrl"),
             ctfWebHostConfiguration.GetRequiredValue<string>("ConnectionStrings:DefaultConnection"),
             new Credentials(
                 ctfWebHostConfiguration.GetRequiredValue<string>("AdminAccount:Email"),

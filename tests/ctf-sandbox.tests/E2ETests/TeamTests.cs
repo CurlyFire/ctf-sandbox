@@ -93,6 +93,7 @@ public class TeamTests
         var ctf = _fixture.InteractWithCTFThrough(channel);
         await ctf.SignIn();
         var bannedWordTeamName = "badword_" + Guid.NewGuid();
+        await _fixture.ExternalSystems.InteractWithBannedWords().CreateBannedWord(bannedWordTeamName);
 
         // Act: Attempt to create team with a banned word in the name
         var error = await ctf.CreateTeam(bannedWordTeamName);

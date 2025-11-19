@@ -23,10 +23,12 @@ public class IpInfoTests
 
         var ipInfo = await ctf.GetIpInfo("8.8.8.8");
 
+        // Limited assertions as we don't control the data returned by the external service
         Assert.Equal("8.8.8.8", ipInfo.Ip);
-        Assert.Equal("dns.google", ipInfo.Hostname);
-        Assert.Equal("Mountain View", ipInfo.City);
-        Assert.Equal("California", ipInfo.Region);
-        Assert.Equal("US", ipInfo.Country);
+        Assert.NotEmpty(ipInfo.Hostname);
+        Assert.NotEmpty(ipInfo.City);
+        Assert.NotEmpty(ipInfo.Region);
+        Assert.NotEmpty(ipInfo.Country);
+        Assert.NotEmpty(ipInfo.Timezone);
     }
 }
