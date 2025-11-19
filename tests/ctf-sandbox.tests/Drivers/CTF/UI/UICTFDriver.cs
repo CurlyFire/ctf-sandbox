@@ -1,8 +1,7 @@
 using ctf_sandbox.Models;
-using ctf_sandbox.tests.Drivers.UI.PageObjectModels;
-using ctf_sandbox.tests.Dsl;
+using ctf_sandbox.tests.Drivers.CTF.UI.PageObjectModels;
 
-namespace ctf_sandbox.tests.Drivers.UI;
+namespace ctf_sandbox.tests.Drivers.CTF.UI;
 
 public class UICTFDriver : ICTFDriver
 {
@@ -10,13 +9,6 @@ public class UICTFDriver : ICTFDriver
     public UICTFDriver(HomePage homePage)
     {
         _homePage = homePage;
-    }
-
-    public async Task<Emails> CheckEmails()
-    {
-        var emailsPage = await _homePage.GoToEmailsPage();
-        var uiEmailsDriver = new UIEmailsDriver(emailsPage);
-        return new Emails(uiEmailsDriver);
     }
 
     public async Task<bool> CreateAccount(string email, string password)

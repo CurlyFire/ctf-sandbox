@@ -1,6 +1,6 @@
 using Microsoft.Playwright;
 
-namespace ctf_sandbox.tests.Drivers.UI.PageObjectModels;
+namespace ctf_sandbox.tests.Drivers.CTF.UI.PageObjectModels;
 
 public class HomePage
 {
@@ -51,14 +51,6 @@ public class HomePage
         var accountLink = _page.GetByRole(AriaRole.Link, new() { Name = "Manage Account Settings" });
         var textContent = await accountLink.TextContentAsync();
         return textContent != null && textContent.Contains(email);
-    }
-
-    public async Task<EmailsPage> GoToEmailsPage()
-    {
-        await _page.GetByRole(AriaRole.Link, new() { Name = "Open Email" }).ClickAsync();
-        var mailpitPage = await _page.WaitForPopupAsync();
-        await mailpitPage.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
-        return new EmailsPage(mailpitPage);
     }
 
     public async Task<CreateAccountPage> GoToCreateAccountPage()

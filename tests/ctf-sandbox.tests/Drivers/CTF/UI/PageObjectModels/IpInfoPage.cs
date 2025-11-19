@@ -1,7 +1,7 @@
 using ctf_sandbox.Models;
 using Microsoft.Playwright;
 
-namespace ctf_sandbox.tests.Drivers.UI.PageObjectModels;
+namespace ctf_sandbox.tests.Drivers.CTF.UI.PageObjectModels;
 
 public class IpInfoPage
 {

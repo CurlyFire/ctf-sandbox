@@ -23,7 +23,8 @@ public class RegisterTests
         var password = "RegisterTest123!";
 
         await ctf.CreateAccount(randomEmail, password);
-        var emails = await ctf.CheckEmails();
+
+        var emails = _fixture.ExternalSystems.InteractWithEmails();
         await emails.ActivateRegistrationSentTo(randomEmail);
         await ctf.SignIn(credentials =>
         {

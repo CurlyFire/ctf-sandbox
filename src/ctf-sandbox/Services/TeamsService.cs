@@ -14,6 +14,7 @@ public class TeamsService : ITeamsService
     private readonly UserManager<IdentityUser> _userManager;
     private readonly IEmailSender _emailSender;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IBannedWordsService _bannedWordsService;
 
     public TeamsService(
         ApplicationDbContext context,
@@ -21,7 +22,8 @@ public class TeamsService : ITeamsService
         TimeProvider timeProvider,
         UserManager<IdentityUser> userManager,
         IEmailSender emailSender,
-        IHttpContextAccessor httpContextAccessor)
+        IHttpContextAccessor httpContextAccessor,
+        IBannedWordsService bannedWordsService)
     {
         _context = context;
         _logger = logger;
@@ -29,6 +31,7 @@ public class TeamsService : ITeamsService
         _userManager = userManager;
         _emailSender = emailSender;
         _httpContextAccessor = httpContextAccessor;
+        _bannedWordsService = bannedWordsService;
     }
 
     public async Task<IEnumerable<Team>> GetTeamsForUserAsync(string userId)
@@ -43,8 +46,13 @@ public class TeamsService : ITeamsService
         return teams;
     }
 
-    public async Task<Team> CreateTeamAsync(string userId, string name, string? description)
+    public async Task<(bool Success, string? ErrorMessage, Team? Team)> CreateTeamAsync(string userId, string name, string? description)
     {
+        if (await _bannedWordsService.ContainsBannedWordAsync(name))
+        {
+            return (false, "Team name contains banned words", null);
+        }
+
         var team = new Team
         {
             Name = name,
@@ -56,7 +64,7 @@ public class TeamsService : ITeamsService
         _context.Teams.Add(team);
         await _context.SaveChangesAsync();
 
-        return team;
+        return (true, null, team);
     }
 
     public async Task<(bool Success, string? ErrorMessage)> UpdateTeamAsync(int teamId, string userId, string name, string? description)
@@ -72,6 +80,11 @@ public class TeamsService : ITeamsService
         if (team.OwnerId != userId)
         {
             return (false, "Only the team owner can update the team");
+        }
+
+        if (await _bannedWordsService.ContainsBannedWordAsync(name))
+        {
+            return (false, "Team name contains banned words");
         }
 
         team.Name = name;

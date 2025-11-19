@@ -4,24 +4,17 @@ using ctf_sandbox.Areas.CTF.Models;
 using ctf_sandbox.Models;
 using ctf_sandbox.tests.Dsl;
 
-namespace ctf_sandbox.tests.Drivers.API;
+namespace ctf_sandbox.tests.Drivers.CTF.API;
 
 public class APICTFDriver : ICTFDriver
 {
     private readonly HttpClient _httpClient;
-    private APIEmailsDriver _apiEmailsDriver;
     private string? _jwt;
 
-    public APICTFDriver(HttpClient httpClient,APIEmailsDriver apiEmailsDriver)
+    public APICTFDriver(HttpClient httpClient)
     {
         _httpClient = httpClient;
-        _apiEmailsDriver = apiEmailsDriver;
         _jwt = null;
-    }
-
-    public Task<Emails> CheckEmails()
-    {
-        return Task.FromResult(new Emails(_apiEmailsDriver));
     }
 
     public async Task<bool> CreateAccount(string email, string password)
@@ -69,6 +62,10 @@ public class APICTFDriver : ICTFDriver
                         }
                     }
                 }
+            }
+            else if (problemDetails.TryGetProperty("message", out var messageProperty))
+            {
+                errors.Add(messageProperty.GetString() ?? "An error occurred");
             }
             else if (problemDetails.TryGetProperty("title", out var titleProperty))
             {

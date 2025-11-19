@@ -1,11 +1,10 @@
 using ctf_sandbox.Models;
 using ctf_sandbox.tests.Dsl;
 
-namespace ctf_sandbox.tests.Drivers;
+namespace ctf_sandbox.tests.Drivers.CTF;
 
 public interface ICTFDriver
 {
-    Task<Emails> CheckEmails();
     Task<bool> CreateAccount(string email, string password);
     Task SignIn(string email, string password);
     Task<string?> CreateTeam(string? teamName);

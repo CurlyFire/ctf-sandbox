@@ -81,6 +81,8 @@ public class Startup
         services.AddHttpClient();
         services.Configure<IpInfoOptions>(Configuration.GetSection("IpInfo"));
         services.AddScoped<IIpInfoService, IpInfoService>();
+        services.Configure<BannedWordsOptions>(Configuration.GetSection("BannedWords"));
+        services.AddScoped<IBannedWordsService, BannedWordsService>();
 
         services.AddControllersWithViews();
         services.AddHealthChecks()

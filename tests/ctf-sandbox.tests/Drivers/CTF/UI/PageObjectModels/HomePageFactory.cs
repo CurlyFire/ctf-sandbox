@@ -2,7 +2,7 @@ using ctf_sandbox.tests.Fixtures;
 using Microsoft.Playwright;
 using Microsoft.Playwright.TestAdapter;
 
-namespace ctf_sandbox.tests.Drivers.UI.PageObjectModels;
+namespace ctf_sandbox.tests.Drivers.CTF.UI.PageObjectModels;
 
 public class HomePageFactory : IDisposable
 {

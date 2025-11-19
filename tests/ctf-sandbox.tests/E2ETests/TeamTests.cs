@@ -67,6 +67,7 @@ public class TeamTests
 
         // Assert: Creation should fail with validation error about length
         Assert.Contains("The Name must be between 2 and 100 characters long", error, StringComparison.OrdinalIgnoreCase);
+        await ctf.ConfirmTeamIsNotAvailable(tooLongTeamName);
     }
 
     [Trait("Category", "E2E")]
@@ -82,5 +83,23 @@ public class TeamTests
 
         // Assert: Creation should fail with validation error about required field
         Assert.Contains("Name field is required", error, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Trait("Category", "E2E")]
+    [Theory]
+    [Channel(Channel.UI, Channel.API)]
+    public async Task ShouldFailToCreateTeamWithBannedWordInName(Channel channel)
+    {
+        var ctf = _fixture.InteractWithCTFThrough(channel);
+        await ctf.SignIn();
+        var bannedWordTeamName = "badword_" + Guid.NewGuid();
+        await _fixture.ExternalSystems.InteractWithBannedWords().CreateBannedWord(bannedWordTeamName);
+
+        // Act: Attempt to create team with a banned word in the name
+        var error = await ctf.CreateTeam(bannedWordTeamName);
+
+        // Assert: Creation should fail with error about banned words
+        Assert.Contains("banned words", error, StringComparison.OrdinalIgnoreCase);
+        await ctf.ConfirmTeamIsNotAvailable(bannedWordTeamName);
     }
 }

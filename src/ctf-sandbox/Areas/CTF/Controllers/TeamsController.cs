@@ -61,7 +61,14 @@ public class TeamsController : Controller
         if (ModelState.IsValid)
         {
             var currentUser = await _userManager.GetUserAsync(User);
-            await _teamsService.CreateTeamAsync(currentUser!.Id, team.Name, team.Description);
+            var (success, errorMessage, _) = await _teamsService.CreateTeamAsync(currentUser!.Id, team.Name, team.Description);
+
+            if (!success)
+            {
+                ModelState.AddModelError("", errorMessage ?? "An error occurred");
+                return View(team);
+            }
+
             return RedirectToAction(nameof(Index));
         }
 

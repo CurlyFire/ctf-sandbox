@@ -1,0 +1,6 @@
+{
+  "BannedWords": [
+    { "id": 1, "word": "foo" },
+    { "id": 2, "word": "bar" }
+  ]
+}

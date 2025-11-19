@@ -23,3 +23,11 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
+
+  banned-words-api:
+    image: clue/json-server
+    ports:
+      - "8081:80"
+    volumes:
+      - ./banned-words-api.json:/data/db.json
+    command: --watch /data/db.json --host 0.0.0.0

@@ -1,7 +1,7 @@
-using ctf_sandbox.tests.Drivers;
-using ctf_sandbox.tests.Drivers.API;
-using ctf_sandbox.tests.Drivers.UI;
-using ctf_sandbox.tests.Drivers.UI.PageObjectModels;
+using ctf_sandbox.tests.Drivers.CTF;
+using ctf_sandbox.tests.Drivers.CTF.API;
+using ctf_sandbox.tests.Drivers.CTF.UI;
+using ctf_sandbox.tests.Drivers.CTF.UI.PageObjectModels;
 using ctf_sandbox.tests.Dsl;
 using ctf_sandbox.tests.Extensions;
 using ctf_sandbox.tests.Utils;
@@ -19,7 +19,6 @@ public abstract class CTFFixture
     private IHost? _host;
     private IServiceScope _scope = null!;
     private bool disposedValue;
-
     public CTFConfiguration? Configuration { get; private set; }
 
     public CTFFixture()
@@ -188,6 +187,7 @@ public abstract class CTFFixture
             webServerUrl,
             ctfWebHostConfiguration.GetRequiredValue<string>("EmailSettings:MailpitUrl"),
             ctfWebHostConfiguration.GetRequiredValue<string>("IPInfo:BaseUrl"),
+            ctfWebHostConfiguration.GetRequiredValue<string>("BannedWords:BaseUrl"),
             ctfWebHostConfiguration.GetRequiredValue<string>("ConnectionStrings:DefaultConnection"),
             new Credentials(
                 ctfWebHostConfiguration.GetRequiredValue<string>("AdminAccount:Email"),
@@ -212,17 +212,11 @@ public abstract class CTFFixture
         });
         services.AddTransient<UICTFDriver>();
         services.AddHttpClient<APICTFDriver>(ConfigureCTFHttpClient);
-        services.AddHttpClient<APIEmailsDriver>(ConfigureEmailsHttpClient);
         ConfigureServices(services);
     }
 
     private void ConfigureCTFHttpClient(HttpClient httpClient)
     {
         httpClient.BaseAddress = new Uri(Configuration!.WebServerUrl + "/api/");
-    }
-
-    private void ConfigureEmailsHttpClient(HttpClient httpClient)
-    {
-        httpClient.BaseAddress = new Uri(Configuration!.MailpitUrl + "/api/v1/");
     }
 }
