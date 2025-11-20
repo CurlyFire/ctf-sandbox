@@ -11,7 +11,7 @@ public class CreateNewTeamPage
         _page = page;
     }
 
-    public async Task<string?> CreateTeam(string? teamName)
+    public async Task<string?> CreateTeam(string? teamName, uint memberCount = 4)
     {
         var nameInput = _page.GetByRole(AriaRole.Textbox, new() { Name = "Name" });
         
@@ -26,6 +26,10 @@ public class CreateNewTeamPage
                 return $"The Name must be between 2 and 100 characters long.";
             }
         }
+        
+        // Set member count
+        var memberCountInput = _page.Locator("input[name='MemberCount']");
+        await memberCountInput.FillAsync(memberCount.ToString());
         
         // Trigger validation by blurring the field
         await nameInput.BlurAsync();

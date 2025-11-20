@@ -1,3 +1,4 @@
+using ctf_sandbox.Areas.CTF.Models;
 using ctf_sandbox.Models;
 using ctf_sandbox.tests.Drivers.CTF.UI.PageObjectModels;
 
@@ -27,24 +28,24 @@ public class UICTFDriver : ICTFDriver
         await signInPage.SignIn(email, password);
     }
 
-    public async Task<string?> CreateTeam(string? teamName)
+    public async Task<string?> CreateTeam(string? teamName, uint memberCount = 4)
     {
         var manageTeamsPage = await _homePage.GoToManageTeamsPage();
         var createNewTeamPage = await manageTeamsPage.GoToCreateNewTeamPage();
-        return await createNewTeamPage.CreateTeam(teamName);
+        return await createNewTeamPage.CreateTeam(teamName, memberCount);
     }
 
-    public async Task UpdateTeam(string oldTeamName, string newTeamName, string? newDescription = null)
+    public async Task UpdateTeam(string oldTeamName, string newTeamName, string? newDescription = null, uint? memberCount = null)
     {
         var manageTeamsPage = await _homePage.GoToManageTeamsPage();
         var editTeamPage = await manageTeamsPage.GoToEditTeamPage(oldTeamName);
-        await editTeamPage.UpdateTeam(newTeamName, newDescription);
+        await editTeamPage.UpdateTeam(newTeamName, newDescription, memberCount);
     }
 
-    public async Task<bool> IsTeamAvailable(string teamName)
+    public async Task<Team?> GetTeam(string teamName)
     {
         var manageTeamsPage = await _homePage.GoToManageTeamsPage();
-        return await manageTeamsPage.IsTeamVisible(teamName);
+        return await manageTeamsPage.GetTeam(teamName);
     }
 
     public async Task<bool> IsUserSignedIn(string email)

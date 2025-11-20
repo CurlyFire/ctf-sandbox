@@ -10,4 +10,8 @@ public class CreateTeamRequest
     
     [StringLength(500)]
     public string? Description { get; set; }
+    
+    [Required]
+    [Range(1, 8, ErrorMessage = "The {0} must be between {1} and {2}.")]
+    public uint MemberCount { get; set; }
 }

@@ -11,7 +11,7 @@ using ctf_sandbox.Data;
 namespace ctf_sandbox.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251101201554_ctf")]
+    [Migration("20251120122553_ctf")]
     partial class ctf
     {
         /// <inheritdoc />
@@ -228,6 +228,9 @@ namespace ctf_sandbox.Migrations
                     b.Property<string>("Description")
                         .HasMaxLength(500)
                         .HasColumnType("TEXT");
+
+                    b.Property<uint>("MemberCount")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .IsRequired()

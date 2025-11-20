@@ -61,7 +61,7 @@ public class TeamsController : Controller
         if (ModelState.IsValid)
         {
             var currentUser = await _userManager.GetUserAsync(User);
-            var (success, errorMessage, _) = await _teamsService.CreateTeamAsync(currentUser!.Id, team.Name, team.Description);
+            var (success, errorMessage, _) = await _teamsService.CreateTeamAsync(currentUser!.Id, team.Name, team.Description, team.MemberCount);
 
             if (!success)
             {
@@ -121,7 +121,7 @@ public class TeamsController : Controller
         if (ModelState.IsValid)
         {
             var currentUser = await _userManager.GetUserAsync(User);
-            var (success, errorMessage) = await _teamsService.UpdateTeamAsync(id, currentUser!.Id, team.Name, team.Description);
+            var (success, errorMessage) = await _teamsService.UpdateTeamAsync(id, currentUser!.Id, team.Name, team.Description, team.MemberCount);
 
             if (!success)
             {

@@ -29,14 +29,15 @@ public class APICTFDriver : ICTFDriver
         return response.IsSuccessStatusCode;
     }
 
-    public async Task<string?> CreateTeam(string? teamName)
+    public async Task<string?> CreateTeam(string? teamName, uint memberCount = 4)
     {
         EnsureAuthenticatedAndSetAuthorizationHeader();
 
         var response = await _httpClient.PostAsJsonAsync("teams",
             new CreateTeamRequest()
             {
-                Name = teamName ?? string.Empty
+                Name = teamName ?? string.Empty,
+                MemberCount = memberCount
             });
 
         if (response.IsSuccessStatusCode)
@@ -81,7 +82,7 @@ public class APICTFDriver : ICTFDriver
         }
     }
 
-    public async Task UpdateTeam(string oldTeamName, string newTeamName, string? newDescription = null)
+    public async Task UpdateTeam(string oldTeamName, string newTeamName, string? newDescription = null, uint? memberCount = null)
     {
         EnsureAuthenticatedAndSetAuthorizationHeader();
 
@@ -102,7 +103,8 @@ public class APICTFDriver : ICTFDriver
             new UpdateTeamRequest()
             {
                 Name = newTeamName,
-                Description = newDescription
+                Description = newDescription,
+                MemberCount = memberCount ?? team.MemberCount // Use provided value or preserve existing
             });
 
         response.EnsureSuccessStatusCode();
@@ -119,7 +121,7 @@ public class APICTFDriver : ICTFDriver
         return ipInfo ?? throw new InvalidOperationException("Failed to deserialize IP info response");
     }
 
-    public async Task<bool> IsTeamAvailable(string teamName)
+    public async Task<Team?> GetTeam(string teamName)
     {
         EnsureAuthenticatedAndSetAuthorizationHeader();
 
@@ -128,7 +130,7 @@ public class APICTFDriver : ICTFDriver
 
         var teams = await response.Content.ReadFromJsonAsync<List<Team>>();
         
-        return teams?.Any(t => t.Name == teamName) ?? false;
+        return teams?.FirstOrDefault(t => t.Name == teamName);
     }
 
     public Task<bool> IsUserSignedIn(string email)

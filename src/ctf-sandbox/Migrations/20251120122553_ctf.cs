@@ -164,6 +164,7 @@ namespace ctf_sandbox.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
                     Description = table.Column<string>(type: "TEXT", maxLength: 500, nullable: true),
+                    MemberCount = table.Column<uint>(type: "INTEGER", nullable: false),
                     OwnerId = table.Column<string>(type: "TEXT", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },

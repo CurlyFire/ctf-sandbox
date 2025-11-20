@@ -46,7 +46,7 @@ public class TeamsService : ITeamsService
         return teams;
     }
 
-    public async Task<(bool Success, string? ErrorMessage, Team? Team)> CreateTeamAsync(string userId, string name, string? description)
+    public async Task<(bool Success, string? ErrorMessage, Team? Team)> CreateTeamAsync(string userId, string name, string? description, uint memberCount)
     {
         if (await _bannedWordsService.ContainsBannedWordAsync(name))
         {
@@ -57,6 +57,7 @@ public class TeamsService : ITeamsService
         {
             Name = name,
             Description = description,
+            MemberCount = memberCount,
             OwnerId = userId,
             CreatedAt = _timeProvider.GetUtcNow().UtcDateTime
         };
@@ -67,7 +68,7 @@ public class TeamsService : ITeamsService
         return (true, null, team);
     }
 
-    public async Task<(bool Success, string? ErrorMessage)> UpdateTeamAsync(int teamId, string userId, string name, string? description)
+    public async Task<(bool Success, string? ErrorMessage)> UpdateTeamAsync(int teamId, string userId, string name, string? description, uint memberCount)
     {
         var team = await _context.Teams
             .FirstOrDefaultAsync(t => t.Id == teamId);
@@ -89,6 +90,7 @@ public class TeamsService : ITeamsService
 
         team.Name = name;
         team.Description = description;
+        team.MemberCount = memberCount;
         await _context.SaveChangesAsync();
 
         return (true, null);

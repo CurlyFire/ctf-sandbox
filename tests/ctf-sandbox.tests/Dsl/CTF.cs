@@ -41,24 +41,41 @@ public class CTF
         return this;
     }
 
-    public async Task<string?> CreateTeam(string? teamName)
+    public async Task<string?> CreateTeam(string? teamName, uint memberCount = 4)
     {
-        return await _driver.CreateTeam(teamName);
+        return await _driver.CreateTeam(teamName, memberCount);
     }
 
-    public async Task UpdateTeam(string oldTeamName, string newTeamName, string? newDescription = null)
+    public async Task UpdateTeam(string oldTeamName, string newTeamName, string? newDescription = null, uint? memberCount = null)
     {
-        await _driver.UpdateTeam(oldTeamName, newTeamName, newDescription);
+        await _driver.UpdateTeam(oldTeamName, newTeamName, newDescription, memberCount);
     }
 
-    public async Task ConfirmTeamIsAvailable(string randomTeamName)
+    public async Task ConfirmTeamIsAvailable(string teamName, uint? expectedMemberCount = null)
     {
-        Assert.True(await _driver.IsTeamAvailable(randomTeamName));
+        var team = await _driver.GetTeam(teamName);
+        Assert.NotNull(team);
+        
+        if (expectedMemberCount.HasValue)
+        {
+            Assert.Equal(expectedMemberCount.Value, team.MemberCount);
+        }
     }
 
-    public async Task ConfirmTeamIsNotAvailable(string teamName)
+    public async Task ConfirmTeamIsNotAvailable(string teamName, uint? unexpectedMemberCount = null)
     {
-        Assert.False(await _driver.IsTeamAvailable(teamName));
+        var team = await _driver.GetTeam(teamName);
+        
+        if (unexpectedMemberCount.HasValue)
+        {
+            // Team should either not exist, or if it exists, should not have the specified member count
+            Assert.True(team == null || team.MemberCount != unexpectedMemberCount.Value);
+        }
+        else
+        {
+            // Team should not exist at all
+            Assert.Null(team);
+        }
     }
 
     public async Task ConfirmUserIsSignedIn(string email)

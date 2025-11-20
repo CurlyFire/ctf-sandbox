@@ -24,6 +24,7 @@
                     }
                     <p class="card-text"><small class="text-muted">Owner: @team.Owner.Email</small></p>
                     <p class="card-text"><small class="text-muted">Created: @team.CreatedAt.ToString("d")</small></p>
+                    <p class="card-text"><small class="text-muted">Max Members: <span data-testid="member-count-@team.Name">@team.MemberCount</span></small></p>
                     
                     @if (team.OwnerId == User.FindFirstValue(ClaimTypes.NameIdentifier))
                     {

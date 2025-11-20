@@ -14,6 +14,10 @@ public class Team
     [StringLength(500)]
     public string? Description { get; set; }
     
+    [Required]
+    [Range(1, 8, ErrorMessage = "The {0} must be between {1} and {2}.")]
+    public uint MemberCount { get; set; }
+    
     public string OwnerId { get; set; } = string.Empty;
     public IdentityUser Owner { get; set; } = null!;
     public DateTime CreatedAt { get; set; }

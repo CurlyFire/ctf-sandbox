@@ -73,7 +73,7 @@ public class TeamsController : ControllerBase
             return Unauthorized();
         }
 
-        var (success, errorMessage, team) = await _teamsService.CreateTeamAsync(currentUser.Id, request.Name, request.Description);
+        var (success, errorMessage, team) = await _teamsService.CreateTeamAsync(currentUser.Id, request.Name, request.Description, request.MemberCount);
 
         if (!success)
         {
@@ -113,7 +113,7 @@ public class TeamsController : ControllerBase
             return Unauthorized();
         }
 
-        var (success, errorMessage) = await _teamsService.UpdateTeamAsync(teamId, currentUser.Id, request.Name, request.Description);
+        var (success, errorMessage) = await _teamsService.UpdateTeamAsync(teamId, currentUser.Id, request.Name, request.Description, request.MemberCount);
 
         if (!success)
         {

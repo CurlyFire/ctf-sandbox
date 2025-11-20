@@ -30,4 +30,32 @@ public class ManageTeamsPage
         return await _page.GetByText(teamName).IsVisibleAsync();
     }
 
+    public async Task<ctf_sandbox.Areas.CTF.Models.Team?> GetTeam(string teamName)
+    {
+        // Check if team is visible first
+        if (!await IsTeamVisible(teamName))
+        {
+            return null;
+        }
+
+        // Find the card containing the team name
+        var teamCard = _page.Locator(".card").Filter(new() { HasText = teamName });
+        
+        // Extract member count from the data-testid attribute
+        var memberCountLocator = teamCard.Locator($"[data-testid='member-count-{teamName}']");
+        var memberCountText = await memberCountLocator.TextContentAsync();
+        
+        if (string.IsNullOrEmpty(memberCountText) || !uint.TryParse(memberCountText, out var memberCount))
+        {
+            return null;
+        }
+
+        // Return a minimal Team object with the information we can extract
+        return new ctf_sandbox.Areas.CTF.Models.Team
+        {
+            Name = teamName,
+            MemberCount = memberCount
+        };
+    }
+
 }

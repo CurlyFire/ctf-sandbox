@@ -8,6 +8,6 @@ Write-Host "🔐 Marking workspace as safe for Git..."
 git config --global --add safe.directory $workspaceRoot
 
 Write-Host "🔧 Installing dotnet-ef tool..."
-dotnet tool install --global dotnet-ef
+dotnet tool install --global dotnet-ef --version 9.0.11
 
 Write-Host "✅ postCreateCommand script complete."
