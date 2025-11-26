@@ -30,6 +30,7 @@ public class TeamTests
         var error = await ctf.CreateTeam(randomTeamName, memberCount);
 
         Assert.Null(error);
+        // Cannot verify creation date because we do not control server time
         await ctf.ConfirmTeamIsAvailable(randomTeamName, memberCount);
     }
 
@@ -114,8 +115,12 @@ public class TeamTests
     }
 
     [Trait("Category", "E2E")]
-    [Fact]
-    public async Task API_ShouldFailToCreateTeamWithNonIntegerMemberCount()
+    [Theory]
+    [InlineData("five")]
+    [InlineData("5a")]
+    [InlineData("a5")]
+    [InlineData(" 5 ")]
+    public async Task API_ShouldFailToCreateTeamWithNonIntegerMemberCount(string memberCount)
     {
         var client = _fixture.InteractWithCTFThroughHttpClient();
         var result = await client.PostAsJsonAsync("auth", new LoginRequest
@@ -132,7 +137,7 @@ public class TeamTests
         {
             Name = "TeamWithInvalidMemberCount",
             Description = "This team has an invalid member count",
-            MemberCount = "five" // Invalid non-integer value
+            MemberCount = memberCount // Invalid non-integer value
         });
 
         Assert.Equal(HttpStatusCode.BadRequest, result.StatusCode);
