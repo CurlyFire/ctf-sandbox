@@ -1,8 +1,6 @@
 name: Save money
 
 on:
-  schedule:
-    - cron: '0 */8 * * *'  # Every 8 hours
   workflow_dispatch:
 
 jobs:
