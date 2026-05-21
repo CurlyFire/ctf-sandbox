@@ -1,6 +1,6 @@
 using Microsoft.Playwright;
 
-namespace ctf_sandbox.tests.Drivers.CTF.UI.PageObjectModels;
+namespace ctf_sandbox.tests.Clients.UI.Pages;
 
 public class CreateAccountPage
 {

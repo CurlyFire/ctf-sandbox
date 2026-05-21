@@ -1,7 +1,7 @@
+using ctf_sandbox.tests.Clients.UI;
 using ctf_sandbox.tests.Drivers.CTF;
 using ctf_sandbox.tests.Drivers.CTF.API;
 using ctf_sandbox.tests.Drivers.CTF.UI;
-using ctf_sandbox.tests.Drivers.CTF.UI.PageObjectModels;
 using ctf_sandbox.tests.Dsl;
 using ctf_sandbox.tests.Extensions;
 using ctf_sandbox.tests.Utils;
@@ -38,9 +38,9 @@ public abstract class CTFFixture
         return _scope.ServiceProvider.GetRequiredService<IHttpClientFactory>().CreateClient(CTFHttpClientName);
     }
 
-    public HomePage InteractWithCTFThroughHomePage()
+    public UIClient InteractWithCTFThroughUIClient()
     {
-        return _scope.ServiceProvider.GetRequiredService<HomePage>();
+        return _scope.ServiceProvider.GetRequiredService<UIClient>();
     }
 
     public CTF InteractWithCTFThrough(Channel channel)
@@ -204,12 +204,7 @@ public abstract class CTFFixture
     {
         services.AddSingleton(Configuration!);
         services.AddHttpClient(CTFHttpClientName, ConfigureCTFHttpClient);
-        services.AddSingleton<HomePageFactory>();
-        services.AddTransient(sp =>
-        {
-            var factory = sp.GetRequiredService<HomePageFactory>();
-            return factory.CreateHomePage();
-        });
+        services.AddTransient<UIClient>();
         services.AddTransient<UICTFDriver>();
         services.AddHttpClient<APICTFDriver>(ConfigureCTFHttpClient);
         ConfigureServices(services);

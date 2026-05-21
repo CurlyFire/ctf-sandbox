@@ -1,6 +1,6 @@
 param(
     [Parameter(Mandatory=$true)]
-    [string]$TestName
+    [string[]]$TestName
 )
 
 try {
@@ -10,8 +10,11 @@ try {
     # Set PWDEBUG for the duration of this script
     $env:PWDEBUG = "1"
 
-    # Run the specified test using the workspace root path
-    dotnet test "$env:WORKSPACE_ROOT/tests/ctf-sandbox.tests" --filter "FullyQualifiedName=$TestName"
+    # Build filter expression joining multiple test names with |
+    $filter = ($TestName | ForEach-Object { "FullyQualifiedName=$_" }) -join "|"
+
+    # Run the specified test(s) using the workspace root path
+    dotnet test "$env:WORKSPACE_ROOT/tests/ctf-sandbox.tests" --filter $filter
 }
 finally {
     # Restore the original PWDEBUG value (or remove it if it wasn't set)
