@@ -1,5 +1,7 @@
 FROM mcr.microsoft.com/devcontainers/dotnet:1-9.0-bookworm
 
+# Fix https://github.com/yarnpkg/yarn/issues/9222
+RUN curl -fsSL https://dl.yarnpkg.com/debian/pubkey.gpg | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/yarn.gpg
 # Install playwright dependencies (MAKE SURE TO KEEP PLAYWRIGHT VERSIONS IN SYNC WITH .NET PROJECTS)
 RUN mkdir /tmp/installplaywright && \
     cd /tmp/installplaywright && \
