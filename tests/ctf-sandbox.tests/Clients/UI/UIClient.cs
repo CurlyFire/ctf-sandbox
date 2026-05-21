@@ -10,14 +10,14 @@ public class UIClient : IDisposable
     private IPlaywright _playwright;
     private IBrowser? _browser;
     private HomePage? _homePage;
-    private IPage _currentPage;
+    private IPage? _currentPage;
     private CTFConfiguration _environmentConfiguration;
     private bool disposedValue;
 
-    public UIClient(CTFConfiguration environmentConfiguration)
+    public UIClient(CTFConfiguration environmentConfiguration, IPlaywright playwright)
     {
         _environmentConfiguration = environmentConfiguration;
-        _playwright = Playwright.CreateAsync().Result;
+        _playwright = playwright;
     }
 
     public async Task<HomePage> OpenHomePage()
@@ -44,7 +44,7 @@ public class UIClient : IDisposable
         {
             throw new InvalidOperationException("Failed to initialize home page.");
         }
-        await _currentPage.GotoAsync(string.Empty);
+        await _currentPage!.GotoAsync(string.Empty);
         return _homePage;
     }
 
