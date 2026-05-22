@@ -16,7 +16,8 @@ public class UITests
     [Fact]
     public async Task ShouldLoadMainPage()
     {
-        var homePage = _fixture.InteractWithCTFThroughHomePage();
+        var uiClient = _fixture.InteractWithCTFThroughUIClient();
+        var homePage = await uiClient.OpenHomePage();
 
         // Check if the page title is correct
         var title = await homePage.GetPageTitle();
@@ -35,7 +36,8 @@ public class UITests
     [Fact]
     public async Task ShouldLoginWithValidCredentials()
     {
-        var homePage = _fixture.InteractWithCTFThroughHomePage();
+        var uIClient = _fixture.InteractWithCTFThroughUIClient();
+        var homePage = await uIClient.OpenHomePage();
         // Navigate to sign in page and login
         var signInPage = await homePage.GoToSignInPage();
         homePage = await signInPage.SignIn(_fixture.Configuration.WebServerCredentials.Username, _fixture.Configuration.WebServerCredentials.Password);

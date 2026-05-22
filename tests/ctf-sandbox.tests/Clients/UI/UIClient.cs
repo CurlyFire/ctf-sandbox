@@ -1,45 +1,51 @@
+using ctf_sandbox.tests.Clients.UI.Pages;
 using ctf_sandbox.tests.Fixtures;
 using Microsoft.Playwright;
 using Microsoft.Playwright.TestAdapter;
 
-namespace ctf_sandbox.tests.Drivers.CTF.UI.PageObjectModels;
+namespace ctf_sandbox.tests.Clients.UI;
 
-public class HomePageFactory : IDisposable
+public class UIClient : IDisposable
 {
     private IPlaywright _playwright;
     private IBrowser? _browser;
+    private HomePage? _homePage;
+    private IPage? _currentPage;
     private CTFConfiguration _environmentConfiguration;
     private bool disposedValue;
 
-    public HomePageFactory(CTFConfiguration environmentConfiguration)
+    public UIClient(CTFConfiguration environmentConfiguration, IPlaywright playwright)
     {
         _environmentConfiguration = environmentConfiguration;
-        _playwright = Playwright.CreateAsync().Result;
+        _playwright = playwright;
     }
 
-    public HomePage CreateHomePage()
+    public async Task<HomePage> OpenHomePage()
     {
         if (_browser == null)
         {
             var browserType = _playwright[PlaywrightSettingsProvider.BrowserName];
             _browser = browserType.LaunchAsync().Result;
-        }
+            var context = _browser.NewContextAsync().Result;
+            if (context == null || context.Browser == null)
+            {
+                throw new InvalidOperationException("Failed to create browser context or browser.");
+            }
 
-        var context = _browser.NewContextAsync().Result;
-        if (context != null && context.Browser != null)
-        {
             var options = new BrowserNewPageOptions
             {
                 BaseURL = _environmentConfiguration.WebServerUrl
             };
-            var page = context.Browser.NewPageAsync(options).Result;
-            page.GotoAsync(string.Empty).Wait();
-            return new HomePage(page);
+            _currentPage = context.Browser.NewPageAsync(options).Result;
+            _homePage = new HomePage(_currentPage);
         }
-        else
+        
+        if (_homePage == null)
         {
-            throw new InvalidOperationException("Failed to create browser context or browser.");
+            throw new InvalidOperationException("Failed to initialize home page.");
         }
+        await _currentPage!.GotoAsync(string.Empty);
+        return _homePage;
     }
 
     protected virtual void Dispose(bool disposing)
