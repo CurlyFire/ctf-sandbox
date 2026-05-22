@@ -1,7 +1,8 @@
 FROM mcr.microsoft.com/devcontainers/dotnet:1-9.0-bookworm
 
-# Fix https://github.com/yarnpkg/yarn/issues/2029
-RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
+# Remove inherited Yarn repo because it breaks apt during Playwright dependency install
+RUN rm -f /etc/apt/sources.list.d/yarn.list /etc/apt/sources.list.d/yarn*.list
+
 # Install playwright dependencies (MAKE SURE TO KEEP PLAYWRIGHT VERSIONS IN SYNC WITH .NET PROJECTS)
 RUN mkdir /tmp/installplaywright && \
     cd /tmp/installplaywright && \
