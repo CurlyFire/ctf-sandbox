@@ -1,3 +1,5 @@
+using ctf_sandbox.tests.Clients.API;
+using ctf_sandbox.tests.Clients.API.Endpoints;
 using ctf_sandbox.tests.Clients.UI;
 using ctf_sandbox.tests.Drivers.CTF;
 using ctf_sandbox.tests.Drivers.CTF.API;
@@ -16,7 +18,6 @@ namespace ctf_sandbox.tests.Fixtures;
 
 public abstract class CTFFixture
 {
-    private const string CTFHttpClientName = "ctf";
     private IHost? _host;
     private IServiceScope _scope = null!;
     private bool disposedValue;
@@ -34,9 +35,10 @@ public abstract class CTFFixture
         GC.SuppressFinalize(this);
     }
 
-    public HttpClient InteractWithCTFThroughHttpClient()
+    public APIClient InteractWithCTFThroughAPIClient()
     {
-        return _scope.ServiceProvider.GetRequiredService<IHttpClientFactory>().CreateClient(CTFHttpClientName);
+        //return _scope.ServiceProvider.GetRequiredService<IHttpClientFactory>().CreateClient(CTFHttpClientName);
+        return _scope.ServiceProvider.GetRequiredService<APIClient>();
     }
 
     public UIClient InteractWithCTFThroughUIClient()
@@ -204,16 +206,23 @@ public abstract class CTFFixture
     private void ConfigureServicesInternal(IServiceCollection services)
     {
         services.AddSingleton(Configuration!);
-        services.AddHttpClient(CTFHttpClientName, ConfigureCTFHttpClient);
-        services.AddTransient<UIClient>();
-        services.AddTransient<UICTFDriver>();
-        services.AddHttpClient<APICTFDriver>(ConfigureCTFHttpClient);
+        services.AddHttpClient().ConfigureHttpClientDefaults(ConfigureCTFHttpClient);
+        services.AddScoped<UIClient>();
+        services.AddScoped<UICTFDriver>();
+        services.AddScoped<APIClient>();
+        services.AddScoped<AuthenticationEndpoint>();
+        services.AddScoped<AccountEndpoint>();
+        services.AddScoped<TeamsEndpoint>();
+        services.AddScoped<IpInfoEndpoint>();
         services.AddSingleton(Playwright.CreateAsync().Result);
         ConfigureServices(services);
     }
 
-    private void ConfigureCTFHttpClient(HttpClient httpClient)
+    private void ConfigureCTFHttpClient(IHttpClientBuilder builder)
     {
-        httpClient.BaseAddress = new Uri(Configuration!.WebServerUrl + "/api/");
+        builder.ConfigureHttpClient(httpClient =>
+        {
+            httpClient.BaseAddress = new Uri(Configuration!.WebServerUrl + "/api/");
+        });
     }
 }

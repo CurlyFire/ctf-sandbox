@@ -11,7 +11,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace ctf_sandbox;
 
@@ -212,5 +211,6 @@ public class Startup
                 Predicate = _ => false
             });
         });
+
     }
 }

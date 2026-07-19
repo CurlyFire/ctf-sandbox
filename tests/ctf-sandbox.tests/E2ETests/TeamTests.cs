@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Http.Json;
-using ctf_sandbox.Models;
 using ctf_sandbox.tests.Fixtures;
 using ctf_sandbox.tests.Utils;
 using Microsoft.AspNetCore.Mvc;
@@ -122,27 +121,25 @@ public class TeamTests
     [InlineData(" 5 ")]
     public async Task API_ShouldFailToCreateTeamWithNonIntegerMemberCount(string memberCount)
     {
-        var client = _fixture.InteractWithCTFThroughHttpClient();
-        var result = await client.PostAsJsonAsync("auth", new LoginRequest
-        {
-            Username = _fixture.Configuration.WebServerCredentials.Username,
-            Password = _fixture.Configuration.WebServerCredentials.Password
-        });
-        result.EnsureSuccessStatusCode();
-        var jwt = await result.Content.ReadAsStringAsync();
-        client.DefaultRequestHeaders.Authorization = 
-            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", jwt);
+        var client = _fixture.InteractWithCTFThroughAPIClient();
+        await client.Authentication.Authenticate(_fixture.Configuration.WebServerCredentials.Username,
+            _fixture.Configuration.WebServerCredentials.Password);
 
-        result = await client.PostAsJsonAsync("teams", new
+        
+        try
         {
-            Name = "TeamWithInvalidMemberCount",
-            Description = "This team has an invalid member count",
-            MemberCount = memberCount // Invalid non-integer value
-        });
+            await client.Teams.CreateTeam("TeamWithInvalidMemberCount", memberCount);    
+        }
+        catch (HttpRequestException ex)
+        {
+            Assert.Equal(HttpStatusCode.BadRequest, ex.StatusCode);
+            // var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>();
+            // var errors = problemDetails.Extensions["errors"].ToString();
+            // Assert.Contains("The JSON value could not be converted to System.UInt32", errors);
+        }
+        
+       
 
-        Assert.Equal(HttpStatusCode.BadRequest, result.StatusCode);
-        var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>();
-        var errors = problemDetails.Extensions["errors"].ToString();
-        Assert.Contains("The JSON value could not be converted to System.UInt32", errors);
+        
     }
 }

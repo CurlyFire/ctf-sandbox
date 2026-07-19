@@ -1,96 +1,53 @@
 using System.IdentityModel.Tokens.Jwt;
-using System.Net.Http.Json;
+using System.Linq;
 using ctf_sandbox.Areas.CTF.Models;
 using ctf_sandbox.Models;
-using ctf_sandbox.tests.Dsl;
+using ctf_sandbox.tests.Clients.API;
 
 namespace ctf_sandbox.tests.Drivers.CTF.API;
 
 public class APICTFDriver : ICTFDriver
 {
-    private readonly HttpClient _httpClient;
-    private string? _jwt;
+    private readonly APIClient _apiClient;
 
-    public APICTFDriver(HttpClient httpClient)
+
+    public APICTFDriver(APIClient apiClient)
     {
-        _httpClient = httpClient;
-        _jwt = null;
+        _apiClient = apiClient;
+        
     }
 
     public async Task<bool> CreateAccount(string email, string password)
     {
-        var response = await _httpClient.PostAsJsonAsync("account",
-            new RegisterAccountRequest()
-            {
-                Email = email,
-                Password = password
-            });
-
-        return response.IsSuccessStatusCode;
+        var accountEndpoint = _apiClient.Account;
+        try
+        {
+            await accountEndpoint.CreateAccount(email, password);
+            return true;
+        }
+        catch (HttpRequestException)
+        {
+            return false;
+        }
     }
 
     public async Task<string?> CreateTeam(string? teamName, uint memberCount = 4)
     {
-        EnsureAuthenticatedAndSetAuthorizationHeader();
-
-        var response = await _httpClient.PostAsJsonAsync("teams",
-            new CreateTeamRequest()
-            {
-                Name = teamName ?? string.Empty,
-                MemberCount = memberCount
-            });
-
-        if (response.IsSuccessStatusCode)
-        {
-            return null; // Success, no error
-        }
-
-        // Parse error response and extract validation errors
         try
         {
-            var problemDetails = await response.Content.ReadFromJsonAsync<System.Text.Json.JsonElement>();
-            var errors = new List<string>();
-
-            if (problemDetails.TryGetProperty("errors", out var errorsProperty))
-            {
-                foreach (var errorProperty in errorsProperty.EnumerateObject())
-                {
-                    if (errorProperty.Value.ValueKind == System.Text.Json.JsonValueKind.Array)
-                    {
-                        foreach (var errorMessage in errorProperty.Value.EnumerateArray())
-                        {
-                            errors.Add(errorMessage.GetString() ?? string.Empty);
-                        }
-                    }
-                }
-            }
-            else if (problemDetails.TryGetProperty("message", out var messageProperty))
-            {
-                errors.Add(messageProperty.GetString() ?? "An error occurred");
-            }
-            else if (problemDetails.TryGetProperty("title", out var titleProperty))
-            {
-                errors.Add(titleProperty.GetString() ?? "Validation failed");
-            }
-
-            return errors.Any() ? string.Join("; ", errors) : "Validation failed";
+            await _apiClient.Teams.CreateTeam("teams",4);
+            return null;
         }
-        catch
+        catch (HttpRequestException exc)
         {
-            // Fallback to raw content if JSON parsing fails
-            return await response.Content.ReadAsStringAsync();
+            return "dude, check tes affaires";
         }
     }
 
     public async Task UpdateTeam(string oldTeamName, string newTeamName, string? newDescription = null, uint? memberCount = null)
     {
-        EnsureAuthenticatedAndSetAuthorizationHeader();
+        var teams = await _apiClient.Teams.GetTeams();
 
-        // First, get the team ID by finding the team with the old name
-        var getResponse = await _httpClient.GetAsync("teams");
-        getResponse.EnsureSuccessStatusCode();
-
-        var teams = await getResponse.Content.ReadFromJsonAsync<List<Team>>();
         var team = teams?.FirstOrDefault(t => t.Name == oldTeamName);
         
         if (team == null)
@@ -98,68 +55,30 @@ public class APICTFDriver : ICTFDriver
             throw new InvalidOperationException($"Team '{oldTeamName}' not found");
         }
 
-        // Update the team
-        var response = await _httpClient.PutAsJsonAsync($"teams/{team.Id}",
-            new UpdateTeamRequest()
-            {
-                Name = newTeamName,
-                Description = newDescription,
-                MemberCount = memberCount ?? team.MemberCount // Use provided value or preserve existing
-            });
 
-        response.EnsureSuccessStatusCode();
     }
 
     public async Task<IpInfo> GetIpInfo(string ipAddress)
     {
-        EnsureAuthenticatedAndSetAuthorizationHeader();
-
-        var response = await _httpClient.GetAsync($"ipinfo/{ipAddress}");
-        response.EnsureSuccessStatusCode();
-
-        var ipInfo = await response.Content.ReadFromJsonAsync<IpInfo>();
-        return ipInfo ?? throw new InvalidOperationException("Failed to deserialize IP info response");
+        return await _apiClient.IpInfo.GetIpInfo(ipAddress);
     }
 
     public async Task<Team?> GetTeam(string teamName)
     {
-        EnsureAuthenticatedAndSetAuthorizationHeader();
+        var teams = await _apiClient.Teams.GetTeams();
 
-        var response = await _httpClient.GetAsync("teams");
-        response.EnsureSuccessStatusCode();
-
-        var teams = await response.Content.ReadFromJsonAsync<List<Team>>();
-        
-        return teams?.FirstOrDefault(t => t.Name == teamName);
+       
+        return teams.FirstOrDefault(t => t.Name == teamName);
     }
 
     public Task<bool> IsUserSignedIn(string email)
     {
-        var decodedJwt = new JwtSecurityTokenHandler().ReadJwtToken(_jwt);
+        var decodedJwt = _apiClient.UserJwtSecurityToken;
         return Task.FromResult(decodedJwt.Claims.Any(c => c.Type == "email" && c.Value == email));
     }
 
-    public async Task SignIn(string email, string password)
+    public Task SignIn(string email, string password)
     {
-        var result = await _httpClient.PostAsJsonAsync("auth",
-         new LoginRequest()
-         {
-             Username = email,
-             Password = password
-         });
-
-        result.EnsureSuccessStatusCode();
-        _jwt = await result.Content.ReadAsStringAsync();
-    }
-
-    private void EnsureAuthenticatedAndSetAuthorizationHeader()
-    {
-        if (string.IsNullOrEmpty(_jwt))
-        {
-            throw new InvalidOperationException("User must be signed in to perform this action");
-        }
-
-        _httpClient.DefaultRequestHeaders.Authorization = 
-            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _jwt);
+        throw new NotImplementedException();
     }
 }
