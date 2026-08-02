@@ -1,8 +1,8 @@
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using ctf_sandbox.Areas.CTF.Models;
 using ctf_sandbox.Models;
 using ctf_sandbox.tests.Clients.API;
+using ctf_sandbox.tests.Clients.API.Endpoints;
 
 namespace ctf_sandbox.tests.Drivers.CTF.API;
 
@@ -10,11 +10,13 @@ public class APICTFDriver : ICTFDriver
 {
     private readonly APIClient _apiClient;
 
+    private string _jwt;
+
 
     public APICTFDriver(APIClient apiClient)
     {
         _apiClient = apiClient;
-        
+        _jwt = string.Empty;
     }
 
     public async Task<bool> CreateAccount(string email, string password)
@@ -35,18 +37,34 @@ public class APICTFDriver : ICTFDriver
     {
         try
         {
-            await _apiClient.Teams.CreateTeam("teams",4);
+            await _apiClient.Teams.CreateTeam(teamName, memberCount, _jwt);
             return null;
         }
-        catch (HttpRequestException exc)
+        catch (UnsuccessfulHttpResponseException exc)
         {
-            return "dude, check tes affaires";
+            var validationProblemDetails = await exc.Response.GetValidationProblemDetails();
+            if (validationProblemDetails != null)
+            {
+                var errorMessages = validationProblemDetails.Errors.SelectMany(e => e.Value);
+                if (validationProblemDetails.Detail != null)
+                {
+                    return string.Join("; ", validationProblemDetails.Detail, errorMessages);
+                }
+                else
+                {
+                    return string.Join("; ", errorMessages);
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException("Failed to create team, and no validation problem details were provided.");
+            }
         }
     }
 
     public async Task UpdateTeam(string oldTeamName, string newTeamName, string? newDescription = null, uint? memberCount = null)
     {
-        var teams = await _apiClient.Teams.GetTeams();
+        var teams = await _apiClient.Teams.GetTeams(_jwt);
 
         var team = teams?.FirstOrDefault(t => t.Name == oldTeamName);
         
@@ -54,18 +72,17 @@ public class APICTFDriver : ICTFDriver
         {
             throw new InvalidOperationException($"Team '{oldTeamName}' not found");
         }
-
-
+        await _apiClient.Teams.UpdateTeam(team.Id, newTeamName, newDescription, memberCount ?? team.MemberCount, _jwt);
     }
 
     public async Task<IpInfo> GetIpInfo(string ipAddress)
     {
-        return await _apiClient.IpInfo.GetIpInfo(ipAddress);
+        return await _apiClient.IpInfo.GetIpInfo(ipAddress, _jwt);
     }
 
     public async Task<Team?> GetTeam(string teamName)
     {
-        var teams = await _apiClient.Teams.GetTeams();
+        var teams = await _apiClient.Teams.GetTeams(_jwt);
 
        
         return teams.FirstOrDefault(t => t.Name == teamName);
@@ -73,12 +90,12 @@ public class APICTFDriver : ICTFDriver
 
     public Task<bool> IsUserSignedIn(string email)
     {
-        var decodedJwt = _apiClient.UserJwtSecurityToken;
+        var decodedJwt = new JwtSecurityTokenHandler().ReadJwtToken(_jwt);
         return Task.FromResult(decodedJwt.Claims.Any(c => c.Type == "email" && c.Value == email));
     }
 
-    public Task SignIn(string email, string password)
+    public async Task SignIn(string email, string password)
     {
-        throw new NotImplementedException();
+        _jwt = await _apiClient.Authentication.Authenticate(email, password);
     }
 }

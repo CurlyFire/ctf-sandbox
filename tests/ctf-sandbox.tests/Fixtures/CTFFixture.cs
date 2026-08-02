@@ -207,13 +207,14 @@ public abstract class CTFFixture
     {
         services.AddSingleton(Configuration!);
         services.AddHttpClient().ConfigureHttpClientDefaults(ConfigureCTFHttpClient);
-        services.AddScoped<UIClient>();
-        services.AddScoped<UICTFDriver>();
-        services.AddScoped<APIClient>();
-        services.AddScoped<AuthenticationEndpoint>();
-        services.AddScoped<AccountEndpoint>();
-        services.AddScoped<TeamsEndpoint>();
-        services.AddScoped<IpInfoEndpoint>();
+        services.AddTransient<UIClient>();
+        services.AddTransient<UICTFDriver>();
+        services.AddTransient<APICTFDriver>();
+        services.AddTransient<APIClient>();
+        services.AddTransient<AuthenticationEndpoint>();
+        services.AddTransient<AccountEndpoint>();
+        services.AddTransient<TeamsEndpoint>();
+        services.AddTransient<IpInfoEndpoint>();
         services.AddSingleton(Playwright.CreateAsync().Result);
         ConfigureServices(services);
     }

@@ -8,9 +8,9 @@ public class IpInfoEndpoint : Endpoint
     {
     }
 
-    public async Task<IpInfo> GetIpInfo(string ipAddress)
+    public async Task<IpInfo> GetIpInfo(string ipAddress, string jwt)
     {
         var url = $"ipinfo/{ipAddress}";
-        return await GetAsyncAndEnsureSuccess<IpInfo>(url);
+        return await GetAsyncAndEnsureSuccess<IpInfo>(url, jwt);
     }
 }

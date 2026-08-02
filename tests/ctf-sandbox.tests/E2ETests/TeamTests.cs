@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using ctf_sandbox.tests.Clients.API.Endpoints;
 using ctf_sandbox.tests.Fixtures;
 using ctf_sandbox.tests.Utils;
 using Microsoft.AspNetCore.Mvc;
@@ -122,24 +123,19 @@ public class TeamTests
     public async Task API_ShouldFailToCreateTeamWithNonIntegerMemberCount(string memberCount)
     {
         var client = _fixture.InteractWithCTFThroughAPIClient();
-        await client.Authentication.Authenticate(_fixture.Configuration.WebServerCredentials.Username,
+        var jwt = await client.Authentication.Authenticate(_fixture.Configuration.WebServerCredentials.Username,
             _fixture.Configuration.WebServerCredentials.Password);
 
         
         try
         {
-            await client.Teams.CreateTeam("TeamWithInvalidMemberCount", memberCount);    
+            await client.Teams.CreateTeam("TeamWithInvalidMemberCount", memberCount, jwt);
         }
-        catch (HttpRequestException ex)
+        catch (UnsuccessfulHttpResponseException ex)
         {
-            Assert.Equal(HttpStatusCode.BadRequest, ex.StatusCode);
-            // var problemDetails = await result.Content.ReadFromJsonAsync<ProblemDetails>();
-            // var errors = problemDetails.Extensions["errors"].ToString();
-            // Assert.Contains("The JSON value could not be converted to System.UInt32", errors);
+            Assert.Equal(HttpStatusCode.BadRequest, ex.Response.StatusCode);
+            var problemDetails = await ex.Response.GetValidationProblemDetails();
+            Assert.Contains("The JSON value could not be converted to System.UInt32",problemDetails.Errors[$"$.{nameof(memberCount)}"][0]);
         }
-        
-       
-
-        
     }
 }

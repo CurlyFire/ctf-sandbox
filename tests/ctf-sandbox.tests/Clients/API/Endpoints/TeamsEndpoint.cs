@@ -9,26 +9,26 @@ public class TeamsEndpoint : Endpoint
     }
 
 
-    public async Task CreateTeam(string teamName, string memberCount)
+    public async Task CreateTeam(string teamName, string memberCount, string jwt)
     {
         await PostAsyncAndEnsureSuccess("teams", new
         {
             Name = teamName,
             MemberCount = memberCount
-        });        
+        }, jwt);        
     }
-    public async Task CreateTeam(string teamName, uint memberCount = 4)
+    public async Task CreateTeam(string teamName, uint memberCount, string jwt)
     {
-        await CreateTeam(teamName, memberCount.ToString());
+        await CreateTeam(teamName, memberCount.ToString(), jwt);
     }
 
-    public async Task<IEnumerable<Team>> GetTeams()
+    public async Task<IEnumerable<Team>> GetTeams(string jwt)
     {
-        var teams = await GetAsyncAndEnsureSuccess<List<Team>>("teams");
+        var teams = await GetAsyncAndEnsureSuccess<List<Team>>("teams", jwt);
         return teams;
     }
 
-    public async Task UpdateTeam(string teamId, string teamName, string? description, string memberCount)
+    public async Task UpdateTeam(string teamId, string teamName, string? description, string memberCount, string jwt)
     {
         var updateRequest = new 
         {
@@ -37,12 +37,12 @@ public class TeamsEndpoint : Endpoint
             MemberCount = memberCount
         };
 
-        await PutAsyncAndEnsureSuccess($"teams/{teamId}", updateRequest);
+        await PutAsyncAndEnsureSuccess($"teams/{teamId}", updateRequest, jwt);
 
     }
 
-    public async Task UpdateTeam(int teamId, string teamName, string? description, uint memberCount)
+    public async Task UpdateTeam(int teamId, string teamName, string? description, uint memberCount, string jwt)
     {
-        await UpdateTeam(teamId.ToString(), teamName, description, memberCount.ToString());
+        await UpdateTeam(teamId.ToString(), teamName, description, memberCount.ToString(), jwt);
     }
 }
