@@ -1,5 +1,7 @@
+using System.Net.Sockets;
 using ctf_sandbox.tests.Clients.API;
 using ctf_sandbox.tests.Clients.API.Endpoints;
+using ctf_sandbox.tests.Clients.ExternalSystems;
 using ctf_sandbox.tests.Clients.UI;
 using ctf_sandbox.tests.Drivers.CTF;
 using ctf_sandbox.tests.Drivers.CTF.API;
@@ -207,6 +209,8 @@ public abstract class CTFFixture
     {
         services.AddSingleton(Configuration!);
         services.AddHttpClient().ConfigureHttpClientDefaults(ConfigureCTFHttpClient);
+        services.AddHttpClient<IpInfoRealClient>(ConfigureIpInfoHttpClient);
+        services.AddTransient<TcpClient>();
         services.AddTransient<UIClient>();
         services.AddTransient<UICTFDriver>();
         services.AddTransient<APICTFDriver>();
@@ -225,5 +229,10 @@ public abstract class CTFFixture
         {
             httpClient.BaseAddress = new Uri(Configuration!.WebServerUrl + "/api/");
         });
+    }
+
+    private void ConfigureIpInfoHttpClient(HttpClient client)
+    {
+        client.BaseAddress = new Uri(Configuration!.IpInfoUrl);
     }
 }

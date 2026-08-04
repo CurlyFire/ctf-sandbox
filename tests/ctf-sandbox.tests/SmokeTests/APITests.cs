@@ -1,5 +1,3 @@
-using System.Net.Http.Json;
-using ctf_sandbox.Models;
 using ctf_sandbox.tests.Fixtures;
 
 namespace ctf_sandbox.tests.SmokeTests;
@@ -13,6 +11,15 @@ public class APITests
     {
         _fixture = fixture;
     }
+
+    [Fact]
+    [Trait("Category", "Smoke_API")]
+    public async Task Api_ShouldBeUpAndRunning()
+    {
+        var client = _fixture.InteractWithCTFThroughAPIClient();
+
+        Assert.True(await client.IsHealthy());
+    }    
 
     [Trait("Category", "Smoke_API")]
     [Fact]

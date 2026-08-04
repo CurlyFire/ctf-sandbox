@@ -1,6 +1,4 @@
-using System.Net.Http.Headers;
-using System.Net.Sockets;
-using System.Text;
+using ctf_sandbox.tests.Clients.ExternalSystems;
 using ctf_sandbox.tests.Fixtures;
 
 namespace ctf_sandbox.tests.SmokeTests;
@@ -19,64 +17,26 @@ public class ExternalSystemsHealthTests
     [Fact]
     public async Task Mailpit_ShouldBeUpAndRunning()
     {
-        // Navigate to Mailpit URL
-        HttpResponseMessage response;
-        using (var client = new HttpClient())
-        {
-            if (!_fixture.Configuration.MailpitCredentials.IsEmpty())
-            {
-                var byteArray = Encoding.ASCII.GetBytes($"{_fixture.Configuration.MailpitCredentials.Username}:{_fixture.Configuration.MailpitCredentials.Password}");
-                client.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
-            }
-            response = await client.GetAsync(_fixture.Configuration.MailpitUrl);
-        }
-        // Check if the response is successful
-        Assert.True(response.IsSuccessStatusCode, $"Failed to connect to Mailpit at {_fixture.Configuration.MailpitUrl}, status code: {response.StatusCode}");
+        var mailpitClient = new MailpitRealClient(new HttpClient { BaseAddress = new Uri(_fixture.Configuration.MailpitUrl) });
+
+        Assert.True(await mailpitClient.IsHealthy());
     }
 
     [Fact]
     [Trait("Category", "Smoke_ExternalSystemsHealth")]
     public async Task IpInfo_ShouldBeUpAndRunning()
     {
-        // Ensure we have a URL configured
-        Assert.NotNull(_fixture.Configuration.IpInfoUrl);
+        var ipInfoClient = new IpInfoRealClient(new HttpClient { BaseAddress = new Uri(_fixture.Configuration.IpInfoUrl) });
 
-        // Parse the URL to get host and port
-        var uri = new Uri(_fixture.Configuration.IpInfoUrl);
-        var port = uri.Port == -1 ? (uri.Scheme == "https" ? 443 : 80) : uri.Port;
-
-        using var client = new TcpClient();
-        var connectTask = client.ConnectAsync(uri.Host, port);
-        // Use a reasonable timeout
-        var timeoutTask = Task.Delay(TimeSpan.FromSeconds(10));
-
-        // Wait for either connection or timeout
-        var completedTask = await Task.WhenAny(connectTask, timeoutTask);
-
-        Assert.True(completedTask == connectTask,
-            $"Failed to establish TCP connection to {uri.Host}:{port} within timeout period");
-        Assert.True(client.Connected,
-            $"TCP connection to {uri.Host}:{port} was not established successfully");
+        Assert.True(await ipInfoClient.IsHealthy());
     }
 
     [Fact]
     [Trait("Category", "Smoke_ExternalSystemsHealth")]
     public async Task BannedWordsApi_ShouldBeUpAndRunning()
     {
-        // Ensure we have a URL configured
-        Assert.NotNull(_fixture.Configuration.BannedWordsUrl);
+        var bannedWordsClient = new BannedWordsRealClient(new HttpClient { BaseAddress = new Uri(_fixture.Configuration.BannedWordsUrl) });
 
-        // Test connection to the banned words API
-        HttpResponseMessage response;
-        using (var client = new HttpClient())
-        {
-            client.BaseAddress = new Uri(_fixture.Configuration.BannedWordsUrl);
-            response = await client.GetAsync(string.Empty);
-        }
-
-        // Check if the response is successful
-        Assert.True(response.IsSuccessStatusCode, 
-            $"Failed to connect to Banned Words API at {_fixture.Configuration.BannedWordsUrl}, status code: {response.StatusCode}");
+        Assert.True(await bannedWordsClient.IsHealthy());
     }
 }
