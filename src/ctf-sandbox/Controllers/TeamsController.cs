@@ -77,7 +77,7 @@ public class TeamsController : ControllerBase
 
         if (!success)
         {
-            return BadRequest(new { message = errorMessage });
+            return Problem(detail: errorMessage, statusCode: StatusCodes.Status400BadRequest);
         }
 
         return CreatedAtAction(nameof(GetTeams), new { id = team!.Id }, team);
