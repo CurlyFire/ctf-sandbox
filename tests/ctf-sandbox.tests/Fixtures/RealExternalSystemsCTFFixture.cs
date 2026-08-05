@@ -1,3 +1,4 @@
+using ctf_sandbox.tests.Clients.ExternalSystems;
 using ctf_sandbox.tests.Drivers.ExternalSystems;
 using ctf_sandbox.tests.Dsl;
 using Microsoft.Extensions.Configuration;
@@ -32,9 +33,11 @@ public class RealExternalSystemsCTFFixture : CTFFixture
         base.ConfigureServices(services);
         services.AddSingleton<ExternalSystems>();
         services.AddSingleton<Emails>();
-        services.AddHttpClient<IEmailsDriver, APIEmailsDriver>(ConfigureEmailsHttpClient);
+        services.AddSingleton<IEmailsDriver, APIEmailsDriver>();
+        services.AddHttpClient<MailpitRealClient>(ConfigureEmailsHttpClient);
         services.AddSingleton<BannedWords>();
-        services.AddHttpClient<IBannedWordsDriver, APIBannedWordsDriver>(ConfigureBannedWordsHttpClient);
+        services.AddSingleton<IBannedWordsDriver, APIBannedWordsDriver>();
+        services.AddHttpClient<BannedWordsRealClient>(ConfigureBannedWordsHttpClient);
     }
 
     protected override void Configure(IServiceProvider serviceProvider)

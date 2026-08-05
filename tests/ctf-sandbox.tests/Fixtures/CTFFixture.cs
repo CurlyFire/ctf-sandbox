@@ -210,7 +210,6 @@ public abstract class CTFFixture
         services.AddSingleton(Configuration!);
         services.AddHttpClient().ConfigureHttpClientDefaults(ConfigureCTFHttpClient);
         services.AddHttpClient<IpInfoRealClient>(ConfigureIpInfoHttpClient);
-        services.AddTransient<TcpClient>();
         services.AddTransient<UIClient>();
         services.AddTransient<UICTFDriver>();
         services.AddTransient<APICTFDriver>();
