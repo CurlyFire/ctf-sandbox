@@ -25,6 +25,11 @@ public class IpInfoTests
 
         // Limited assertions as we don't control the data returned by the external service
         Assert.Equal("8.8.8.8", ipInfo.Ip);
+        Assert.NotNull(ipInfo.Hostname);
+        Assert.NotNull(ipInfo.City);
+        Assert.NotNull(ipInfo.Region);
+        Assert.NotNull(ipInfo.Country);
+        Assert.NotNull(ipInfo.Timezone);
         Assert.NotEmpty(ipInfo.Hostname);
         Assert.NotEmpty(ipInfo.City);
         Assert.NotEmpty(ipInfo.Region);

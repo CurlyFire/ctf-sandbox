@@ -1,12 +1,12 @@
 using System.Net.Sockets;
-using ctf_sandbox.tests.Clients.API;
-using ctf_sandbox.tests.Clients.API.Endpoints;
-using ctf_sandbox.tests.Clients.ExternalSystems;
-using ctf_sandbox.tests.Clients.UI;
-using ctf_sandbox.tests.Drivers.CTF;
-using ctf_sandbox.tests.Drivers.CTF.API;
-using ctf_sandbox.tests.Drivers.CTF.UI;
-using ctf_sandbox.tests.Dsl;
+using ctf_sandbox.tests.Core.Clients.API;
+using ctf_sandbox.tests.Core.Clients.API.Endpoints;
+using ctf_sandbox.tests.Core.Clients.ExternalSystems;
+using ctf_sandbox.tests.Core.Clients.UI;
+using ctf_sandbox.tests.Core.Drivers.CTF;
+using ctf_sandbox.tests.Core.Drivers.CTF.API;
+using ctf_sandbox.tests.Core.Drivers.CTF.UI;
+using ctf_sandbox.tests.Core.Dsl;
 using ctf_sandbox.tests.Extensions;
 using ctf_sandbox.tests.Utils;
 using Microsoft.AspNetCore.Hosting;
@@ -218,6 +218,7 @@ public abstract class CTFFixture
         services.AddTransient<AccountEndpoint>();
         services.AddTransient<TeamsEndpoint>();
         services.AddTransient<IpInfoEndpoint>();
+        services.AddTransient<HealthEndpoint>();
         services.AddSingleton(Playwright.CreateAsync().Result);
         ConfigureServices(services);
     }

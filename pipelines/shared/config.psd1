@@ -27,11 +27,11 @@
             Default    = @("Unit", "NarrowIntegration", "Component", "ContractVerification")
         }
         acceptance = @{
-            Default    = @("Smoke_ExternalSystemsHealth", "Smoke_BackEndHealth", "Smoke_FrontEndHealth", "Smoke_API", "Smoke_UI", "Acceptance")
-            e2e        = @("Smoke_ExternalSystemsHealth", "Smoke_BackEndHealth", "Smoke_FrontEndHealth", "Smoke_API", "Smoke_UI", "Acceptance", "ExternalSystemContract", "E2E")
+            Default    = @("Smoke_ExternalSystems", "Smoke_CTF", "Acceptance")
+            e2e        = @("Smoke_ExternalSystems", "Smoke_CTF", "Acceptance", "ExternalSystemContract", "E2E")
         }
         release = @{
-            Default    = @("Smoke_ExternalSystemsHealth", "Smoke_BackEndHealth", "Smoke_FrontEndHealth", "Smoke_API", "Smoke_UI")
+            Default    = @("Smoke_ExternalSystems", "Smoke_CTF")
         }
     }
 }

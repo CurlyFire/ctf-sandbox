@@ -5,7 +5,7 @@ namespace ctf_sandbox.Models;
 public class IpInfo
 {
     [JsonPropertyName("ip")]
-    public string Ip { get; set; }
+    public string Ip { get; set; } = string.Empty;
 
     [JsonPropertyName("hostname")]
     public string? Hostname { get; set; }

@@ -19,6 +19,11 @@ public class SmtpHealthCheck : IHealthCheck
         var host = _config["EmailSettings:SmtpServer"];
         var portStr = _config["EmailSettings:SmtpPort"];
 
+        if (string.IsNullOrWhiteSpace(host))
+        {
+            return HealthCheckResult.Unhealthy("SMTP server config is invalid.");
+        }
+
         if (!int.TryParse(portStr, out var port))
         {
             return HealthCheckResult.Unhealthy("SMTP port config is invalid.");

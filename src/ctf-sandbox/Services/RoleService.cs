@@ -24,6 +24,8 @@ public class RoleService : IRoleService
         var role = await _roleManager.FindByIdAsync(roleId);
         if (role == null) return new List<IdentityUser>();
 
+        if (role.Name == null) return new List<IdentityUser>();
+
         var users = await _userManager.GetUsersInRoleAsync(role.Name);
         return users.ToList();
     }
@@ -33,7 +35,7 @@ public class RoleService : IRoleService
         var user = await _userManager.FindByIdAsync(userId);
         var role = await _roleManager.FindByIdAsync(roleId);
         
-        if (user == null || role == null) return false;
+        if (user == null || role?.Name == null) return false;
         
         if (!await _userManager.IsInRoleAsync(user, role.Name))
         {
@@ -49,7 +51,7 @@ public class RoleService : IRoleService
         var user = await _userManager.FindByIdAsync(userId);
         var role = await _roleManager.FindByIdAsync(roleId);
         
-        if (user == null || role == null) return false;
+        if (user == null || role?.Name == null) return false;
         
         if (await _userManager.IsInRoleAsync(user, role.Name))
         {

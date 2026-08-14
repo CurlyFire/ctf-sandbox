@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ctf_sandbox.Migrations
 {
     /// <inheritdoc />
-    public partial class ctf : Migration
+    public partial class Ctf : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

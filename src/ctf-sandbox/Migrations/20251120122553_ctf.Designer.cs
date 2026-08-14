@@ -12,7 +12,7 @@ namespace ctf_sandbox.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     [Migration("20251120122553_ctf")]
-    partial class ctf
+    partial class Ctf
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
