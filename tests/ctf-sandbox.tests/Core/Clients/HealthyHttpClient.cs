@@ -14,6 +14,11 @@ public abstract class HealthyHttpClient
     public async Task<bool> IsHealthy()
     {
         var uri = HttpClient.BaseAddress;
+        if (uri == null)
+        {
+            return false;
+        }
+
         var port = uri.Port == -1 ? (uri.Scheme == "https" ? 443 : 80) : uri.Port;
 
         using var client = new TcpClient();

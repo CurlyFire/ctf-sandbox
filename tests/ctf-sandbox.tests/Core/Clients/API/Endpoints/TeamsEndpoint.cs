@@ -9,7 +9,7 @@ public class TeamsEndpoint : Endpoint
     }
 
 
-    public async Task CreateTeam(string teamName, string memberCount, string jwt)
+    public async Task CreateTeam(string? teamName, string memberCount, string jwt)
     {
         await PostAsyncAndEnsureSuccess("teams", new
         {
@@ -17,7 +17,7 @@ public class TeamsEndpoint : Endpoint
             MemberCount = memberCount
         }, jwt);        
     }
-    public async Task CreateTeam(string teamName, uint memberCount, string jwt)
+    public async Task CreateTeam(string? teamName, uint memberCount, string jwt)
     {
         await CreateTeam(teamName, memberCount.ToString(), jwt);
     }

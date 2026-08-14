@@ -87,10 +87,11 @@ public class APICTFDriver : ICTFDriver
         return teams.FirstOrDefault(t => t.Name == teamName);
     }
 
-    public async Task ConfirmUserIsSignedIn(string email)
+    public Task ConfirmUserIsSignedIn(string email)
     {
         var decodedJwt = new JwtSecurityTokenHandler().ReadJwtToken(_jwt);
         Assert.Contains(decodedJwt.Claims, c => c.Type == "email" && c.Value == email);
+        return Task.CompletedTask;
     }
 
     public async Task SignIn(string email, string password)
