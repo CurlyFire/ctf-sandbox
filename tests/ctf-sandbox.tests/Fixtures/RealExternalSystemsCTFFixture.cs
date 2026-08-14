@@ -1,6 +1,6 @@
-using ctf_sandbox.tests.Clients.ExternalSystems;
-using ctf_sandbox.tests.Drivers.ExternalSystems;
-using ctf_sandbox.tests.Dsl;
+using ctf_sandbox.tests.Core.Clients.ExternalSystems;
+using ctf_sandbox.tests.Core.Drivers.ExternalSystems;
+using ctf_sandbox.tests.Core.Dsl;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 

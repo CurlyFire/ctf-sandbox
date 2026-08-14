@@ -1,4 +1,4 @@
-using ctf_sandbox.tests.Clients.ExternalSystems;
+using ctf_sandbox.tests.Core.Clients.ExternalSystems;
 using ctf_sandbox.tests.Fixtures;
 
 namespace ctf_sandbox.tests.SmokeTests;

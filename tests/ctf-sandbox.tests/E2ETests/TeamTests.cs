@@ -1,9 +1,7 @@
 using System.Net;
-using System.Net.Http.Json;
-using ctf_sandbox.tests.Clients.API.Endpoints;
+using ctf_sandbox.tests.Core.Clients.API.Endpoints;
 using ctf_sandbox.tests.Fixtures;
 using ctf_sandbox.tests.Utils;
-using Microsoft.AspNetCore.Mvc;
 
 namespace ctf_sandbox.tests.E2ETests;
 
