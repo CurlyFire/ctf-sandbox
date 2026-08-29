@@ -12,7 +12,7 @@ public class UICTFDriver : ICTFDriver
         _uiClient = uiClient;
     }
 
-    public async Task<bool> CreateAccount(string email, string password)
+    public async Task<Result<VoidValue, SystemError>> CreateAccount(string email, string password)
     {
         var homePage = await _uiClient.OpenHomePage();
         var createAccountPage = await homePage.GoToCreateAccountPage();
@@ -23,11 +23,12 @@ public class UICTFDriver : ICTFDriver
         return await accountCreationConfirmationPage.IsConfirmationMessageVisible();
     }
 
-    public async Task SignIn(string email, string password)
+    public async Task<Result<VoidValue, SystemError>> SignIn(string email, string password)
     {
         var homePage = await _uiClient.OpenHomePage();
         var signInPage = await homePage.GoToSignInPage();
         await signInPage.SignIn(email, password);
+        return Result.Success<SystemError>();
     }
 
     public async Task<string?> CreateTeam(string? teamName, uint memberCount = 4)
@@ -80,5 +81,10 @@ public class UICTFDriver : ICTFDriver
         Assert.True(await homePage.IsMainContentAreaVisible(), "Main content area should be visible on the home page");
         Assert.True(await homePage.IsFooterVisible(), "Footer should be visible on the home page");
         Assert.True(await homePage.IsBrandLogoVisible(), "CTF Arena logo should be visible on the home page");        
+    }
+
+    public Task GoToCTF()
+    {
+        throw new NotImplementedException();
     }
 }

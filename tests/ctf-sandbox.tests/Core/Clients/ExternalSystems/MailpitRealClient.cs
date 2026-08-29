@@ -3,11 +3,11 @@ using System.Text.RegularExpressions;
 
 namespace ctf_sandbox.tests.Core.Clients.ExternalSystems;
 
-public class MailpitRealClient : HealthyHttpClient
+public class MailpitRealClient : HealthyTcpClient
 {
     private readonly HttpClient _httpClient;
 
-    public MailpitRealClient(HttpClient httpClient) : base(httpClient)
+    public MailpitRealClient(HttpClient httpClient) : base(httpClient.BaseAddress!)
     {
         _httpClient = httpClient;
     }

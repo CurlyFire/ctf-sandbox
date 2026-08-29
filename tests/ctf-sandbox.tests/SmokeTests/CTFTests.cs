@@ -20,7 +20,7 @@ public class CTFTests
     public async Task ShouldBeUpAndRunning(Channel channel)
     {
         var ctf = _fixture.InteractWithCTFThrough(channel);
-        await ctf.ConfirmIsUpAndRunning();
+        (await ctf.GoToCTF().Execute()).ShouldSucceed();
     }
 
     [Trait("Category", "Smoke_CTF")]
@@ -29,7 +29,7 @@ public class CTFTests
     public async Task ShouldLoginWithValidCredentials(Channel channel)
     {
         var ctf = _fixture.InteractWithCTFThrough(channel);
-        await ctf.SignIn();
+        (await ctf.SignIn().Execute()).ShouldSucceed();
         await ctf.ConfirmUserIsSignedIn();
     }
 }

@@ -21,7 +21,7 @@ public class TeamTests
     public async Task ShouldBeAbleToCreateTeam(Channel channel)
     {
         var ctf = _fixture.InteractWithCTFThrough(channel);
-        await ctf.SignIn();
+        (await ctf.SignIn().Execute()).ShouldSucceed();
         var randomTeamName = $"team_{Guid.NewGuid()}";
         uint memberCount = 5;
 
@@ -38,7 +38,7 @@ public class TeamTests
     public async Task ShouldBeAbleToUpdateExistingTeam(Channel channel)
     {
         var ctf = _fixture.InteractWithCTFThrough(channel);
-        await ctf.SignIn();
+        (await ctf.SignIn().Execute()).ShouldSucceed();
         var originalTeamName = $"team_{Guid.NewGuid()}";
         var updatedTeamName = $"updated_{Guid.NewGuid()}";
         var updatedDescription = "This is an updated team description";
@@ -64,7 +64,7 @@ public class TeamTests
     public async Task ShouldFailToCreateTeamWithNameTooLong(Channel channel)
     {
         var ctf = _fixture.InteractWithCTFThrough(channel);
-        await ctf.SignIn();
+        (await ctf.SignIn().Execute()).ShouldSucceed();
         // Create a team name with 101 characters (exceeds max of 100)
         var tooLongTeamName = new string('A', 101);
         uint memberCount = 4;
@@ -83,7 +83,7 @@ public class TeamTests
     public async Task ShouldFailToCreateTeamWithMissingName(Channel channel)
     {
         var ctf = _fixture.InteractWithCTFThrough(channel);
-        await ctf.SignIn();
+        (await ctf.SignIn().Execute()).ShouldSucceed();
         uint memberCount = 4;
 
         // Act: Attempt to create team with null/empty name
@@ -99,7 +99,7 @@ public class TeamTests
     public async Task ShouldFailToCreateTeamWithBannedWordInName(Channel channel)
     {
         var ctf = _fixture.InteractWithCTFThrough(channel);
-        await ctf.SignIn();
+        (await ctf.SignIn().Execute()).ShouldSucceed();
         var bannedWordTeamName = "badword_" + Guid.NewGuid();
         uint memberCount = 4;
         await _fixture.ExternalSystems.InteractWithBannedWords().CreateBannedWord(bannedWordTeamName);

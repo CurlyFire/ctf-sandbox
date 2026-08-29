@@ -1,8 +1,8 @@
 namespace ctf_sandbox.tests.Core.Clients.ExternalSystems;
 
-public class IpInfoRealClient : HealthyHttpClient
+public class IpInfoRealClient
 {
-    public IpInfoRealClient(HttpClient client) : base(client)
+    public IpInfoRealClient(HttpClient client)
     {
     }
 }

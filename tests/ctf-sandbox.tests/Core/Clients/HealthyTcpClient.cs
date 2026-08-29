@@ -2,27 +2,21 @@ using System.Net.Sockets;
 
 namespace ctf_sandbox.tests.Core.Clients;
 
-public abstract class HealthyHttpClient
+public abstract class HealthyTcpClient
 {
-    protected HttpClient HttpClient {get;}
+    private readonly Uri _baseAddress;
 
-    public HealthyHttpClient(HttpClient httpClient)
+    public HealthyTcpClient(Uri baseAddress)
     {
-        HttpClient = httpClient;
+        _baseAddress = baseAddress;
     }
 
     public async Task<bool> IsHealthy()
     {
-        var uri = HttpClient.BaseAddress;
-        if (uri == null)
-        {
-            return false;
-        }
-
-        var port = uri.Port == -1 ? (uri.Scheme == "https" ? 443 : 80) : uri.Port;
+        var port = _baseAddress.Port == -1 ? (_baseAddress.Scheme == "https" ? 443 : 80) : _baseAddress.Port;
 
         using var client = new TcpClient();
-        var connectTask = client.ConnectAsync(uri.Host, port);
+        var connectTask = client.ConnectAsync(_baseAddress.Host, port);
         // Use a reasonable timeout
         var timeoutTask = Task.Delay(TimeSpan.FromSeconds(10));
 

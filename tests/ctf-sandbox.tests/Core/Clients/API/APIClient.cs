@@ -1,27 +1,23 @@
-using System.IdentityModel.Tokens.Jwt;
 using ctf_sandbox.tests.Core.Clients.API.Endpoints;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ctf_sandbox.tests.Core.Clients.API;
 
-public class APIClient : HealthyHttpClient
+public class APIClient
 {
     private readonly AuthenticationEndpoint _authenticationEndpoint;
     private readonly AccountEndpoint _accountEndpoint;
     private readonly TeamsEndpoint _teamsEndpoint;
     private readonly IpInfoEndpoint _ipInfoEndpoint;
     private readonly HealthEndpoint _healthEndpoint;
-        public APIClient(AuthenticationEndpoint authenticationEndpoint,
-        AccountEndpoint accountEndpoint,
-        TeamsEndpoint teamsEndpoint,
-        IpInfoEndpoint ipInfoEndpoint,
-        HealthEndpoint healthEndpoint,
-        HttpClient httpClient) : base(httpClient)
+        public APIClient(HttpClient httpClient)
     {
-        _authenticationEndpoint = authenticationEndpoint;
-        _accountEndpoint = accountEndpoint;
-        _teamsEndpoint = teamsEndpoint;
-        _ipInfoEndpoint = ipInfoEndpoint;
-        _healthEndpoint = healthEndpoint;
+        var jsonHttpClient = new JsonHttpClient<ValidationProblemDetails>(httpClient);
+        _authenticationEndpoint = new AuthenticationEndpoint(jsonHttpClient);
+        _accountEndpoint = new AccountEndpoint(jsonHttpClient);
+        _teamsEndpoint = new TeamsEndpoint(jsonHttpClient);
+        _ipInfoEndpoint = new IpInfoEndpoint(jsonHttpClient);
+        _healthEndpoint = new HealthEndpoint(jsonHttpClient);;
     }
 
     public AuthenticationEndpoint Authentication => _authenticationEndpoint;
@@ -29,16 +25,4 @@ public class APIClient : HealthyHttpClient
     public TeamsEndpoint Teams => _teamsEndpoint;
     public IpInfoEndpoint IpInfo => _ipInfoEndpoint;
     public HealthEndpoint Health => _healthEndpoint;
-    public JwtSecurityToken? UserJwtSecurityToken
-    {
-        get
-        {
-            if (HttpClient.DefaultRequestHeaders.Authorization?.Parameter is string token)
-            {
-                var handler = new JwtSecurityTokenHandler();
-                return handler.ReadJwtToken(token);
-            }
-            return null;
-        }
-    }
 }

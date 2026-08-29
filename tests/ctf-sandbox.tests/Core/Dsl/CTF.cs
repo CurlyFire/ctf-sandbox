@@ -1,5 +1,6 @@
 using ctf_sandbox.Models;
 using ctf_sandbox.tests.Core.Drivers.CTF;
+using ctf_sandbox.tests.Core.Dsl.UseCases;
 using ctf_sandbox.tests.Fixtures;
 
 namespace ctf_sandbox.tests.Core.Dsl;
@@ -9,13 +10,15 @@ public class CTF
     private readonly ICTFDriver _driver;
     private readonly CTFConfiguration _configuration;
     private Action<SignInParameters> _noConfiguration;
+    private readonly UseCaseContext _context;
 
 
-    public CTF(ICTFDriver driver, CTFConfiguration configuration)
+    public CTF(ICTFDriver driver, CTFConfiguration configuration, UseCaseContext context)
     {
         _driver = driver;
         _configuration = configuration;
         _noConfiguration = _ => { };
+        _context = context;
     }
 
     public async Task<bool> CreateAccount(string email, string password)
@@ -23,22 +26,13 @@ public class CTF
         return await _driver.CreateAccount(email, password);
     }
 
-    public async Task<CTF> SignIn()
-    {
-        return await SignIn(_noConfiguration);
-    }
+    public UseCases.SignIn SignIn() => SignIn(_noConfiguration);
 
-    public async Task<CTF> SignIn(Action<SignInParameters> configure)
+    public UseCases.SignIn SignIn(Action<SignInParameters> configure)
     {
         var parameters = SignInParameters.CreateWithDefaults(_configuration);
         configure(parameters);
-        return await SignIn(parameters);
-    }
-
-    private async Task<CTF> SignIn(SignInParameters parameters)
-    {
-        await _driver.SignIn(parameters.UserName, parameters.Password);
-        return this;
+        return new UseCases.SignIn(_driver, _context, parameters);
     }
 
     public async Task<string?> CreateTeam(string? teamName, uint memberCount = 4)
@@ -94,8 +88,5 @@ public class CTF
         return await _driver.GetIpInfo(ipAddress);
     }
 
-    public async Task ConfirmIsUpAndRunning()
-    {
-        await _driver.ConfirmIsUpAndRunning();
-    }
+    public GoToCTF GoToCTF() => new(_driver, _context);
 }

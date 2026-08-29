@@ -1,16 +1,18 @@
-using System.Net.Http.Json;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ctf_sandbox.tests.Core.Clients.ExternalSystems;
 
-public class BannedWordsRealClient : HealthyHttpClient
+public class BannedWordsRealClient
 {
-    public BannedWordsRealClient(HttpClient client) : base(client)
+    protected JsonHttpClient<ValidationProblemDetails> JsonHttpClient {get;}
+
+    protected BannedWordsRealClient(HttpClient httpClient)
     {
+        JsonHttpClient = new JsonHttpClient<ValidationProblemDetails>(httpClient);
     }
 
-    public async Task CreateBannedWordAsync(string word)
+    public async Task<Result<VoidValue, ValidationProblemDetails>> CreateBannedWordAsync(string word)
     {
-        var response = await HttpClient.PostAsJsonAsync("/BannedWords", new { Word = word });
-        response.EnsureSuccessStatusCode();
+        return await JsonHttpClient.PostAsync("/BannedWords", new { Word = word });
     }
 }

@@ -1,20 +1,21 @@
 using ctf_sandbox.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ctf_sandbox.tests.Core.Clients.API.Endpoints;
 
 public class AuthenticationEndpoint : Endpoint
 {
-    public AuthenticationEndpoint(HttpClient httpClient) : base(httpClient)
+    public AuthenticationEndpoint(JsonHttpClient<ValidationProblemDetails> jsonHttpClient) : base(jsonHttpClient)
     {
     }
 
-    public async Task<string> Authenticate(string username, string password)
+    public async Task<Result<string, ValidationProblemDetails>> Authenticate(string username, string password)
     {
-        var token = await PostAsyncAndEnsureSuccess<LoginRequest, string>("auth", new LoginRequest
+        var result = await JsonHttpClient.PostAsync<string>("auth", new LoginRequest
         {
             Username = username,
             Password = password
         });
-        return token;
+        return result;
     }
 }

@@ -2,7 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using ctf_sandbox.Areas.CTF.Models;
 using ctf_sandbox.Models;
 using ctf_sandbox.tests.Core.Clients.API;
-using ctf_sandbox.tests.Core.Clients.API.Endpoints;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ctf_sandbox.tests.Core.Drivers.CTF.API;
 
@@ -19,88 +19,86 @@ public class APICTFDriver : ICTFDriver
         _jwt = string.Empty;
     }
 
-    public async Task<bool> CreateAccount(string email, string password)
+    public async Task<Result<VoidValue, SystemError>> CreateAccount(string email, string password)
     {
-        var accountEndpoint = _apiClient.Account;
-        try
-        {
-            await accountEndpoint.CreateAccount(email, password);
-            return true;
-        }
-        catch (HttpRequestException)
-        {
-            return false;
-        }
+        return await _apiClient.Account.CreateAccount(email, password).MapErrorAsync(MapError);
     }
 
-    public async Task<string?> CreateTeam(string? teamName, uint memberCount = 4)
+    public async Task<Result<int, SystemError>> CreateTeam(string? teamName, uint memberCount = 4)
     {
-        try
+        return await _apiClient.Teams.CreateTeam(teamName, memberCount, _jwt).MapErrorAsync(MapError);
+    }
+
+    public async Task<Result<VoidValue, SystemError>> UpdateTeam(string oldTeamName, string newTeamName, string? newDescription = null, uint? memberCount = null)
+    {
+        var result = await _apiClient.Teams.GetTeams(_jwt);
+        if (result.IsSuccess)
         {
-            await _apiClient.Teams.CreateTeam(teamName, memberCount, _jwt);
-            return null;
-        }
-        catch (UnsuccessfulHttpResponseException exc)
-        {
-            var validationProblemDetails = await exc.Response.GetValidationProblemDetails();
-            //TODO : Extract helper function to format validation problem details into a string
-            if (validationProblemDetails != null)
+            var team = result.Value.FirstOrDefault(t => t.Name == oldTeamName);
+            if (team != null)
             {
-                var errorMessages = validationProblemDetails.Errors.SelectMany(e => e.Value);
-                if (validationProblemDetails.Detail != null)
-                {
-                    return string.Join("; ", validationProblemDetails.Detail, errorMessages);
-                }
-                else
-                {
-                    return string.Join("; ", errorMessages);
-                }
+                await _apiClient.Teams.UpdateTeam(team.Id, newTeamName, newDescription, memberCount ?? team.MemberCount, _jwt);
             }
             else
             {
-                throw new InvalidOperationException("Failed to create team, and no validation problem details were provided.");
+                return Result.Failure(SystemError.Of($"Team '{oldTeamName}' not found"));
             }
         }
-    }
-
-    public async Task UpdateTeam(string oldTeamName, string newTeamName, string? newDescription = null, uint? memberCount = null)
-    {
-        var teams = await _apiClient.Teams.GetTeams(_jwt);
-
-        var team = teams?.FirstOrDefault(t => t.Name == oldTeamName);
-        
-        if (team == null)
+        else
         {
-            throw new InvalidOperationException($"Team '{oldTeamName}' not found");
+            return Result.Failure(MapError(result.Error));
         }
-        await _apiClient.Teams.UpdateTeam(team.Id, newTeamName, newDescription, memberCount ?? team.MemberCount, _jwt);
+
+        return Result.Success<SystemError>();
     }
 
-    public async Task<IpInfo> GetIpInfo(string ipAddress)
+    public async Task<Result<IpInfo, SystemError>> GetIpInfo(string ipAddress)
     {
-        return await _apiClient.IpInfo.GetIpInfo(ipAddress, _jwt);
+        return await _apiClient.IpInfo.GetIpInfo(ipAddress, _jwt).MapErrorAsync(MapError);
     }
 
-    public async Task<Team?> GetTeam(string teamName)
+    public async Task<Result<Team?, SystemError>> GetTeam(string teamName)
     {
-        var teams = await _apiClient.Teams.GetTeams(_jwt);
-        return teams.FirstOrDefault(t => t.Name == teamName);
+        return await _apiClient.Teams.GetTeams(_jwt).MapErrorAsync(MapError).MapAsync(teams => teams.FirstOrDefault(t => t.Name == teamName));
     }
-
-    public Task ConfirmUserIsSignedIn(string email)
+    public Task<Result<bool, SystemError>> IsUserSignedIn(string email)
     {
         var decodedJwt = new JwtSecurityTokenHandler().ReadJwtToken(_jwt);
-        Assert.Contains(decodedJwt.Claims, c => c.Type == "email" && c.Value == email);
-        return Task.CompletedTask;
+        var isSignedIn = decodedJwt.Claims.Any(c => c.Type == "email" && c.Value == email);
+        return Task.FromResult(Result.Success<SystemError>().Map(_ => isSignedIn));
+    }
+    
+    public async Task<Result<VoidValue, SystemError>> SignIn(string email, string password)
+    {
+        var result = await _apiClient.Authentication.Authenticate(email, password);
+        if (result.IsSuccess)
+        {
+            _jwt = result.Value;
+            return Result.Success<SystemError>();
+        }
+        else
+        {
+            return Result.Failure(MapError(result.Error));
+        }
     }
 
-    public async Task SignIn(string email, string password)
+    public async Task<Result<VoidValue, SystemError>> GoToCTF()
     {
-        _jwt = await _apiClient.Authentication.Authenticate(email, password);
+        return await _apiClient.Health.CheckHealth().MapErrorAsync(MapError);
     }
 
-    public async Task ConfirmIsUpAndRunning()
+    private static SystemError MapError(ValidationProblemDetails problemDetail)
     {
-        Assert.True(await _apiClient.Health.IsHealthy(), "API is not healthy");
+        var message = problemDetail.Detail ?? "Request failed";
+        if (problemDetail.Errors != null && problemDetail.Errors.Count > 0)
+        {
+            var fieldErrors = problemDetail.Errors
+                .Select(e => new SystemError.FieldError(e.Key ?? "unknown", e.Value.ToString() ?? string.Empty))
+                .ToList();
+            return SystemError.Of(message, fieldErrors.AsReadOnly());
+        }
+        return SystemError.Of(message);
     }
+
+
 }
