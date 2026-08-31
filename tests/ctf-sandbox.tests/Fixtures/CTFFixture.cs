@@ -56,7 +56,7 @@ public abstract class CTFFixture
             Channel.API => _scope.ServiceProvider.GetRequiredService<APICTFDriver>(),
             _ => throw new ArgumentOutOfRangeException(nameof(channel), channel, null)
         };
-        return new CTF(driver, Configuration!);
+        return new CTF(driver, Configuration!, _scope.ServiceProvider.GetRequiredService<UseCaseContext>());
     }
 
     /// <summary>
