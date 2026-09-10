@@ -7,6 +7,7 @@ using ctf_sandbox.tests.Core.Drivers.CTF;
 using ctf_sandbox.tests.Core.Drivers.CTF.API;
 using ctf_sandbox.tests.Core.Drivers.CTF.UI;
 using ctf_sandbox.tests.Core.Dsl;
+using ctf_sandbox.tests.Core.Dsl.UseCases;
 using ctf_sandbox.tests.Extensions;
 using ctf_sandbox.tests.Utils;
 using Microsoft.AspNetCore.Hosting;
@@ -56,7 +57,9 @@ public abstract class CTFFixture
             Channel.API => _scope.ServiceProvider.GetRequiredService<APICTFDriver>(),
             _ => throw new ArgumentOutOfRangeException(nameof(channel), channel, null)
         };
-        return new CTF(driver, Configuration!, _scope.ServiceProvider.GetRequiredService<UseCaseContext>());
+        var useCaseFactory = ActivatorUtilities.CreateInstance<UseCaseFactory>(_scope.ServiceProvider, driver);
+        var ctf = ActivatorUtilities.CreateInstance<CTF>(_scope.ServiceProvider, useCaseFactory);
+        return ctf;
     }
 
     /// <summary>
@@ -220,6 +223,15 @@ public abstract class CTFFixture
         services.AddTransient<IpInfoEndpoint>();
         services.AddTransient<HealthEndpoint>();
         services.AddSingleton(Playwright.CreateAsync().Result);
+        services.AddSingleton<UseCaseFactory>();
+        services.AddScoped<GoToCTF>();
+        services.AddScoped<SignIn>();
+        services.AddScoped<SignInParameters>();
+        services.AddScoped<CreateTeam>();
+        services.AddScoped<CreateTeamParameters>();
+        services.AddScoped<UpdateTeam>();
+        services.AddScoped<UpdateTeamParameters>();
+        services.AddScoped<UseCaseContext>();
         ConfigureServices(services);
     }
 

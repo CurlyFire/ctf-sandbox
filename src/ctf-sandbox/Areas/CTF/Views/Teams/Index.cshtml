@@ -20,7 +20,7 @@
                     <h5 class="card-title">@team.Name</h5>
                     @if (!string.IsNullOrEmpty(team.Description))
                     {
-                        <p class="card-text">@team.Description</p>
+                        <p class="card-text" data-testid="team-description-@team.Name">@team.Description</p>
                     }
                     <p class="card-text"><small class="text-muted">Owner: @team.Owner.Email</small></p>
                     <p class="card-text"><small class="text-muted">Created: @team.CreatedAt.ToString("d")</small></p>

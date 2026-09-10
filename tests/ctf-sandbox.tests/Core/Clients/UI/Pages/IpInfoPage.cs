@@ -3,42 +3,39 @@ using Microsoft.Playwright;
 
 namespace ctf_sandbox.tests.Core.Clients.UI.Pages;
 
-public class IpInfoPage
+public class IpInfoPage : ErrorPage
 {
-    private readonly IPage _page;
-
-    public IpInfoPage(IPage page)
+    public IpInfoPage(IPage page) : base(page)
     {
-        _page = page;
     }
 
     public async Task<IpInfo> GetIpInfo(string ipAddress)
     {
         // Enter IP address in the input field
-        await _page.Locator("#ipAddress").FillAsync(ipAddress);
+        await Page.Locator("#ipAddress").FillAsync(ipAddress);
         
         // Click the Lookup button
-        await _page.GetByRole(AriaRole.Button, new() { Name = "Lookup IP address" }).ClickAsync();
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Lookup IP address" }).ClickAsync();
         
         // Wait for results to appear
-        await _page.Locator("#results").WaitForAsync(new() { State = WaitForSelectorState.Visible });
+        await Page.Locator("#results").WaitForAsync(new() { State = WaitForSelectorState.Visible });
         
         // Extract data from the results table
         var ipInfo = new IpInfo
         {
-            Ip = await _page.Locator("[data-testid='result-ip']").TextContentAsync() ?? string.Empty,
-            Hostname = await _page.Locator("[data-testid='result-hostname']").TextContentAsync(),
-            City = await _page.Locator("[data-testid='result-city']").TextContentAsync(),
-            Region = await _page.Locator("[data-testid='result-region']").TextContentAsync(),
-            Country = await _page.Locator("[data-testid='result-country']").TextContentAsync(),
-            Location = await _page.Locator("[data-testid='result-location']").TextContentAsync(),
-            Organization = await _page.Locator("[data-testid='result-org']").TextContentAsync(),
-            PostalCode = await _page.Locator("[data-testid='result-postal']").TextContentAsync(),
-            Timezone = await _page.Locator("[data-testid='result-timezone']").TextContentAsync()
+            Ip = await Page.Locator("[data-testid='result-ip']").TextContentAsync() ?? string.Empty,
+            Hostname = await Page.Locator("[data-testid='result-hostname']").TextContentAsync(),
+            City = await Page.Locator("[data-testid='result-city']").TextContentAsync(),
+            Region = await Page.Locator("[data-testid='result-region']").TextContentAsync(),
+            Country = await Page.Locator("[data-testid='result-country']").TextContentAsync(),
+            Location = await Page.Locator("[data-testid='result-location']").TextContentAsync(),
+            Organization = await Page.Locator("[data-testid='result-org']").TextContentAsync(),
+            PostalCode = await Page.Locator("[data-testid='result-postal']").TextContentAsync(),
+            Timezone = await Page.Locator("[data-testid='result-timezone']").TextContentAsync()
         };
         
         // Parse the anycast value
-        var anycastText = await _page.Locator("[data-testid='result-anycast']").TextContentAsync();
+        var anycastText = await Page.Locator("[data-testid='result-anycast']").TextContentAsync();
         ipInfo.Anycast = anycastText?.Trim().Equals("Yes", StringComparison.OrdinalIgnoreCase);
         
         return ipInfo;

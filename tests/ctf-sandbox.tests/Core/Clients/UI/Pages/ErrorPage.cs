@@ -1,18 +1,101 @@
 using Microsoft.Playwright;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ctf_sandbox.tests.Core.Clients.UI.Pages;
 
 public class ErrorPage
 {
-    private readonly IPage _page;
+    protected IPage Page { get; }
 
     public ErrorPage(IPage page)
     {
-        _page = page;
+        Page = page;
     }
 
-    public async Task<bool> HasErrors()
+    public async Task<ValidationProblemDetails?> GetErrors()
     {
-        throw new NotImplementedException();
+        var errors = new Dictionary<string, string[]>();
+        string? title = null;
+
+        // Error page
+        if (await Page.GetByRole(AriaRole.Alert, new() { Name = "Application error", Exact = true }).IsVisibleAsync())
+        {
+            title = string.Join(" ", await GetVisibleTextValues(Page.Locator(".text-danger")));
+        }
+        // Developer exception page
+        else if (await Page.GetByText("An unhandled exception occurred while processing the request.", new() { Exact = true }).IsVisibleAsync())
+        {
+            title = "An unhandled exception occurred while processing the request.";
+        }
+        else
+        {
+            var validationSummary = Page.Locator("[data-valmsg-summary]");
+            if (await validationSummary.IsVisibleAsync())
+            {
+                var summaryMessages = await GetVisibleMessages(validationSummary);
+                if (summaryMessages.Length > 0)
+                {
+                    errors[string.Empty] = summaryMessages;
+                }
+            }
+
+            foreach (var fieldMessage in await Page.Locator("[data-valmsg-for]").AllAsync())
+            {
+                if (!await fieldMessage.IsVisibleAsync())
+                {
+                    continue;
+                }
+
+                var message = (await fieldMessage.TextContentAsync())?.Trim();
+                var fieldName = await fieldMessage.GetAttributeAsync("data-valmsg-for");
+                if (!string.IsNullOrWhiteSpace(message) && !string.IsNullOrWhiteSpace(fieldName))
+                {
+                    errors[fieldName] = [message];
+                }
+            }
+        }
+
+        if (title is null && errors.Count == 0)
+        {
+            return null;
+        }
+
+        return new ValidationProblemDetails(errors) { Title = title };
+    }
+
+    private static async Task<string[]> GetVisibleTextValues(ILocator locator)
+    {
+        var values = new List<string>();
+        foreach (var item in await locator.AllAsync())
+        {
+            if (await item.IsVisibleAsync())
+            {
+                var value = (await item.TextContentAsync())?.Trim();
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    values.Add(value);
+                }
+            }
+        }
+
+        return values.ToArray();
+    }
+
+    private static async Task<string[]> GetVisibleMessages(ILocator locator)
+    {
+        var messages = new List<string>();
+        foreach (var item in await locator.Locator("li").AllAsync())
+        {
+            if (await item.IsVisibleAsync())
+            {
+                var message = (await item.TextContentAsync())?.Trim();
+                if (!string.IsNullOrWhiteSpace(message))
+                {
+                    messages.Add(message);
+                }
+            }
+        }
+
+        return messages.ToArray();
     }
 }

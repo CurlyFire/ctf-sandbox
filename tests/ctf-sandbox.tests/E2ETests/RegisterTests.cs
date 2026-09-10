@@ -26,7 +26,7 @@ public class RegisterTests
 
         var emails = _fixture.ExternalSystems.InteractWithEmails();
         await emails.ActivateRegistrationSentTo(randomEmail);
-        (await ctf.SignIn(credentials =>
+        (await ctf.SignIn().With(credentials =>
         {
             credentials.UserName = randomEmail;
             credentials.Password = password;

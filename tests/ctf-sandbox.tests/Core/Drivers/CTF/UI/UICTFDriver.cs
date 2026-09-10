@@ -12,119 +12,153 @@ public class UICTFDriver : ICTFDriver
         _uiClient = uiClient;
     }
 
-    // public async Task<Result<VoidValue, SystemError>> CreateAccount(string email, string password)
-    // {
-    //     var homePage = await _uiClient.OpenHomePage();
-    //     var createAccountPage = await homePage.GoToCreateAccountPage();
-    //     await createAccountPage.FillEmail(email);
-    //     await createAccountPage.FillPassword(password);
-    //     await createAccountPage.FillConfirmPassword(password);
-    //     var accountCreationConfirmationPage = await createAccountPage.CreateAccount();
-    //     return await accountCreationConfirmationPage.IsConfirmationMessageVisible();
-    // }
-
-    // public async Task<Result<VoidValue, SystemError>> SignIn(string email, string password)
-    // {
-    //     var homePage = await _uiClient.OpenHomePage();
-    //     var signInPage = await homePage.GoToSignInPage();
-    //     await signInPage.SignIn(email, password);
-    //     return Result.Success<SystemError>();
-    // }
-
-    // public async Task<string?> CreateTeam(string? teamName, uint memberCount = 4)
-    // {
-    //     var homePage = await _uiClient.OpenHomePage();
-    //     var manageTeamsPage = await homePage.GoToManageTeamsPage();
-    //     var createNewTeamPage = await manageTeamsPage.GoToCreateNewTeamPage();
-    //     return await createNewTeamPage.CreateTeam(teamName, memberCount);
-    // }
-
-    // public async Task UpdateTeam(string oldTeamName, string newTeamName, string? newDescription = null, uint? memberCount = null)
-    // {
-    //     var homePage = await _uiClient.OpenHomePage();
-    //     var manageTeamsPage = await homePage.GoToManageTeamsPage();
-    //     var editTeamPage = await manageTeamsPage.GoToEditTeamPage(oldTeamName);
-    //     await editTeamPage.UpdateTeam(newTeamName, newDescription, memberCount);
-    // }
-
-    // public async Task<Team?> GetTeam(string teamName)
-    // {
-    //     var homePage = await _uiClient.OpenHomePage();
-    //     var manageTeamsPage = await homePage.GoToManageTeamsPage();
-    //     return await manageTeamsPage.GetTeam(teamName);
-    // }
-
-    // public async Task ConfirmUserIsSignedIn(string email)
-    // {
-    //     var homePage = await _uiClient.OpenHomePage();
-    //     Assert.True(await homePage.IsUserLoggedIn(email));
-    // }
-
-    // public async Task<IpInfo> GetIpInfo(string ipAddress)
-    // {
-    //     var homePage = await _uiClient.OpenHomePage();
-    //     var ipInfoPage = await homePage.GoToIpInfoPage();
-    //     return await ipInfoPage.GetIpInfo(ipAddress);
-    // }
-
-    // public async Task ConfirmIsUpAndRunning()
-    // {
-    //     var homePage = await _uiClient.OpenHomePage();
-    //     // Check if the page title is correct
-    //     var title = await homePage.GetPageTitle();
-    //     Assert.Equal("Home Page - CTF Arena", title);
-
-    //     // Verify each main layout component individually
-    //     Assert.True(await homePage.IsBannerVisible(), "Header banner should be visible on the home page");
-    //     Assert.True(await homePage.IsMainNavigationVisible(), "Main navigation menu should be visible on the home page");
-    //     Assert.True(await homePage.IsDashboardLinkVisible(), "Dashboard link should be visible on the home page");
-    //     Assert.True(await homePage.IsMainContentAreaVisible(), "Main content area should be visible on the home page");
-    //     Assert.True(await homePage.IsFooterVisible(), "Footer should be visible on the home page");
-    //     Assert.True(await homePage.IsBrandLogoVisible(), "CTF Arena logo should be visible on the home page");        
-    // }
-
-    public Task GoToCTF()
+    public async Task<Result<VoidValue, SystemError>> CreateAccount(string email, string password)
     {
-        throw new NotImplementedException();
+        var homePage = await _uiClient.OpenHomePage();
+        var createAccountPage = await homePage.GoToCreateAccountPage();
+        await createAccountPage.FillEmail(email);
+        await createAccountPage.FillPassword(password);
+        await createAccountPage.FillConfirmPassword(password);
+        var accountCreationConfirmationPage = await createAccountPage.CreateAccount();
+        var errors = await accountCreationConfirmationPage.GetErrors();
+        if (errors != null)
+        {
+            return Result.Failure(ValidationProblemDetailsExtensions.MapError(errors));
+        }
+        else
+        {
+            var result = await accountCreationConfirmationPage.IsConfirmationMessageVisible();
+            return result ? Result.Success<SystemError>() : Result.Failure(SystemError.Of("Account creation confirmation message was not found"));
+        }
     }
 
-    Task<Result<int, SystemError>> ICTFDriver.CreateTeam(string? teamName, uint memberCount)
+    public async Task<Result<VoidValue, SystemError>> SignIn(string? email, string? password)
     {
-        throw new NotImplementedException();
+        var homePage = await _uiClient.OpenHomePage();
+        var signInPage = await homePage.GoToSignInPage();
+        var result = await signInPage.SignIn(email, password);
+        if (result.IsSuccess)
+        {
+            return Result.Success<SystemError>();
+        }
+        else
+        {
+            return Result.Failure(ValidationProblemDetailsExtensions.MapError(result.Error));
+        }
     }
 
-    Task<Result<VoidValue, SystemError>> ICTFDriver.UpdateTeam(string oldTeamName, string newTeamName, string? newDescription, uint? memberCount)
+    public async Task<Result<Team?, SystemError>> CreateTeam(string? teamName, uint memberCount = 4)
     {
-        throw new NotImplementedException();
+        var homePage = await _uiClient.OpenHomePage();
+        var manageTeamsPage = await homePage.GoToManageTeamsPage();
+        var createNewTeamPage = await manageTeamsPage.GoToCreateNewTeamPage();
+        var result = await createNewTeamPage.CreateTeam(teamName, memberCount);
+        if (result.IsSuccess)
+        {
+            var createdTeam = await result.Value.GetTeam(teamName);
+            if (createdTeam.IsSuccess)
+                return Result<Team?, SystemError>.Success(createdTeam.Value);
+            else
+                return Result<Team?, SystemError>.Failure(ValidationProblemDetailsExtensions.MapError(createdTeam.Error));
+        }
+        else
+        {
+            return Result<Team?, SystemError>.Failure(ValidationProblemDetailsExtensions.MapError(result.Error));
+        }        
     }
 
-    Task<Result<Team?, SystemError>> ICTFDriver.GetTeam(string teamName)
+    public async Task<Result<Team, SystemError>> UpdateTeam(string oldTeamName, string newTeamName, string? newDescription = null, uint? memberCount = null)
     {
-        throw new NotImplementedException();
+        var homePage = await _uiClient.OpenHomePage();
+        var manageTeamsPage = await homePage.GoToManageTeamsPage();
+        var editTeamPage = await manageTeamsPage.GoToEditTeamPage(oldTeamName);
+        var result = await editTeamPage.UpdateTeam(newTeamName, newDescription, memberCount);
+        if (result.IsSuccess)
+        {
+            var team = await result.Value.GetTeam(newTeamName);
+            return Result<Team, SystemError>.Success(team.Value);
+        }
+        else
+        {
+            return Result<Team, SystemError>.Failure(ValidationProblemDetailsExtensions.MapError(result.Error));
+        }
     }
 
-    public Task<Result<bool, SystemError>> IsUserSignedIn(string email)
+    public async Task<Result<Team, SystemError>> GetTeam(string teamName)
     {
-        throw new NotImplementedException();
+        var homePage = await _uiClient.OpenHomePage();
+        var manageTeamsPage = await homePage.GoToManageTeamsPage();
+
+        var result = await manageTeamsPage.GetTeam(teamName);
+        if (result.IsSuccess)
+        {
+            return Result<Team, SystemError>.Success(result.Value);
+        }
+        else
+        {
+            return Result<Team, SystemError>.Failure(ValidationProblemDetailsExtensions.MapError(result.Error));
+        }
     }
 
-    Task<Result<IpInfo, SystemError>> ICTFDriver.GetIpInfo(string ipAddress)
+    public async Task<Result<VoidValue, SystemError>> ConfirmUserIsSignedIn(string email)
     {
-        throw new NotImplementedException();
+        var homePage = await _uiClient.OpenHomePage();
+        var isLoggedIn = await homePage.IsUserLoggedIn(email);
+        if (isLoggedIn)
+            return Result.Success<SystemError>();
+        else
+            return Result<VoidValue, SystemError>.Failure(SystemError.Of("User is not signed in"));
     }
 
-    Task<Result<VoidValue, SystemError>> ICTFDriver.GoToCTF()
+    public async Task<Result<IpInfo, SystemError>> GetIpInfo(string ipAddress)
     {
-        throw new NotImplementedException();
+        var homePage = await _uiClient.OpenHomePage();
+        var ipInfoPage = await homePage.GoToIpInfoPage();
+        var ipInfo = await ipInfoPage.GetIpInfo(ipAddress);
+        var errors = await ipInfoPage.GetErrors();
+        if (errors != null)
+        {
+            return Result<IpInfo, SystemError>.Failure(ValidationProblemDetailsExtensions.MapError(errors));
+        }
+        return Result<IpInfo, SystemError>.Success(ipInfo);
     }
 
-    public Task<Result<VoidValue, SystemError>> CreateAccount(string email, string password)
+    public async Task<Result<VoidValue, SystemError>> ConfirmIsUpAndRunning()
     {
-        throw new NotImplementedException();
+        var homePage = await _uiClient.OpenHomePage();
+        var title = await homePage.GetPageTitle();
+        if (title != "Home Page - CTF Arena")
+            return Result.Failure(SystemError.Of("The CTF Arena home page title is incorrect."));
+
+        if (!await homePage.IsBannerVisible())
+            return Result.Failure(SystemError.Of("The home page header banner is not visible."));
+
+        if (!await homePage.IsMainNavigationVisible())
+            return Result.Failure(SystemError.Of("The home page main navigation menu is not visible."));
+
+        if (!await homePage.IsDashboardLinkVisible())
+            return Result.Failure(SystemError.Of("The home page dashboard link is not visible."));
+
+        if (!await homePage.IsMainContentAreaVisible())
+            return Result.Failure(SystemError.Of("The home page main content area is not visible."));
+
+        if (!await homePage.IsFooterVisible())
+            return Result.Failure(SystemError.Of("The home page footer is not visible."));
+
+        if (!await homePage.IsBrandLogoVisible())
+            return Result.Failure(SystemError.Of("The CTF Arena logo is not visible on the home page."));
+
+        return Result.Success<SystemError>();
     }
 
-    public Task<Result<VoidValue, SystemError>> SignIn(string email, string password)
+    public async Task<Result<VoidValue, SystemError>> GoToCTF()
     {
-        throw new NotImplementedException();
+        var homePage = await _uiClient.OpenHomePage();
+        var errors = await homePage.GetErrors();
+        if (errors != null)
+        {
+            return Result.Failure(ValidationProblemDetailsExtensions.MapError(errors));
+        }
+        return Result.Success<SystemError>();
     }
 }

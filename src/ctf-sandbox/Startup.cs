@@ -145,6 +145,7 @@ public class Startup
         // Configure the HTTP request pipeline.
         if (env.IsDevelopment())
         {
+            app.UseDeveloperExceptionPage();
             app.UseMigrationsEndPoint();
             
             // Enable Swagger in development
