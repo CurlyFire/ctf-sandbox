@@ -229,6 +229,8 @@ public abstract class CTFFixture
         services.AddScoped<SignInParameters>();
         services.AddScoped<CreateAccount>();
         services.AddScoped<CreateAccountParameters>();
+        services.AddScoped<GetIpInfo>();
+        services.AddScoped<GetIpInfoParameters>();
         services.AddScoped<CreateTeam>();
         services.AddScoped<CreateTeamParameters>();
         services.AddScoped<UpdateTeam>();

@@ -20,11 +20,7 @@ public class CTF
 
     public UpdateTeam UpdateTeam() => _useCaseFactory.Create<UpdateTeam>();
 
-    public async Task<IpInfo> GetIpInfo(string ipAddress)
-    {
-        throw new NotImplementedException();
-        // return await _driver.GetIpInfo(ipAddress);
-    }
+    public GetIpInfo GetIpInfo() => _useCaseFactory.Create<GetIpInfo>();
 
     public GoToCTF GoToCTF() => _useCaseFactory.Create<GoToCTF>();
 }
