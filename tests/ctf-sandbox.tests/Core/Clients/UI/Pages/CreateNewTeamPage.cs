@@ -12,7 +12,7 @@ public class CreateNewTeamPage : ErrorPage
     public async Task<Result<ManageTeamsPage?, ValidationProblemDetails>> CreateTeam(string? teamName, uint memberCount = 4)
     {
         var nameInput = Page.GetByRole(AriaRole.Textbox, new() { Name = "Name" });
-        await nameInput.FillAsync(teamName);
+        await nameInput.FillAsync(teamName ?? string.Empty);
         
         // Set member count
         var memberCountInput = Page.Locator("input[name='MemberCount']");

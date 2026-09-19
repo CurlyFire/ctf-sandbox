@@ -28,7 +28,7 @@ public class ExternalSystemsHealthTests
     {
         var ipInfoClient = new IpInfoRealClient(new HttpClient { BaseAddress = new Uri(_fixture.Configuration!.IpInfoUrl) });
 
-        // Assert.True(await ipInfoClient.IsHealthy());
+        Assert.True(await ipInfoClient.IsHealthy());
     }
 
     [Fact]

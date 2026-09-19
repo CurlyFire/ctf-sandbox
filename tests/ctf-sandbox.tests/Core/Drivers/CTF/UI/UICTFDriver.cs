@@ -47,24 +47,28 @@ public class UICTFDriver : ICTFDriver
         }
     }
 
-    public async Task<Result<Team?, SystemError>> CreateTeam(string? teamName, uint memberCount = 4)
+    public async Task<Result<Team, SystemError>> CreateTeam(string? teamName, uint memberCount = 4)
     {
         var homePage = await _uiClient.OpenHomePage();
         var manageTeamsPage = await homePage.GoToManageTeamsPage();
         var createNewTeamPage = await manageTeamsPage.GoToCreateNewTeamPage();
-        var result = await createNewTeamPage.CreateTeam(teamName, memberCount);
-        if (result.IsSuccess)
+        var result = await createNewTeamPage.CreateTeam(teamName ?? string.Empty, memberCount);
+        if (result.IsSuccess && result.Value is not null)
         {
-            var createdTeam = await result.Value.GetTeam(teamName);
-            if (createdTeam.IsSuccess)
-                return Result<Team?, SystemError>.Success(createdTeam.Value);
+            var createdTeam = await result.Value.GetTeam(teamName ?? string.Empty);
+            if (createdTeam.IsSuccess && createdTeam.Value is not null)
+                return Result<Team, SystemError>.Success(createdTeam.Value);
             else
-                return Result<Team?, SystemError>.Failure(ValidationProblemDetailsExtensions.MapError(createdTeam.Error));
+                return createdTeam.IsSuccess
+                    ? Result<Team, SystemError>.Failure(SystemError.Of("The created team could not be read from the page."))
+                    : Result<Team, SystemError>.Failure(ValidationProblemDetailsExtensions.MapError(createdTeam.Error));
         }
-        else
+        if (!result.IsSuccess)
         {
-            return Result<Team?, SystemError>.Failure(ValidationProblemDetailsExtensions.MapError(result.Error));
+            return Result<Team, SystemError>.Failure(ValidationProblemDetailsExtensions.MapError(result.Error));
         }        
+
+        return Result<Team, SystemError>.Failure(SystemError.Of("The create-team page was not available after team creation."));
     }
 
     public async Task<Result<Team, SystemError>> UpdateTeam(string oldTeamName, string newTeamName, string? newDescription = null, uint? memberCount = null)
@@ -73,10 +77,15 @@ public class UICTFDriver : ICTFDriver
         var manageTeamsPage = await homePage.GoToManageTeamsPage();
         var editTeamPage = await manageTeamsPage.GoToEditTeamPage(oldTeamName);
         var result = await editTeamPage.UpdateTeam(newTeamName, newDescription, memberCount);
-        if (result.IsSuccess)
+        if (result.IsSuccess && result.Value is not null)
         {
             var team = await result.Value.GetTeam(newTeamName);
-            return Result<Team, SystemError>.Success(team.Value);
+            if (team.IsSuccess && team.Value is not null)
+                return Result<Team, SystemError>.Success(team.Value);
+
+            return team.IsSuccess
+                ? Result<Team, SystemError>.Failure(SystemError.Of("The updated team could not be read from the page."))
+                : Result<Team, SystemError>.Failure(ValidationProblemDetailsExtensions.MapError(team.Error));
         }
         else
         {
@@ -84,7 +93,7 @@ public class UICTFDriver : ICTFDriver
         }
     }
 
-    public async Task<Result<Team, SystemError>> GetTeam(string teamName)
+    public async Task<Result<Team?, SystemError>> GetTeam(string teamName)
     {
         var homePage = await _uiClient.OpenHomePage();
         var manageTeamsPage = await homePage.GoToManageTeamsPage();
@@ -92,22 +101,12 @@ public class UICTFDriver : ICTFDriver
         var result = await manageTeamsPage.GetTeam(teamName);
         if (result.IsSuccess)
         {
-            return Result<Team, SystemError>.Success(result.Value);
+            return Result<Team?, SystemError>.Success(result.Value);
         }
         else
         {
-            return Result<Team, SystemError>.Failure(ValidationProblemDetailsExtensions.MapError(result.Error));
+            return Result<Team?, SystemError>.Failure(ValidationProblemDetailsExtensions.MapError(result.Error));
         }
-    }
-
-    public async Task<Result<VoidValue, SystemError>> ConfirmUserIsSignedIn(string email)
-    {
-        var homePage = await _uiClient.OpenHomePage();
-        var isLoggedIn = await homePage.IsUserLoggedIn(email);
-        if (isLoggedIn)
-            return Result.Success<SystemError>();
-        else
-            return Result<VoidValue, SystemError>.Failure(SystemError.Of("User is not signed in"));
     }
 
     public async Task<Result<IpInfo, SystemError>> GetIpInfo(string ipAddress)

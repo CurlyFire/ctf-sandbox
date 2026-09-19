@@ -64,21 +64,7 @@ public class APICTFDriver : ICTFDriver
         return await _apiClient.Teams.GetTeams(_jwt).MapErrorAsync(ValidationProblemDetailsExtensions.MapError).MapAsync(teams => teams.FirstOrDefault(t => t.Name == teamName));
     }
 
-    public async Task<Result<VoidValue, SystemError>> ConfirmUserIsSignedIn(string email)
-    {
-        var decodedJwt = new JwtSecurityTokenHandler().ReadJwtToken(_jwt);
-        var isSignedIn = decodedJwt.Claims.Any(c => c.Type == "email" && c.Value == email);
-        if (isSignedIn)
-        {
-            return Result.Success<SystemError>();
-        }
-        else
-        {
-            return Result.Failure(SystemError.Of($"User with email '{email}' is not signed in"));
-        }
-    }
-
-    public async Task<Result<VoidValue, SystemError>> SignIn(string email, string password)
+    public async Task<Result<VoidValue, SystemError>> SignIn(string? email, string? password)
     {
         var result = await _apiClient.Authentication.Authenticate(email, password);
         if (result.IsSuccess)
