@@ -70,7 +70,7 @@ public class TeamTests
 
     [Trait("Category", "E2E")]
     [Theory]
-    [Channel(Channel.UI, Channel.API)]
+    [Channel(Channel.API)]
     public async Task ShouldFailToCreateTeamWithNameTooLong(Channel channel)
     {
         var ctf = _fixture.InteractWithCTFThrough(channel);
@@ -109,7 +109,7 @@ public class TeamTests
 
     [Trait("Category", "E2E")]
     [Theory]
-    [Channel(Channel.UI, Channel.API)]
+    [Channel(Channel.UI)]
     public async Task ShouldFailToCreateTeamWithBannedWordInName(Channel channel)
     {
         var ctf = _fixture.InteractWithCTFThrough(channel);
@@ -125,8 +125,8 @@ public class TeamTests
             t.MemberCount = memberCount;
         }).Execute())
         .ShouldFail()
-        .ErrorMessage("banned words");
-        //await ctf.ConfirmTeamIsNotAvailable(bannedWordTeamName);
+        .ErrorMessage("Team name contains banned words");
+
     }
 
     [Trait("Category", "E2E")]

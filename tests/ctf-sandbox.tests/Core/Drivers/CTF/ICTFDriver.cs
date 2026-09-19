@@ -10,7 +10,6 @@ public interface ICTFDriver
     Task<Result<Team, SystemError>> CreateTeam(string? teamName, uint memberCount = 4);
     Task<Result<Team, SystemError>> UpdateTeam(string oldTeamName, string newTeamName, string? newDescription = null, uint? memberCount = null);
     Task<Result<Team?, SystemError>> GetTeam(string teamName);
-    Task<Result<VoidValue, SystemError>> ConfirmUserIsSignedIn(string email);
     Task<Result<IpInfo, SystemError>> GetIpInfo(string ipAddress);
     Task<Result<VoidValue, SystemError>> GoToCTF();
 }

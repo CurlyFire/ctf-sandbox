@@ -7,7 +7,7 @@ public static class ValidationProblemDetailsExtensions
 
     public static SystemError MapError(this ValidationProblemDetails validationProblemDetails)
     {
-        var message = validationProblemDetails.Detail ?? "Request failed";
+        var message = validationProblemDetails.Title ?? string.Empty + validationProblemDetails.Detail ?? string.Empty;
         if (validationProblemDetails.Errors != null && validationProblemDetails.Errors.Count > 0)
         {
             var fieldErrors = validationProblemDetails.Errors

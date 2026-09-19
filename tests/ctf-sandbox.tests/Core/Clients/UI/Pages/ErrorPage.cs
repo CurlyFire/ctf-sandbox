@@ -16,26 +16,29 @@ public class ErrorPage
     {
         var errors = new Dictionary<string, string[]>();
         string? title = null;
+        string? detail = null;
 
         // Error page
         if (await Page.GetByRole(AriaRole.Alert, new() { Name = "Application error", Exact = true }).IsVisibleAsync())
         {
-            title = string.Join(" ", await GetVisibleTextValues(Page.Locator(".text-danger")));
+            title = "Error page";
+            detail = string.Join(",", await GetVisibleTextValues(Page.Locator(".text-danger")));
         }
         // Developer exception page
         else if (await Page.GetByText("An unhandled exception occurred while processing the request.", new() { Exact = true }).IsVisibleAsync())
         {
-            title = "An unhandled exception occurred while processing the request.";
+            title = "Developer exception page";
+            detail = await Page.Locator(".titleerror").TextContentAsync();
         }
         else
         {
-            var validationSummary = Page.Locator("[data-valmsg-summary]");
+            var validationSummary = Page.Locator(".validation-summary-errors");
             if (await validationSummary.IsVisibleAsync())
             {
                 var summaryMessages = await GetVisibleMessages(validationSummary);
                 if (summaryMessages.Length > 0)
                 {
-                    errors[string.Empty] = summaryMessages;
+                    title = string.Join(" ", summaryMessages);
                 }
             }
 
