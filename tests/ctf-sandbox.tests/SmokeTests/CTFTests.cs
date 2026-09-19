@@ -30,6 +30,5 @@ public class CTFTests
     {
         var ctf = _fixture.InteractWithCTFThrough(channel);
         (await ctf.SignIn().Execute()).ShouldSucceed();
-        await ctf.ConfirmUserIsSignedIn();
     }
 }

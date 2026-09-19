@@ -198,4 +198,9 @@ public class TeamsService : ITeamsService
 
         return true;
     }
+
+    public async Task<Team?> GetTeamAsync(int teamId)
+    {
+        return await _context.Teams.FindAsync(teamId);
+    }
 }

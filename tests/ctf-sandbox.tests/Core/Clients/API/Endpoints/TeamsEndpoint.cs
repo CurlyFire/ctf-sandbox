@@ -10,7 +10,7 @@ public class TeamsEndpoint : Endpoint
     {
     }
 
-    public async Task<Result<int, ValidationProblemDetails>> CreateTeam(string? teamName, string memberCount, string jwt)
+    public async Task<Result<Team, ValidationProblemDetails>> CreateTeam(string? teamName, string memberCount, string jwt)
     {
         var createTeamRequest = new
         {
@@ -18,18 +18,10 @@ public class TeamsEndpoint : Endpoint
             MemberCount = memberCount
         };
 
-        var result = await JsonHttpClient.PostAsync<Team>("teams", createTeamRequest, jwt);
-        if (result.IsSuccess)
-        {
-            return Result<int, ValidationProblemDetails>.Success(result.Value.Id);
-        }
-        else
-        {
-            return Result<int, ValidationProblemDetails>.Failure(result.Error);
-        }
+        return await JsonHttpClient.PostAsync<Team>("teams", createTeamRequest, jwt);
     }
 
-    public async Task<Result<int, ValidationProblemDetails>> CreateTeam(string? teamName, uint memberCount, string jwt)
+    public async Task<Result<Team, ValidationProblemDetails>> CreateTeam(string? teamName, uint memberCount, string jwt)
     {
         return await CreateTeam(teamName, memberCount.ToString(), jwt);
     }
@@ -39,7 +31,7 @@ public class TeamsEndpoint : Endpoint
         return await JsonHttpClient.GetAsync<IEnumerable<Team>>("teams", jwt);
     }
 
-    public async Task<Result<VoidValue, ValidationProblemDetails>> UpdateTeam(string teamId, string teamName, string? description, string memberCount, string jwt)
+    public async Task<Result<Team, ValidationProblemDetails>> UpdateTeam(string teamId, string teamName, string? description, string memberCount, string jwt)
     {
         var updateRequest = new 
         {
@@ -48,10 +40,10 @@ public class TeamsEndpoint : Endpoint
             MemberCount = memberCount
         };
 
-        return await JsonHttpClient.PutAsync($"teams/{teamId}", updateRequest, jwt);
+        return await JsonHttpClient.PutAsync<Team>($"teams/{teamId}", updateRequest, jwt);
     }
 
-    public async Task<Result<VoidValue, ValidationProblemDetails>> UpdateTeam(int teamId, string teamName, string? description, uint memberCount, string jwt)
+    public async Task<Result<Team, ValidationProblemDetails>> UpdateTeam(int teamId, string teamName, string? description, uint memberCount, string jwt)
     {
         return await UpdateTeam(teamId.ToString(), teamName, description, memberCount.ToString(), jwt);
     }

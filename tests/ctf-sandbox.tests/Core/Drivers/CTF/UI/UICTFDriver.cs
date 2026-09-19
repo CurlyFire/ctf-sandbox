@@ -20,71 +20,144 @@ public class UICTFDriver : ICTFDriver
         await createAccountPage.FillPassword(password);
         await createAccountPage.FillConfirmPassword(password);
         var accountCreationConfirmationPage = await createAccountPage.CreateAccount();
-        return await accountCreationConfirmationPage.IsConfirmationMessageVisible();
+        var errors = await accountCreationConfirmationPage.GetErrors();
+        if (errors != null)
+        {
+            return Result.Failure(ValidationProblemDetailsExtensions.MapError(errors));
+        }
+        else
+        {
+            var result = await accountCreationConfirmationPage.IsConfirmationMessageVisible();
+            return result ? Result.Success<SystemError>() : Result.Failure(SystemError.Of("Account creation confirmation message was not found"));
+        }
     }
 
-    public async Task<Result<VoidValue, SystemError>> SignIn(string email, string password)
+    public async Task<Result<VoidValue, SystemError>> SignIn(string? email, string? password)
     {
         var homePage = await _uiClient.OpenHomePage();
         var signInPage = await homePage.GoToSignInPage();
-        await signInPage.SignIn(email, password);
-        return Result.Success<SystemError>();
+        var result = await signInPage.SignIn(email, password);
+        if (result.IsSuccess)
+        {
+            return Result.Success<SystemError>();
+        }
+        else
+        {
+            return Result.Failure(ValidationProblemDetailsExtensions.MapError(result.Error));
+        }
     }
 
-    public async Task<string?> CreateTeam(string? teamName, uint memberCount = 4)
+    public async Task<Result<Team, SystemError>> CreateTeam(string? teamName, uint memberCount = 4)
     {
         var homePage = await _uiClient.OpenHomePage();
         var manageTeamsPage = await homePage.GoToManageTeamsPage();
         var createNewTeamPage = await manageTeamsPage.GoToCreateNewTeamPage();
-        return await createNewTeamPage.CreateTeam(teamName, memberCount);
+        var result = await createNewTeamPage.CreateTeam(teamName ?? string.Empty, memberCount);
+        if (result.IsSuccess && result.Value is not null)
+        {
+            var createdTeam = await result.Value.GetTeam(teamName ?? string.Empty);
+            if (createdTeam.IsSuccess && createdTeam.Value is not null)
+                return Result<Team, SystemError>.Success(createdTeam.Value);
+            else
+                return createdTeam.IsSuccess
+                    ? Result<Team, SystemError>.Failure(SystemError.Of("The created team could not be read from the page."))
+                    : Result<Team, SystemError>.Failure(ValidationProblemDetailsExtensions.MapError(createdTeam.Error));
+        }
+        if (!result.IsSuccess)
+        {
+            return Result<Team, SystemError>.Failure(ValidationProblemDetailsExtensions.MapError(result.Error));
+        }        
+
+        return Result<Team, SystemError>.Failure(SystemError.Of("The create-team page was not available after team creation."));
     }
 
-    public async Task UpdateTeam(string oldTeamName, string newTeamName, string? newDescription = null, uint? memberCount = null)
+    public async Task<Result<Team, SystemError>> UpdateTeam(string oldTeamName, string newTeamName, string? newDescription = null, uint? memberCount = null)
     {
         var homePage = await _uiClient.OpenHomePage();
         var manageTeamsPage = await homePage.GoToManageTeamsPage();
         var editTeamPage = await manageTeamsPage.GoToEditTeamPage(oldTeamName);
-        await editTeamPage.UpdateTeam(newTeamName, newDescription, memberCount);
+        var result = await editTeamPage.UpdateTeam(newTeamName, newDescription, memberCount);
+        if (result.IsSuccess && result.Value is not null)
+        {
+            var team = await result.Value.GetTeam(newTeamName);
+            if (team.IsSuccess && team.Value is not null)
+                return Result<Team, SystemError>.Success(team.Value);
+
+            return team.IsSuccess
+                ? Result<Team, SystemError>.Failure(SystemError.Of("The updated team could not be read from the page."))
+                : Result<Team, SystemError>.Failure(ValidationProblemDetailsExtensions.MapError(team.Error));
+        }
+        else
+        {
+            return Result<Team, SystemError>.Failure(ValidationProblemDetailsExtensions.MapError(result.Error));
+        }
     }
 
-    public async Task<Team?> GetTeam(string teamName)
+    public async Task<Result<Team?, SystemError>> GetTeam(string teamName)
     {
         var homePage = await _uiClient.OpenHomePage();
         var manageTeamsPage = await homePage.GoToManageTeamsPage();
-        return await manageTeamsPage.GetTeam(teamName);
+
+        var result = await manageTeamsPage.GetTeam(teamName);
+        if (result.IsSuccess)
+        {
+            return Result<Team?, SystemError>.Success(result.Value);
+        }
+        else
+        {
+            return Result<Team?, SystemError>.Failure(ValidationProblemDetailsExtensions.MapError(result.Error));
+        }
     }
 
-    public async Task ConfirmUserIsSignedIn(string email)
-    {
-        var homePage = await _uiClient.OpenHomePage();
-        Assert.True(await homePage.IsUserLoggedIn(email));
-    }
-
-    public async Task<IpInfo> GetIpInfo(string ipAddress)
+    public async Task<Result<IpInfo, SystemError>> GetIpInfo(string ipAddress)
     {
         var homePage = await _uiClient.OpenHomePage();
         var ipInfoPage = await homePage.GoToIpInfoPage();
-        return await ipInfoPage.GetIpInfo(ipAddress);
+        var ipInfo = await ipInfoPage.GetIpInfo(ipAddress);
+        var errors = await ipInfoPage.GetErrors();
+        if (errors != null)
+        {
+            return Result<IpInfo, SystemError>.Failure(ValidationProblemDetailsExtensions.MapError(errors));
+        }
+        return Result<IpInfo, SystemError>.Success(ipInfo);
     }
 
-    public async Task ConfirmIsUpAndRunning()
+    public async Task<Result<VoidValue, SystemError>> ConfirmIsUpAndRunning()
     {
         var homePage = await _uiClient.OpenHomePage();
-        // Check if the page title is correct
         var title = await homePage.GetPageTitle();
-        Assert.Equal("Home Page - CTF Arena", title);
+        if (title != "Home Page - CTF Arena")
+            return Result.Failure(SystemError.Of("The CTF Arena home page title is incorrect."));
 
-        // Verify each main layout component individually
-        Assert.True(await homePage.IsBannerVisible(), "Header banner should be visible on the home page");
-        Assert.True(await homePage.IsMainNavigationVisible(), "Main navigation menu should be visible on the home page");
-        Assert.True(await homePage.IsDashboardLinkVisible(), "Dashboard link should be visible on the home page");
-        Assert.True(await homePage.IsMainContentAreaVisible(), "Main content area should be visible on the home page");
-        Assert.True(await homePage.IsFooterVisible(), "Footer should be visible on the home page");
-        Assert.True(await homePage.IsBrandLogoVisible(), "CTF Arena logo should be visible on the home page");        
+        if (!await homePage.IsBannerVisible())
+            return Result.Failure(SystemError.Of("The home page header banner is not visible."));
+
+        if (!await homePage.IsMainNavigationVisible())
+            return Result.Failure(SystemError.Of("The home page main navigation menu is not visible."));
+
+        if (!await homePage.IsDashboardLinkVisible())
+            return Result.Failure(SystemError.Of("The home page dashboard link is not visible."));
+
+        if (!await homePage.IsMainContentAreaVisible())
+            return Result.Failure(SystemError.Of("The home page main content area is not visible."));
+
+        if (!await homePage.IsFooterVisible())
+            return Result.Failure(SystemError.Of("The home page footer is not visible."));
+
+        if (!await homePage.IsBrandLogoVisible())
+            return Result.Failure(SystemError.Of("The CTF Arena logo is not visible on the home page."));
+
+        return Result.Success<SystemError>();
     }
 
-    public Task GoToCTF()
+    public async Task<Result<VoidValue, SystemError>> GoToCTF()
     {
-        throw new NotImplementedException();
+        var homePage = await _uiClient.OpenHomePage();
+        var errors = await homePage.GetErrors();
+        if (errors != null)
+        {
+            return Result.Failure(ValidationProblemDetailsExtensions.MapError(errors));
+        }
+        return Result.Success<SystemError>();
     }
 }

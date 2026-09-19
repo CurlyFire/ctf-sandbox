@@ -2,18 +2,15 @@ using Microsoft.Playwright;
 
 namespace ctf_sandbox.tests.Core.Clients.UI.Pages;
 
-public class ConfirmAccountCreationPage
+public class ConfirmAccountCreationPage : ErrorPage
 {
-    private readonly IPage _page;
-
-    public ConfirmAccountCreationPage(IPage page)
+    public ConfirmAccountCreationPage(IPage page) : base(page)
     {
-        _page = page;
     }
 
     public async Task<bool> IsConfirmationMessageVisible()
     {
-        return await _page.GetByText("Please check your email to confirm your account.").IsVisibleAsync();
+        return await Page.GetByText("Please check your email to confirm your account.").IsVisibleAsync();
     }
 
 }

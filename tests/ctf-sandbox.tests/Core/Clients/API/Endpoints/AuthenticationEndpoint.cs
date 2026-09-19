@@ -9,12 +9,12 @@ public class AuthenticationEndpoint : Endpoint
     {
     }
 
-    public async Task<Result<string, ValidationProblemDetails>> Authenticate(string username, string password)
+    public async Task<Result<string, ValidationProblemDetails>> Authenticate(string? username, string? password)
     {
         var result = await JsonHttpClient.PostAsync<string>("auth", new LoginRequest
         {
-            Username = username,
-            Password = password
+            Username = username ?? string.Empty,
+            Password = password ?? string.Empty
         });
         return result;
     }

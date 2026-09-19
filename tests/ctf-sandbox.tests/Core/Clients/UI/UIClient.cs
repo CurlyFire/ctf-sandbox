@@ -36,7 +36,7 @@ public class UIClient : IDisposable
             {
                 BaseURL = _environmentConfiguration.WebServerUrl
             };
-            _currentPage = context.Browser.NewPageAsync(options).Result;
+            _currentPage =  await context.Browser.NewPageAsync(options);
             _homePage = new HomePage(_currentPage);
         }
         

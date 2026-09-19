@@ -1,22 +1,26 @@
+using ctf_sandbox.tests.Core.Drivers.CTF;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Playwright;
 
 namespace ctf_sandbox.tests.Core.Clients.UI.Pages;
 
-public class SignInPage
+public class SignInPage : ErrorPage
 {
-    private readonly IPage _page;
-
-    public SignInPage(IPage page)
+    public SignInPage(IPage page) : base(page)
     {
-        _page = page;
     }
 
-    public async Task<HomePage> SignIn(string handle, string accessCode)
+    public async Task<Result<HomePage?, ValidationProblemDetails>> SignIn(string? handle, string? accessCode)
     {
-        await _page.GetByRole(AriaRole.Textbox, new() { Name = "Handle" }).FillAsync(handle);
-        await _page.GetByRole(AriaRole.Textbox, new() { Name = "Access Code" }).FillAsync(accessCode);
-        await _page.GetByRole(AriaRole.Button, new() { Name = "AUTHENTICATE" }).ClickAsync();
-        return new HomePage(_page);
+        await Page.GetByRole(AriaRole.Textbox, new() { Name = "Handle" }).FillAsync(handle ?? string.Empty);
+        await Page.GetByRole(AriaRole.Textbox, new() { Name = "Access Code" }).FillAsync(accessCode ?? string.Empty);
+        await Page.GetByRole(AriaRole.Button, new() { Name = "AUTHENTICATE" }).ClickAsync();
+        var errors = await GetErrors();
+        if (errors != null)
+        {
+            return Result<HomePage?, ValidationProblemDetails>.Failure(errors);
+        }
+        return Result<HomePage?, ValidationProblemDetails>.Success(new HomePage(Page));
     }
 
 }

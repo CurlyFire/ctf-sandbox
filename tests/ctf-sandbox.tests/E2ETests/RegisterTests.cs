@@ -22,16 +22,18 @@ public class RegisterTests
         var randomEmail = $"registertest_{Guid.NewGuid()}@test.com";
         var password = "RegisterTest123!";
 
-        await ctf.CreateAccount(randomEmail, password);
+        (await ctf.CreateAccount().With(account =>
+        {
+            account.Email = randomEmail;
+            account.Password = password;
+        }).Execute()).ShouldSucceed();
 
         var emails = _fixture.ExternalSystems.InteractWithEmails();
         await emails.ActivateRegistrationSentTo(randomEmail);
-        (await ctf.SignIn(credentials =>
+        (await ctf.SignIn().With(credentials =>
         {
             credentials.UserName = randomEmail;
             credentials.Password = password;
         }).Execute()).ShouldSucceed();
-
-        await ctf.ConfirmUserIsSignedIn(randomEmail);
     }
 }

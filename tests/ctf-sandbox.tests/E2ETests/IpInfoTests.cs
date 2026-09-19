@@ -21,19 +21,9 @@ public class IpInfoTests
         var ctf = _fixture.InteractWithCTFThrough(channel);
         (await ctf.SignIn().Execute()).ShouldSucceed();
 
-        var ipInfo = await ctf.GetIpInfo("8.8.8.8");
-
-        // Limited assertions as we don't control the data returned by the external service
-        Assert.Equal("8.8.8.8", ipInfo.Ip);
-        Assert.NotNull(ipInfo.Hostname);
-        Assert.NotNull(ipInfo.City);
-        Assert.NotNull(ipInfo.Region);
-        Assert.NotNull(ipInfo.Country);
-        Assert.NotNull(ipInfo.Timezone);
-        Assert.NotEmpty(ipInfo.Hostname);
-        Assert.NotEmpty(ipInfo.City);
-        Assert.NotEmpty(ipInfo.Region);
-        Assert.NotEmpty(ipInfo.Country);
-        Assert.NotEmpty(ipInfo.Timezone);
+        (await ctf.GetIpInfo().With(ip => ip.IpAddress = "8.8.8.8").Execute())
+            .ShouldSucceed()
+            .HasIp("8.8.8.8")
+            .HasLocationData();
     }
 }

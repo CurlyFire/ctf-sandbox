@@ -128,7 +128,9 @@ public class TeamsController : ControllerBase
             return BadRequest(new { message = errorMessage });
         }
 
-        return NoContent();
+        var updatedTeam = await _teamsService.GetTeamAsync(teamId);
+
+        return Ok(updatedTeam);
     }
 
     /// <summary>

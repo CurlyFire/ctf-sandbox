@@ -1,5 +1,7 @@
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Net.Mime;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -22,6 +24,8 @@ public class JsonHttpClient<E> : IDisposable
     public JsonHttpClient(HttpClient httpClient)
     {
         _httpClient = httpClient;
+        _httpClient.DefaultRequestHeaders.Accept.Clear();
+        _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(MediaTypeNames.Application.Json));
     }
 
     public void Dispose()
@@ -108,7 +112,7 @@ public class JsonHttpClient<E> : IDisposable
         var uri = GetUri(path);
         var httpRequest = new HttpRequestMessage(HttpMethod.Put, uri)
         {
-            Content = JsonContent.Create(new { }, options: _jsonOptions)
+            Content = JsonContent.Create(request, options: _jsonOptions)
         };
         return await SendRequest(httpRequest, jwt);
     }
@@ -121,7 +125,11 @@ public class JsonHttpClient<E> : IDisposable
     }
 
     private Task<HttpResponseMessage> SendRequest(HttpRequestMessage httpRequest, string? jwt = null)
-        => _httpClient.SendAsync(httpRequest);
+    {
+        httpRequest.Headers.Authorization = jwt != null ? new AuthenticationHeaderValue("Bearer", jwt) : null;
+        return _httpClient.SendAsync(httpRequest);
+    }
+        
 
     private static async Task<T> ReadResponseAsync<T>(HttpResponseMessage httpResponse, JsonSerializerOptions jsonOptions)
     {
