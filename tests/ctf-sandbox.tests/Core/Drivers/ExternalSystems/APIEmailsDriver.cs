@@ -21,8 +21,16 @@ public class APIEmailsDriver : IEmailsDriver
             : Result.Failure<SystemError>(SystemError.Of("Mailpit service is not healthy"));
     }
 
-    public async Task ActivateRegistrationSentTo(string email)
+    public async Task<Result<VoidValue, SystemError>> ActivateRegistrationSentTo(string email)
     {
-        await _client.ActivateRegistrationSentTo(email);
+        try
+        {
+            await _client.ActivateRegistrationSentTo(email);
+            return Result.Success<SystemError>();
+        }
+        catch (Exception exception)
+        {
+            return Result.Failure<SystemError>(SystemError.Of(exception.Message));
+        }
     }
 }

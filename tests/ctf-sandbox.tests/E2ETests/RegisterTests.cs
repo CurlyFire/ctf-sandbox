@@ -30,7 +30,7 @@ public class RegisterTests
         
 
         var emails = system.ExternalSystems.Emails;
-        await emails.ActivateRegistrationSentTo(randomEmail);
+        (await emails.ActivateRegistrationSentTo(randomEmail).Execute()).ShouldSucceed();
         (await system.CTF.SignIn().With(credentials =>
         {
             credentials.UserName = randomEmail;

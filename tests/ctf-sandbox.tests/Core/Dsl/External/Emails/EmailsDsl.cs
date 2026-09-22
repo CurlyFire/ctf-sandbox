@@ -17,8 +17,6 @@ public class EmailsDsl
 
     public GoToMailpit GoToMailpit() => _useCaseFactory.Create<GoToMailpit>();
 
-    public async Task ActivateRegistrationSentTo(string email)
-    {
-        await _driver.ActivateRegistrationSentTo(email);
-    }
+    public ActivateRegistrationSentTo ActivateRegistrationSentTo(string email) =>
+        _useCaseFactory.Create<ActivateRegistrationSentTo>().With(email);
 }
