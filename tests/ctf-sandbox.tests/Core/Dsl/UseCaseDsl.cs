@@ -2,14 +2,12 @@ namespace ctf_sandbox.tests.Core.Dsl;
 
 public class UseCaseDsl
 {
-    public CTF CTF { get; }
-    public Emails Emails { get; }
-    public BannedWords BannedWords { get; }
+    public CTFDsl CTF { get; }
+    public ExternalSystemsDsl ExternalSystems { get; }
 
-    public UseCaseDsl(CTF ctf, Emails emails, BannedWords bannedWords)
+    public UseCaseDsl(CTFDsl ctf, ExternalSystemsDsl externalSystems)
     {
         CTF = ctf;
-        Emails = emails;
-        BannedWords = bannedWords;
+        ExternalSystems = externalSystems;
     }
 }

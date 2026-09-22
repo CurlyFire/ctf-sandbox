@@ -1,4 +1,3 @@
-using System.Net.Sockets;
 using ctf_sandbox.tests.Core.Clients.API;
 using ctf_sandbox.tests.Core.Clients.API.Endpoints;
 using ctf_sandbox.tests.Core.Clients.ExternalSystems;
@@ -7,9 +6,13 @@ using ctf_sandbox.tests.Core.Drivers.CTF;
 using ctf_sandbox.tests.Core.Drivers.CTF.API;
 using ctf_sandbox.tests.Core.Drivers.CTF.UI;
 using ctf_sandbox.tests.Core.Dsl;
+using ctf_sandbox.tests.Core.Dsl.External.BannedWords;
+using ctf_sandbox.tests.Core.Dsl.External.Emails;
 using ctf_sandbox.tests.Core.Dsl.UseCases;
 using ctf_sandbox.tests.Extensions;
 using ctf_sandbox.tests.Utils;
+using CtfSandbox.Tests.Core.Drivers.ExternalSystems;
+using CtfSandbox.Tests.Core.Dsl.External.IpInfo;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.EnvironmentVariables;
@@ -40,7 +43,6 @@ public abstract class CTFFixture
 
     public APIClient InteractWithCTFThroughAPIClient()
     {
-        //return _scope.ServiceProvider.GetRequiredService<IHttpClientFactory>().CreateClient(CTFHttpClientName);
         return _scope.ServiceProvider.GetRequiredService<APIClient>();
     }
 
@@ -49,7 +51,15 @@ public abstract class CTFFixture
         return _scope.ServiceProvider.GetRequiredService<UIClient>();
     }
 
-    public CTF InteractWithCTFThrough(Channel channel)
+    /// <summary>
+    /// Interact with the system through the default channel (API).
+    /// </summary>
+    public UseCaseDsl InteractWithSystem()
+    {
+        return InteractWithSystemThrough(Channel.API);
+    }
+
+    public UseCaseDsl InteractWithSystemThrough(Channel channel)
     {
         ICTFDriver driver = channel switch
         {
@@ -57,9 +67,16 @@ public abstract class CTFFixture
             Channel.API => _scope.ServiceProvider.GetRequiredService<APICTFDriver>(),
             _ => throw new ArgumentOutOfRangeException(nameof(channel), channel, null)
         };
-        var useCaseFactory = ActivatorUtilities.CreateInstance<UseCaseFactory>(_scope.ServiceProvider, driver);
-        var ctf = ActivatorUtilities.CreateInstance<CTF>(_scope.ServiceProvider, useCaseFactory);
-        return ctf;
+        //TODO: Replace all this manual creation with a more robust dependency injection library (autofac)
+        var ctfUseCaseFactory = ActivatorUtilities.CreateInstance<UseCaseFactory<ICTFDriver>>(_scope.ServiceProvider, driver);
+        var ctf = ActivatorUtilities.CreateInstance<CTFDsl>(_scope.ServiceProvider, ctfUseCaseFactory);
+
+        var ipInfoUseCaseFactory = ActivatorUtilities.CreateInstance<UseCaseFactory<IIpInfoDriver>>(_scope.ServiceProvider, _scope.ServiceProvider.GetRequiredService<IIpInfoDriver>());
+        var ipInfo = ActivatorUtilities.CreateInstance<IpInfoDsl>(_scope.ServiceProvider, ipInfoUseCaseFactory);
+        var email = ActivatorUtilities.CreateInstance<EmailsDsl>(_scope.ServiceProvider);
+        var bannedWords = ActivatorUtilities.CreateInstance<BannedWordsDsl>(_scope.ServiceProvider);
+        var externalSystems = ActivatorUtilities.CreateInstance<ExternalSystemsDsl>(_scope.ServiceProvider,ipInfo,email,bannedWords);
+        return ActivatorUtilities.CreateInstance<UseCaseDsl>(_scope.ServiceProvider, ctf, externalSystems);
     }
 
     /// <summary>
@@ -223,7 +240,6 @@ public abstract class CTFFixture
         services.AddTransient<IpInfoEndpoint>();
         services.AddTransient<HealthEndpoint>();
         services.AddSingleton(Playwright.CreateAsync().Result);
-        services.AddSingleton<UseCaseFactory>();
         services.AddScoped<GoToCTF>();
         services.AddScoped<SignIn>();
         services.AddScoped<SignInParameters>();
@@ -236,6 +252,12 @@ public abstract class CTFFixture
         services.AddScoped<UpdateTeam>();
         services.AddScoped<UpdateTeamParameters>();
         services.AddScoped<UseCaseContext>();
+        services.AddSingleton<CTFDsl>();
+        services.AddSingleton<ExternalSystemsDsl>();
+        services.AddSingleton<IpInfoDsl>();
+        services.AddSingleton<ExternalSystemsDsl>();
+        services.AddSingleton<EmailsDsl>();
+        services.AddSingleton<BannedWordsDsl>();
         ConfigureServices(services);
     }
 

@@ -1,21 +1,20 @@
-using ctf_sandbox.tests.Core.Drivers.CTF;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ctf_sandbox.tests.Core.Dsl.UseCases;
 
-public class UseCaseFactory
+public class UseCaseFactory<TDriver> where TDriver : notnull
 {
-    private readonly ICTFDriver driver;
+    private readonly TDriver _driver;
     private readonly IServiceProvider _serviceProvider;
 
-    public UseCaseFactory(ICTFDriver driver, IServiceProvider serviceProvider)
+    public UseCaseFactory(TDriver driver, IServiceProvider serviceProvider)
     {
-        this.driver = driver;
+        _driver = driver;
         _serviceProvider = serviceProvider;
     }
 
     public T Create<T>() where T : notnull
     {
-        return ActivatorUtilities.CreateInstance<T>(_serviceProvider, driver);
+        return ActivatorUtilities.CreateInstance<T>(_serviceProvider, _driver);
     }
 }

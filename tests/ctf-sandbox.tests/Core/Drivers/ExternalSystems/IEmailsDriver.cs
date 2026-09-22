@@ -1,6 +1,9 @@
+using ctf_sandbox.tests.Core;
+
 namespace ctf_sandbox.tests.Core.Drivers.ExternalSystems;
 
 public interface IEmailsDriver
 {
-    Task ActivateRegistrationSentTo(string email);
+    Task<Result<VoidValue, SystemError>> GoToMailpit();
+    Task<Result<VoidValue, SystemError>> ActivateRegistrationSentTo(string email);
 }

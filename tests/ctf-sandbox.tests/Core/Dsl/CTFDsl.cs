@@ -1,13 +1,13 @@
-using ctf_sandbox.Models;
+using ctf_sandbox.tests.Core.Drivers.CTF;
 using ctf_sandbox.tests.Core.Dsl.UseCases;
 
 namespace ctf_sandbox.tests.Core.Dsl;
 
-public class CTF
+public class CTFDsl
 {
-    private readonly UseCaseFactory _useCaseFactory;
+    private readonly UseCaseFactory<ICTFDriver> _useCaseFactory;
 
-    public CTF(UseCaseFactory useCaseFactory)
+    public CTFDsl(UseCaseFactory<ICTFDriver> useCaseFactory)
     {
         _useCaseFactory = useCaseFactory;
     }

@@ -18,7 +18,7 @@ public class IpInfoTests
     [Channel(Channel.UI, Channel.API)]
     public async Task ShouldBeAbleToGetIpInfo(Channel channel)
     {
-        var ctf = _fixture.InteractWithCTFThrough(channel);
+        var ctf = _fixture.InteractWithSystemThrough(channel).CTF;
         (await ctf.SignIn().Execute()).ShouldSucceed();
 
         (await ctf.GetIpInfo().With(ip => ip.IpAddress = "8.8.8.8").Execute())

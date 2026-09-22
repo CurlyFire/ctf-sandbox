@@ -19,7 +19,7 @@ public class CTFTests
     [Channel(Channel.UI, Channel.API)]    
     public async Task ShouldBeUpAndRunning(Channel channel)
     {
-        var ctf = _fixture.InteractWithCTFThrough(channel);
+        var ctf = _fixture.InteractWithSystemThrough(channel).CTF;
         (await ctf.GoToCTF().Execute()).ShouldSucceed();
     }
 
@@ -28,7 +28,7 @@ public class CTFTests
     [Channel(Channel.UI, Channel.API)] 
     public async Task ShouldLoginWithValidCredentials(Channel channel)
     {
-        var ctf = _fixture.InteractWithCTFThrough(channel);
+        var ctf = _fixture.InteractWithSystemThrough(channel).CTF;
         (await ctf.SignIn().Execute()).ShouldSucceed();
     }
 }
