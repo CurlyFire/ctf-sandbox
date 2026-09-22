@@ -28,9 +28,6 @@ public class ExternalSystemsHealthTests
     {
         var system = _fixture.InteractWithSystem();
         (await system.ExternalSystems.IpInfo.GoToIpInfo().Execute()).ShouldSucceed();
-        // var ipInfoClient = new IpInfoRealClient(new HttpClient { BaseAddress = new Uri(_fixture.Configuration!.IpInfoUrl) });
-
-        // Assert.True(await ipInfoClient.IsHealthy());
     }
 
     [Fact]
