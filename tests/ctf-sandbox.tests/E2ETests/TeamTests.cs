@@ -19,7 +19,7 @@ public class TeamTests
     [Channel(Channel.UI, Channel.API)]
     public async Task ShouldBeAbleToCreateTeam(Channel channel)
     {
-        var ctf = _fixture.InteractWithCTFThrough(channel);
+        var ctf = _fixture.InteractWithSystemThrough(channel).CTF;
         (await ctf.SignIn().Execute()).ShouldSucceed();
         var randomTeamName = $"team_{Guid.NewGuid()}";
         uint memberCount = 5;
@@ -40,7 +40,7 @@ public class TeamTests
     [Channel(Channel.UI, Channel.API)]
     public async Task ShouldBeAbleToUpdateExistingTeam(Channel channel)
     {
-        var ctf = _fixture.InteractWithCTFThrough(channel);
+        var ctf = _fixture.InteractWithSystemThrough(channel).CTF;
         (await ctf.SignIn().Execute()).ShouldSucceed();
         var originalTeamName = $"team_{Guid.NewGuid()}";
         var updatedTeamName = $"updated_{Guid.NewGuid()}";
@@ -74,7 +74,7 @@ public class TeamTests
     [Channel(Channel.API)]
     public async Task ShouldFailToCreateTeamWithNameTooLong(Channel channel)
     {
-        var ctf = _fixture.InteractWithCTFThrough(channel);
+        var ctf = _fixture.InteractWithSystemThrough(channel).CTF;
         (await ctf.SignIn().Execute()).ShouldSucceed();
         // Create a team name with 101 characters (exceeds max of 100)
         var tooLongTeamName = new string('A', 101);
@@ -95,7 +95,7 @@ public class TeamTests
     [Channel(Channel.UI, Channel.API)]
     public async Task ShouldFailToCreateTeamWithMissingName(Channel channel)
     {
-        var ctf = _fixture.InteractWithCTFThrough(channel);
+        var ctf = _fixture.InteractWithSystemThrough(channel).CTF;
         (await ctf.SignIn().Execute()).ShouldSucceed();
         uint memberCount = 4;
 
@@ -113,14 +113,15 @@ public class TeamTests
     [Channel(Channel.UI)]
     public async Task ShouldFailToCreateTeamWithBannedWordInName(Channel channel)
     {
-        var ctf = _fixture.InteractWithCTFThrough(channel);
-        (await ctf.SignIn().Execute()).ShouldSucceed();
+        var system = _fixture.InteractWithSystemThrough(channel);
+        
+        (await system.CTF.SignIn().Execute()).ShouldSucceed();
         var bannedWordTeamName = "badword_" + Guid.NewGuid();
         uint memberCount = 4;
-        await _fixture.ExternalSystems.InteractWithBannedWords().CreateBannedWord(bannedWordTeamName);
+        await system.ExternalSystems.BannedWords.CreateBannedWord(bannedWordTeamName);
 
         // Act: Attempt to create team with a banned word in the name
-        (await ctf.CreateTeam().With(t =>
+        (await system.CTF.CreateTeam().With(t =>
         {
             t.TeamName = bannedWordTeamName;
             t.MemberCount = memberCount;

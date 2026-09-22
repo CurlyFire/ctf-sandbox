@@ -18,19 +18,20 @@ public class RegisterTests
     [Channel(Channel.UI, Channel.API)]
     public async Task ShouldBeAbleToRegister(Channel channel)
     {
-        var ctf = _fixture.InteractWithCTFThrough(channel);
+        var system = _fixture.InteractWithSystemThrough(channel);
         var randomEmail = $"registertest_{Guid.NewGuid()}@test.com";
         var password = "RegisterTest123!";
 
-        (await ctf.CreateAccount().With(account =>
+        (await system.CTF.CreateAccount().With(account =>
         {
             account.Email = randomEmail;
             account.Password = password;
         }).Execute()).ShouldSucceed();
+        
 
-        var emails = _fixture.ExternalSystems.InteractWithEmails();
+        var emails = system.ExternalSystems.Emails;
         await emails.ActivateRegistrationSentTo(randomEmail);
-        (await ctf.SignIn().With(credentials =>
+        (await system.CTF.SignIn().With(credentials =>
         {
             credentials.UserName = randomEmail;
             credentials.Password = password;

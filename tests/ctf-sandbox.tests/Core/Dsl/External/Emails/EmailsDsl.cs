@@ -1,12 +1,12 @@
 using ctf_sandbox.tests.Core.Drivers.ExternalSystems;
 
-namespace ctf_sandbox.tests.Core.Dsl;
+namespace ctf_sandbox.tests.Core.Dsl.External.Emails;
 
-public class Emails
+public class EmailsDsl
 {
     private readonly IEmailsDriver _driver;
 
-    public Emails(IEmailsDriver driver)
+    public EmailsDsl(IEmailsDriver driver)
     {
         _driver = driver;
     }

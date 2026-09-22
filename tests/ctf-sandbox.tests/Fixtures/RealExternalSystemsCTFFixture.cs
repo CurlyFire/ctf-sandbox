@@ -1,6 +1,6 @@
 using ctf_sandbox.tests.Core.Clients.ExternalSystems;
 using ctf_sandbox.tests.Core.Drivers.ExternalSystems;
-using ctf_sandbox.tests.Core.Dsl;
+using CtfSandbox.Tests.Core.Drivers.ExternalSystems;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -8,20 +8,6 @@ namespace ctf_sandbox.tests.Fixtures;
 
 public class RealExternalSystemsCTFFixture : CTFFixture
 {
-
-    private ExternalSystems? _externalSystems;
-    public ExternalSystems ExternalSystems
-    {
-        get
-        {
-            if (_externalSystems == null)
-            {
-                throw new InvalidOperationException("ExternalSystems has not been initialized yet.");
-            }
-            return _externalSystems;
-        }
-    }
-
     override protected void ConfigureAppConfiguration(IConfigurationBuilder configBuilder)
     {
         configBuilder.AddJsonFile("appsettings.web.real.json", optional: false)
@@ -31,19 +17,12 @@ public class RealExternalSystemsCTFFixture : CTFFixture
     protected override void ConfigureServices(IServiceCollection services)
     {
         base.ConfigureServices(services);
-        services.AddSingleton<ExternalSystems>();
-        services.AddSingleton<Emails>();
         services.AddSingleton<IEmailsDriver, APIEmailsDriver>();
         services.AddHttpClient<MailpitRealClient>(ConfigureEmailsHttpClient);
-        services.AddSingleton<BannedWords>();
         services.AddSingleton<IBannedWordsDriver, APIBannedWordsDriver>();
         services.AddHttpClient<BannedWordsRealClient>(ConfigureBannedWordsHttpClient);
-    }
-
-    protected override void Configure(IServiceProvider serviceProvider)
-    {
-        base.Configure(serviceProvider);
-        _externalSystems = serviceProvider.GetRequiredService<ExternalSystems>();
+        services.AddSingleton<IIpInfoDriver, IPInfoDriver>();
+        services.AddHttpClient<IpInfoRealClient>(ConfigureIpInfoHttpClient);
     }
 
     private void ConfigureEmailsHttpClient(HttpClient httpClient)
@@ -54,5 +33,10 @@ public class RealExternalSystemsCTFFixture : CTFFixture
     private void ConfigureBannedWordsHttpClient(HttpClient httpClient)
     {
         httpClient.BaseAddress = new Uri(Configuration!.BannedWordsUrl);
+    }
+
+    private void ConfigureIpInfoHttpClient(HttpClient httpClient)
+    {
+        httpClient.BaseAddress = new Uri(Configuration!.IpInfoUrl);
     }
 }

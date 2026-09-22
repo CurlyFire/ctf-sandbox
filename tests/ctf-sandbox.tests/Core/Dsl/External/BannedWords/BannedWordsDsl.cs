@@ -1,12 +1,12 @@
 using ctf_sandbox.tests.Core.Drivers.ExternalSystems;
 
-namespace ctf_sandbox.tests.Core.Dsl;
+namespace ctf_sandbox.tests.Core.Dsl.External.BannedWords;
 
-public class BannedWords
+public class BannedWordsDsl
 {
     private readonly IBannedWordsDriver _bannedWordsDriver;
 
-    public BannedWords(IBannedWordsDriver bannedWordsDriver)
+    public BannedWordsDsl(IBannedWordsDriver bannedWordsDriver)
     {
         _bannedWordsDriver = bannedWordsDriver;
     }
