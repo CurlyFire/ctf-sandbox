@@ -1,4 +1,5 @@
 using ctf_sandbox.tests;
+using ctf_sandbox.tests.Core.Dsl.Scenario;
 using ctf_sandbox.tests.Fixtures;
 using ctf_sandbox.tests.Utils;
 
@@ -19,16 +20,7 @@ public class CTFTests
     [Channel(Channel.UI, Channel.API)]    
     public async Task ShouldBeUpAndRunning(Channel channel)
     {
-        var ctf = _fixture.InteractWithSystemThrough(channel).CTF;
-        (await ctf.GoToCTF().Execute()).ShouldSucceed();
-    }
-
-    [Trait("Category", "Smoke_CTF")]
-    [Theory]
-    [Channel(Channel.UI, Channel.API)] 
-    public async Task ShouldLoginWithValidCredentials(Channel channel)
-    {
-        var ctf = _fixture.InteractWithSystemThrough(channel).CTF;
-        (await ctf.SignIn().Execute()).ShouldSucceed();
+        await _fixture.Scenario(channel)
+            .Assume().MyShop().ShouldBeRunning();
     }
 }

@@ -1,3 +1,4 @@
+using ctf_sandbox.tests.Core.Dsl.Scenario;
 using ctf_sandbox.tests.Core.Dsl;
 using ctf_sandbox.tests.Fixtures;
 using ctf_sandbox.tests.Utils;
@@ -19,20 +20,15 @@ public class TeamTests
     [Channel(Channel.UI, Channel.API)]
     public async Task ShouldBeAbleToCreateTeam(Channel channel)
     {
-        var ctf = _fixture.InteractWithSystemThrough(channel).CTF;
-        (await ctf.SignIn().Execute()).ShouldSucceed();
-        var randomTeamName = $"team_{Guid.NewGuid()}";
-        uint memberCount = 5;
+        var teamName = $"team_{Guid.NewGuid()}";
+        const uint memberCount = 5;
 
-        // Cannot verify creation date because we do not control server time
-        (await ctf.CreateTeam().With(t =>
-        {
-            t.TeamName = randomTeamName;
-            t.MemberCount = memberCount;
-        }).Execute())
-        .ShouldSucceed()
-        .HasMemberCount(memberCount)
-        .HasTeamName(randomTeamName);
+        await _fixture.Scenario(channel)
+            .Given().SignedIn()
+            .When().CreateTeam().WithTeamName(teamName).WithMemberCount(memberCount)
+            .Then().ShouldSucceed().Satisfies(v => v
+                .HasMemberCount(memberCount)
+                .HasTeamName(teamName));
     }
 
     [Trait("Category", "E2E")]
@@ -40,33 +36,24 @@ public class TeamTests
     [Channel(Channel.UI, Channel.API)]
     public async Task ShouldBeAbleToUpdateExistingTeam(Channel channel)
     {
-        var ctf = _fixture.InteractWithSystemThrough(channel).CTF;
-        (await ctf.SignIn().Execute()).ShouldSucceed();
         var originalTeamName = $"team_{Guid.NewGuid()}";
         var updatedTeamName = $"updated_{Guid.NewGuid()}";
-        var updatedDescription = "This is an updated team description";
-        uint originalMemberCount = 3;
-        uint updatedMemberCount = 6;
+        const string updatedDescription = "This is an updated team description";
+        const uint originalMemberCount = 3;
+        const uint updatedMemberCount = 6;
 
-        // Arrange: Create a team
-        (await ctf.CreateTeam().With(t =>
-        {
-            t.TeamName = originalTeamName;
-            t.MemberCount = originalMemberCount;
-        }).Execute())
-        .ShouldSucceed();
-
-        (await ctf.UpdateTeam().With(t =>
-        {
-            t.OriginalTeamName = originalTeamName;
-            t.TeamName = updatedTeamName;
-            t.Description = updatedDescription;
-            t.MemberCount = updatedMemberCount;
-        }).Execute())
-        .ShouldSucceed()
-        .HasTeamName(updatedTeamName)
-        .HasMemberCount(updatedMemberCount)
-        .HasDescription(updatedDescription);
+        await _fixture.Scenario(channel)
+            .Given().SignedIn()
+            .And().TeamCreated(originalTeamName, originalMemberCount)
+            .When().UpdateTeam()
+                .WithOriginalTeamName(originalTeamName)
+                .WithTeamName(updatedTeamName)
+                .WithDescription(updatedDescription)
+                .WithMemberCount(updatedMemberCount)
+            .Then().ShouldSucceed().Satisfies(v => v
+                .HasTeamName(updatedTeamName)
+                .HasMemberCount(updatedMemberCount)
+                .HasDescription(updatedDescription));
     }
 
     [Trait("Category", "E2E")]
@@ -74,20 +61,11 @@ public class TeamTests
     [Channel(Channel.API)]
     public async Task ShouldFailToCreateTeamWithNameTooLong(Channel channel)
     {
-        var ctf = _fixture.InteractWithSystemThrough(channel).CTF;
-        (await ctf.SignIn().Execute()).ShouldSucceed();
-        // Create a team name with 101 characters (exceeds max of 100)
-        var tooLongTeamName = new string('A', 101);
-        uint memberCount = 4;
-
-        // Act: Attempt to create team
-        (await ctf.CreateTeam().With(t =>
-        {
-            t.TeamName = tooLongTeamName;
-            t.MemberCount = memberCount;
-        }).Execute())
-        .ShouldFail()
-        .FieldErrorMessage("Name", "The Name must be between 2 and 100 characters long.");
+        await _fixture.Scenario(channel)
+            .Given().SignedIn()
+            .When().CreateTeam().WithTeamName(new string('A', 101)).WithMemberCount(4)
+            .Then().ShouldFail()
+            .FieldErrorMessage("Name", "The Name must be between 2 and 100 characters long.");
     }
 
     [Trait("Category", "E2E")]
@@ -95,17 +73,10 @@ public class TeamTests
     [Channel(Channel.UI, Channel.API)]
     public async Task ShouldFailToCreateTeamWithMissingName(Channel channel)
     {
-        var ctf = _fixture.InteractWithSystemThrough(channel).CTF;
-        (await ctf.SignIn().Execute()).ShouldSucceed();
-        uint memberCount = 4;
-
-        (await ctf.CreateTeam().With(t =>
-        {
-            t.TeamName = string.Empty; // Missing name
-            t.MemberCount = memberCount;
-        }).Execute())
-        .ShouldFail()
-        .FieldErrorMessage("Name", "The Name field is required.");
+        await _fixture.Scenario(channel)
+            .Given().SignedIn()
+            .When().CreateTeam().WithTeamName(string.Empty)
+            .Then().ShouldFail().FieldErrorMessage("Name", "The Name field is required.");
     }
 
     [Trait("Category", "E2E")]
@@ -113,22 +84,13 @@ public class TeamTests
     [Channel(Channel.UI)]
     public async Task ShouldFailToCreateTeamWithBannedWordInName(Channel channel)
     {
-        var system = _fixture.InteractWithSystemThrough(channel);
-        
-        (await system.CTF.SignIn().Execute()).ShouldSucceed();
-        var bannedWordTeamName = "badword_" + Guid.NewGuid();
-        uint memberCount = 4;
-        await system.ExternalSystems.BannedWords.CreateBannedWord(bannedWordTeamName);
+        var teamName = $"badword_{Guid.NewGuid()}";
 
-        // Act: Attempt to create team with a banned word in the name
-        (await system.CTF.CreateTeam().With(t =>
-        {
-            t.TeamName = bannedWordTeamName;
-            t.MemberCount = memberCount;
-        }).Execute())
-        .ShouldFail()
-        .ErrorMessage("Team name contains banned words");
-
+        await _fixture.Scenario(channel)
+            .Given().SignedIn()
+            .And().BannedWordExists(teamName)
+            .When().CreateTeam().WithTeamName(teamName).WithMemberCount(4)
+            .Then().ShouldFail().ErrorMessage("Team name contains banned words");
     }
 
     [Trait("Category", "E2E")]
@@ -140,12 +102,16 @@ public class TeamTests
     public async Task API_ShouldFailToCreateTeamWithNonIntegerMemberCount(string memberCount)
     {
         var client = _fixture.InteractWithCTFThroughAPIClient();
-        var authenticateResult = await client.Authentication.Authenticate(_fixture.Configuration!.WebServerCredentials.Username,
+        var authenticateResult = await client.Authentication.Authenticate(
+            _fixture.Configuration!.WebServerCredentials.Username,
             _fixture.Configuration.WebServerCredentials.Password);
         authenticateResult.ShouldBeSuccess();
 
-        var createTeamResult = await client.Teams.CreateTeam("TeamWithInvalidMemberCount", memberCount, authenticateResult.Value);
-        
+        var createTeamResult = await client.Teams.CreateTeam(
+            "TeamWithInvalidMemberCount",
+            memberCount,
+            authenticateResult.Value);
+
         var problemDetails = createTeamResult.Error;
         Assert.NotNull(problemDetails);
         Assert.True(problemDetails!.Errors.TryGetValue($"$.{nameof(memberCount)}", out var errors));

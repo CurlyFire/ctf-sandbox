@@ -1,3 +1,4 @@
+using ctf_sandbox.tests.Core.Dsl.Scenario;
 using ctf_sandbox.tests.Fixtures;
 using ctf_sandbox.tests.Utils;
 
@@ -18,23 +19,12 @@ public class RegisterTests
     [Channel(Channel.UI, Channel.API)]
     public async Task ShouldBeAbleToRegister(Channel channel)
     {
-        var system = _fixture.InteractWithSystemThrough(channel);
         var randomEmail = $"registertest_{Guid.NewGuid()}@test.com";
         var password = "RegisterTest123!";
 
-        (await system.CTF.CreateAccount().With(account =>
-        {
-            account.Email = randomEmail;
-            account.Password = password;
-        }).Execute()).ShouldSucceed();
-        
-
-        var emails = system.ExternalSystems.Emails;
-        (await emails.ActivateRegistrationSentTo(randomEmail).Execute()).ShouldSucceed();
-        (await system.CTF.SignIn().With(credentials =>
-        {
-            credentials.UserName = randomEmail;
-            credentials.Password = password;
-        }).Execute()).ShouldSucceed();
+        await _fixture.Scenario(channel)
+            .Given().NotSignedIn().And().AccountRegistered(randomEmail, password)
+            .When().SignIn().WithUserName(randomEmail).WithPassword(password)
+            .Then().ShouldSucceed();
     }
 }
