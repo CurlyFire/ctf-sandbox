@@ -1,3 +1,4 @@
+using ctf_sandbox.tests.Core.Dsl.Scenario;
 using ctf_sandbox.tests.Fixtures;
 
 namespace ctf_sandbox.tests.SmokeTests;
@@ -16,23 +17,23 @@ public class ExternalSystemsHealthTests
     [Fact]
     public async Task Mailpit_ShouldBeUpAndRunning()
     {
-        var system = _fixture.InteractWithSystem();
-        (await system.ExternalSystems.Emails.GoToMailpit().Execute()).ShouldSucceed();
+        await _fixture.Scenario()
+            .Assume().Mailpit().ShouldBeRunning();
     }
 
     [Fact]
     [Trait("Category", "Smoke_ExternalSystemsHealth")]
     public async Task IpInfo_ShouldBeUpAndRunning()
     {
-        var system = _fixture.InteractWithSystem();
-        (await system.ExternalSystems.IpInfo.GoToIpInfo().Execute()).ShouldSucceed();
+        await _fixture.Scenario()
+            .Assume().IpInfo().ShouldBeRunning();
     }
 
     [Fact]
     [Trait("Category", "Smoke_ExternalSystemsHealth")]
     public async Task BannedWordsApi_ShouldBeUpAndRunning()
     {
-        var system = _fixture.InteractWithSystem();
-        (await system.ExternalSystems.BannedWords.GoToBannedWords().Execute()).ShouldSucceed();
+        await _fixture.Scenario()
+            .Assume().BannedWords().ShouldBeRunning();
     }
 }
