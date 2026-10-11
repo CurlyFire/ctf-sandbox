@@ -1,3 +1,5 @@
+using ctf_sandbox.tests.Core.Dsl.Scenario.Given.Steps;
+
 namespace ctf_sandbox.tests.Core.Dsl.Scenario.Given;
 
 /// <summary>
@@ -8,6 +10,7 @@ public class GivenStage
     private readonly UseCaseDsl _app;
     private readonly ScenarioDsl _scenario;
     private readonly List<Func<Task>> _setupActions = [];
+    private readonly List<BaseGiven> _steps = [];
     private bool _signedIn = true;
 
     internal GivenStage(UseCaseDsl app, ScenarioDsl scenario)
@@ -44,26 +47,18 @@ public class GivenStage
         return this;
     }
 
-    public GivenStage BannedWordExists(string word)
+    public GivenBannedWord BannedWord()
     {
-        _setupActions.Add(() => _app.ExternalSystems.BannedWords.CreateBannedWord(word));
-        return this;
+        var step = new GivenBannedWord(this);
+        _steps.Add(step);
+        return step;
     }
 
-    public GivenStage AccountRegistered(string email, string password)
+    public GivenAccount Account()
     {
-        _setupActions.Add(async () =>
-        {
-            (await _app.CTF.CreateAccount().With(account =>
-            {
-                account.Email = email;
-                account.Password = password;
-            }).Execute()).ShouldSucceed();
-
-            (await _app.ExternalSystems.Emails.ActivateRegistrationSentTo(email).Execute()).ShouldSucceed();
-        });
-
-        return this;
+        var step = new GivenAccount(this);
+        _steps.Add(step);
+        return step;
     }
 
     public GivenStage And() => this;
@@ -80,6 +75,11 @@ public class GivenStage
         foreach (var setupAction in _setupActions)
         {
             await setupAction();
+        }
+
+        foreach (var step in _steps)
+        {
+            await step.Execute(_app);
         }
     }
 }

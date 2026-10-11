@@ -24,11 +24,15 @@ public class TeamTests
         const uint memberCount = 5;
 
         await _fixture.Scenario(channel)
-            .Given().SignedIn()
-            .When().CreateTeam().WithTeamName(teamName).WithMemberCount(memberCount)
-            .Then().ShouldSucceed().Satisfies(v => v
-                .HasMemberCount(memberCount)
-                .HasTeamName(teamName));
+            .When()
+                .CreateTeam()
+                    .WithTeamName(teamName)
+                    .WithMemberCount(memberCount)
+            .Then()
+                .ShouldSucceed()
+                    .Satisfies(v => v
+                        .HasMemberCount(memberCount)
+                        .HasTeamName(teamName));
     }
 
     [Trait("Category", "E2E")]
@@ -43,17 +47,20 @@ public class TeamTests
         const uint updatedMemberCount = 6;
 
         await _fixture.Scenario(channel)
-            .Given().SignedIn()
-            .And().TeamCreated(originalTeamName, originalMemberCount)
-            .When().UpdateTeam()
-                .WithOriginalTeamName(originalTeamName)
-                .WithTeamName(updatedTeamName)
-                .WithDescription(updatedDescription)
-                .WithMemberCount(updatedMemberCount)
-            .Then().ShouldSucceed().Satisfies(v => v
-                .HasTeamName(updatedTeamName)
-                .HasMemberCount(updatedMemberCount)
-                .HasDescription(updatedDescription));
+            .Given()
+                .TeamCreated(originalTeamName, originalMemberCount)
+            .When()
+                .UpdateTeam()
+                    .WithOriginalTeamName(originalTeamName)
+                    .WithTeamName(updatedTeamName)
+                    .WithDescription(updatedDescription)
+                    .WithMemberCount(updatedMemberCount)
+            .Then()
+                .ShouldSucceed()
+                    .Satisfies(v => v
+                        .HasTeamName(updatedTeamName)
+                        .HasMemberCount(updatedMemberCount)
+                        .HasDescription(updatedDescription));
     }
 
     [Trait("Category", "E2E")]
@@ -62,10 +69,13 @@ public class TeamTests
     public async Task ShouldFailToCreateTeamWithNameTooLong(Channel channel)
     {
         await _fixture.Scenario(channel)
-            .Given().SignedIn()
-            .When().CreateTeam().WithTeamName(new string('A', 101)).WithMemberCount(4)
-            .Then().ShouldFail()
-            .FieldErrorMessage("Name", "The Name must be between 2 and 100 characters long.");
+            .When()
+            .CreateTeam()
+                .WithTeamName(new string('A', 101))
+                .WithMemberCount(4)
+            .Then()
+                .ShouldFail()
+                    .FieldErrorMessage("Name", "The Name must be between 2 and 100 characters long.");
     }
 
     [Trait("Category", "E2E")]
@@ -74,9 +84,12 @@ public class TeamTests
     public async Task ShouldFailToCreateTeamWithMissingName(Channel channel)
     {
         await _fixture.Scenario(channel)
-            .Given().SignedIn()
-            .When().CreateTeam().WithTeamName(string.Empty)
-            .Then().ShouldFail().FieldErrorMessage("Name", "The Name field is required.");
+            .When()
+                .CreateTeam()
+                    .WithTeamName(string.Empty)
+            .Then()
+                .ShouldFail()
+                    .FieldErrorMessage("Name", "The Name field is required.");
     }
 
     [Trait("Category", "E2E")]
@@ -87,10 +100,16 @@ public class TeamTests
         var teamName = $"badword_{Guid.NewGuid()}";
 
         await _fixture.Scenario(channel)
-            .Given().SignedIn()
-            .And().BannedWordExists(teamName)
-            .When().CreateTeam().WithTeamName(teamName).WithMemberCount(4)
-            .Then().ShouldFail().ErrorMessage("Team name contains banned words");
+            .Given()
+                .BannedWord()
+                    .WithWord(teamName)
+            .When()
+                .CreateTeam()
+                    .WithTeamName(teamName)
+                    .WithMemberCount(4)
+            .Then()
+                .ShouldFail()
+                    .ErrorMessage("Team name contains banned words");
     }
 
     [Trait("Category", "E2E")]
