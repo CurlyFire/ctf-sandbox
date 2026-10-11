@@ -23,8 +23,17 @@ public class RegisterTests
         var password = "RegisterTest123!";
 
         await _fixture.Scenario(channel)
-            .Given().NotSignedIn().And().AccountRegistered(randomEmail, password)
-            .When().SignIn().WithUserName(randomEmail).WithPassword(password)
-            .Then().ShouldSucceed();
+            .Given()
+                .NotSignedIn()
+            .And()
+                .Account()
+                .WithEmail(randomEmail)
+                .WithPassword(password)
+            .When()
+                .SignIn()
+                    .WithUserName(randomEmail)
+                    .WithPassword(password)
+            .Then()
+                .ShouldSucceed();
     }
 }

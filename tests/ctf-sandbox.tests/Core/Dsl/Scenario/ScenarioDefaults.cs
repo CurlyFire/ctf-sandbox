@@ -5,5 +5,11 @@ public static class ScenarioDefaults
 {
     public const uint DefaultMemberCount = 4;
 
-    public static string NewTeamName() => $"team_{Guid.NewGuid()}";
+    public const string DefaultPassword = "Password123!";
+
+    public const string DefaultEmail = "default@test.com";
+
+    public const string DefaultBannedWord = "default-banned-word";
+
+    public const string DefaultTeamName = "default-team";
 }

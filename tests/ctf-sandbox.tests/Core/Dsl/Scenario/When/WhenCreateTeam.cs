@@ -5,7 +5,7 @@ namespace ctf_sandbox.tests.Core.Dsl.Scenario.When;
 
 public class WhenCreateTeam : BaseWhen<Team, CreateTeamVerification>
 {
-    private string _teamName = ScenarioDefaults.NewTeamName();
+    private string _teamName = ScenarioDefaults.DefaultTeamName;
     private uint _memberCount = ScenarioDefaults.DefaultMemberCount;
 
     internal WhenCreateTeam(UseCaseDsl app, ScenarioDsl scenario, Func<Task> setup)
