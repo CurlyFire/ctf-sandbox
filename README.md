@@ -57,6 +57,7 @@ C4Context
         System(systemctf, "CTF Sandbox", "Manage challenges, teams, and competitions")
         System_Ext(systememail, "E-mail system", "SMTP testing tool for development")
         System_Ext(systemipinfo, "Ip Lookup system", "Ip information lookup")
+        System_Ext(bannedwords, "Banned words system", "Checks team names against a list of banned words")
 
         Rel(user, systemctf, "Registers, creates teams, participates")
         UpdateRelStyle(user, systemctf, $offsetX="-230", $offsetY="-45")
@@ -66,46 +67,48 @@ C4Context
 
         Rel(systemctf, systemipinfo, "Lookup ip")
         UpdateRelStyle(systemctf, systemipinfo, $offsetX="10", $offsetY="-10")
+
+        Rel(systemctf, bannedwords, "Checks team names")
     }
 ```
 
 ### Container diagram
 ```mermaid
-C4Container
-    UpdateLayoutConfig($c4ShapeInRow="2", $c4BoundaryInRow="1")
+flowchart LR
+    user([User])
 
-    Person(user, "User", "Creates or participates in CTF competitions")
+    subgraph ctf["CTF Sandbox"]
+        direction TB
+        webapp["Web application<br/>ASP.NET Core MVC"]
+        sqlite[("SQLite database<br/>Users, teams, challenges")]
+        webapp <-->|Reads and writes| sqlite
+    end
 
-    System_Boundary(ctf, "CTF Sandbox") {
-        Container(webapp, "Web Application (ASP.NET MVC)", "C#", "Handles UI, business logic, and data access")
-        Container_Ext(mailpit, "E-mail System", "SMTP / Dev Tool", "Receives email notifications from the app")
-        ContainerDb(sqlite, "SQLite Database", "SQL", "Stores users, teams, challenges, competitions")
-        Container_Ext(systemipinfo, "Ip Lookup system", "HTTP REST", "Resolves ip information")
+    subgraph external["External systems"]
+        direction TB
+        mailpit["E-mail system<br/>Mailpit SMTP"]
+        ipinfo["IP lookup<br/>HTTP API"]
+        bannedwords["Banned words API<br/>HTTP JSON"]
+    end
 
-        Rel(user, webapp, "Uses")
-        UpdateRelStyle(user, webapp,  $offsetX="-50", $offsetY="-20")
-
-        Rel(webapp, sqlite, "Reads from and writes to", "SQL")
-        UpdateRelStyle(webapp, sqlite,  $offsetX="-50", $offsetY="-20")
-
-        Rel(webapp, mailpit, "Sends email via SMTP")
-        UpdateRelStyle(webapp, mailpit, $offsetX="-50", $offsetY="-30")
-
-        Rel(webapp, systemipinfo, "Lookups ip information")
-        UpdateRelStyle(webapp, mailpit, $offsetX="-50", $offsetY="-30")
-
-    }
+    user -->|Uses| webapp
+    webapp -->|Sends email| mailpit
+    webapp -->|Looks up IP| ipinfo
+    webapp -->|Checks team names| bannedwords
 ```
 The CTF competition UI has all the features mentionned in the Sytem use cases section.  Mailpit is used as a SMPT server for invitations and registrations, however, the emails all stay there and can be seen from the mailpit UI.  If you require access to it, ask me and I will create a user for you to view all emails.
 
 # External systems
 Each environment has it's own external system docker container instances.  The test environments (acceptance, E2E, docker-compose) also have their own external test instances, however they are ephemeral and last only for the duration of the tests, so no links are provided here.
 
-|             | Real                     |Stubbed                   |
-|-------------|--------------------------|--------------------------|
-| Email       | Mailpit Docker container | Mailpit Docker container |
-| Ip info     | https://ipinfo.io        | WireMock                 |
-| Time        | System clock             | WireMock                 |
+| System       | Real                       | Stubbed                          |
+|--------------|----------------------------|----------------------------------|
+| Email        | Mailpit Docker container   | Mailpit Docker container        |
+| Ip info      | https://ipinfo.io          | WireMock                        |
+| Time         | System clock               | WireMock                        |
+| Banned words | No real service configured | JSON Server (`banned-words-api`) |
+
+The banned-words API is used when creating or updating a team: the app requests its banned-word list and rejects team names that contain a listed word. For local development, JSON Server serves the list in [`.devcontainer/banned-words-api.json`](.devcontainer/banned-words-api.json) at `http://localhost:8081/BannedWords` from the host, or `http://banned-words-api/BannedWords` from another container on the devcontainer network. Update the JSON file to change the local list.
 
 ## Configuring real vs stubbed
 ### Email
@@ -131,6 +134,11 @@ The contract used to get the current time is through the abstract class System.T
 }
 
 ```
+
+### Banned words
+
+The app gets the banned-word list over HTTP. Configure `BannedWords:BaseUrl` with the API base URL (without the `/BannedWords` path); for local development, the default is `http://banned-words-api`. The API should return a JSON array of objects with `id` and `word` fields.
+
 ## Links to external systems
 | Environment | External system | Link |
 |-------------|-----------------|------|
@@ -156,7 +164,11 @@ example with appsettings.json
     # Change these values to connect to a different ipinfo instance
     "Token": "MySecretToken",
     "BaseUrl": "https://ipinfo.io"
-  },  
+  },
+  "BannedWords": {
+    # Use the JSON Server container in the devcontainer network
+    "BaseUrl": "http://banned-words-api"
+  },
 }
 
 ```
@@ -220,4 +232,3 @@ Responsible for writing addditional E2E tests.
 #### From the terminal
 - Open up a terminal from within Visual Studio Code
 - Execute ./dev-scripts/run-tests.ps1
-
