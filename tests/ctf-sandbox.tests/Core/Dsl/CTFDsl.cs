@@ -20,6 +20,8 @@ public class CTFDsl
 
     public UpdateTeam UpdateTeam() => _useCaseFactory.Create<UpdateTeam>();
 
+    public GetTeam GetTeam() => _useCaseFactory.Create<GetTeam>();
+
     public GetIpInfo GetIpInfo() => _useCaseFactory.Create<GetIpInfo>();
 
     public GoToCTF GoToCTF() => _useCaseFactory.Create<GoToCTF>();

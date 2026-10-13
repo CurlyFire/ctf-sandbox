@@ -9,7 +9,6 @@ public class GivenStage
 {
     private readonly UseCaseDsl _app;
     private readonly ScenarioDsl _scenario;
-    private readonly List<Func<Task>> _setupActions = [];
     private readonly List<BaseGiven> _steps = [];
     private bool _signedIn = true;
 
@@ -31,20 +30,11 @@ public class GivenStage
         return this;
     }
 
-    public GivenStage TeamCreated(string teamName, uint memberCount)
+    public GivenTeam Team()
     {
-        _setupActions.Add(async () =>
-        {
-            var result = await _app.CTF.CreateTeam().With(team =>
-            {
-                team.TeamName = teamName;
-                team.MemberCount = memberCount;
-            }).Execute();
-
-            result.ShouldSucceed();
-        });
-
-        return this;
+        var step = new GivenTeam(this);
+        _steps.Add(step);
+        return step;
     }
 
     public GivenBannedWord BannedWord()
@@ -70,11 +60,6 @@ public class GivenStage
         if (_signedIn)
         {
             (await _app.CTF.SignIn().Execute()).ShouldSucceed();
-        }
-
-        foreach (var setupAction in _setupActions)
-        {
-            await setupAction();
         }
 
         foreach (var step in _steps)

@@ -22,7 +22,7 @@ public class IpInfoTests
         await _fixture.Scenario(channel)
             .Given().SignedIn()
             .When().GetIpInfo().WithIpAddress("8.8.8.8")
-            .Then().ShouldSucceed().Satisfies(verification => verification
+            .Then().ShouldSucceed().And().Response(verification => verification
                 .HasIp("8.8.8.8")
                 .HasLocationData());
     }
