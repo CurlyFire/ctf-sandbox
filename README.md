@@ -74,33 +74,27 @@ C4Context
 
 ### Container diagram
 ```mermaid
-C4Container
-    UpdateLayoutConfig($c4ShapeInRow="2", $c4BoundaryInRow="1")
+flowchart LR
+    user([User])
 
-    Person(user, "User", "Creates or participates in CTF competitions")
+    subgraph ctf["CTF Sandbox"]
+        direction TB
+        webapp["Web application<br/>ASP.NET Core MVC"]
+        sqlite[("SQLite database<br/>Users, teams, challenges")]
+        webapp <-->|Reads and writes| sqlite
+    end
 
-    System_Boundary(ctf, "CTF Sandbox") {
-        Container(webapp, "Web Application (ASP.NET MVC)", "C#", "Handles UI, business logic, and data access")
-        ContainerDb(sqlite, "SQLite Database", "SQL", "Stores users, teams, challenges, competitions")
-    }
+    subgraph external["External systems"]
+        direction TB
+        mailpit["E-mail system<br/>Mailpit SMTP"]
+        ipinfo["IP lookup<br/>HTTP API"]
+        bannedwords["Banned words API<br/>HTTP JSON"]
+    end
 
-    Container_Ext(mailpit, "E-mail System", "SMTP / Dev Tool", "Receives email notifications from the app")
-    Container_Ext(systemipinfo, "Ip Lookup system", "HTTP REST", "Resolves ip information")
-    Container_Ext(bannedwords, "Banned words API", "HTTP REST", "Checks team names against the configured banned-word list")
-
-    Rel(user, webapp, "Uses")
-    UpdateRelStyle(user, webapp,  $offsetX="-50", $offsetY="-20")
-
-    Rel(webapp, sqlite, "Reads from and writes to", "SQL")
-    UpdateRelStyle(webapp, sqlite,  $offsetX="-50", $offsetY="-20")
-
-    Rel(webapp, mailpit, "Sends email via SMTP")
-    UpdateRelStyle(webapp, mailpit, $offsetX="-50", $offsetY="-30")
-
-    Rel(webapp, systemipinfo, "Lookups ip information")
-    UpdateRelStyle(webapp, systemipinfo, $offsetX="-50", $offsetY="-30")
-
-    Rel(webapp, bannedwords, "Checks team names")
+    user -->|Uses| webapp
+    webapp -->|Sends email| mailpit
+    webapp -->|Looks up IP| ipinfo
+    webapp -->|Checks team names| bannedwords
 ```
 The CTF competition UI has all the features mentionned in the Sytem use cases section.  Mailpit is used as a SMPT server for invitations and registrations, however, the emails all stay there and can be seen from the mailpit UI.  If you require access to it, ask me and I will create a user for you to view all emails.
 
