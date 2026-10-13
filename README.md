@@ -81,25 +81,26 @@ C4Container
 
     System_Boundary(ctf, "CTF Sandbox") {
         Container(webapp, "Web Application (ASP.NET MVC)", "C#", "Handles UI, business logic, and data access")
-        Container_Ext(mailpit, "E-mail System", "SMTP / Dev Tool", "Receives email notifications from the app")
         ContainerDb(sqlite, "SQLite Database", "SQL", "Stores users, teams, challenges, competitions")
-        Container_Ext(systemipinfo, "Ip Lookup system", "HTTP REST", "Resolves ip information")
-        Container_Ext(bannedwords, "Banned words API", "HTTP REST", "Checks team names against the configured banned-word list")
-
-        Rel(user, webapp, "Uses")
-        UpdateRelStyle(user, webapp,  $offsetX="-50", $offsetY="-20")
-
-        Rel(webapp, sqlite, "Reads from and writes to", "SQL")
-        UpdateRelStyle(webapp, sqlite,  $offsetX="-50", $offsetY="-20")
-
-        Rel(webapp, mailpit, "Sends email via SMTP")
-        UpdateRelStyle(webapp, mailpit, $offsetX="-50", $offsetY="-30")
-
-        Rel(webapp, systemipinfo, "Lookups ip information")
-        UpdateRelStyle(webapp, mailpit, $offsetX="-50", $offsetY="-30")
-
-        Rel(webapp, bannedwords, "Checks team names")
     }
+
+    Container_Ext(mailpit, "E-mail System", "SMTP / Dev Tool", "Receives email notifications from the app")
+    Container_Ext(systemipinfo, "Ip Lookup system", "HTTP REST", "Resolves ip information")
+    Container_Ext(bannedwords, "Banned words API", "HTTP REST", "Checks team names against the configured banned-word list")
+
+    Rel(user, webapp, "Uses")
+    UpdateRelStyle(user, webapp,  $offsetX="-50", $offsetY="-20")
+
+    Rel(webapp, sqlite, "Reads from and writes to", "SQL")
+    UpdateRelStyle(webapp, sqlite,  $offsetX="-50", $offsetY="-20")
+
+    Rel(webapp, mailpit, "Sends email via SMTP")
+    UpdateRelStyle(webapp, mailpit, $offsetX="-50", $offsetY="-30")
+
+    Rel(webapp, systemipinfo, "Lookups ip information")
+    UpdateRelStyle(webapp, systemipinfo, $offsetX="-50", $offsetY="-30")
+
+    Rel(webapp, bannedwords, "Checks team names")
 ```
 The CTF competition UI has all the features mentionned in the Sytem use cases section.  Mailpit is used as a SMPT server for invitations and registrations, however, the emails all stay there and can be seen from the mailpit UI.  If you require access to it, ask me and I will create a user for you to view all emails.
 
@@ -237,4 +238,3 @@ Responsible for writing addditional E2E tests.
 #### From the terminal
 - Open up a terminal from within Visual Studio Code
 - Execute ./dev-scripts/run-tests.ps1
-
