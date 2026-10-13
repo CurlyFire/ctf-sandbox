@@ -19,7 +19,7 @@ public abstract class BaseWhen<TSuccessResponse, TSuccessVerification>
     public ThenStage<TSuccessResponse, TSuccessVerification> Then()
     {
         _scenario.MarkAsExecuted();
-        return new ThenStage<TSuccessResponse, TSuccessVerification>(async () =>
+        return new ThenStage<TSuccessResponse, TSuccessVerification>(_app, async () =>
         {
             await _setup();
             return await Execute(_app);

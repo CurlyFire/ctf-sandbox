@@ -30,9 +30,8 @@ public class TeamTests
                     .WithMemberCount(memberCount)
             .Then()
                 .ShouldSucceed()
-                    .Satisfies(v => v
-                        .HasMemberCount(memberCount)
-                        .HasTeamName(teamName));
+                    .And().Team(teamName)
+                        .HasMemberCount(memberCount);
     }
 
     [Trait("Category", "E2E")]
@@ -48,7 +47,7 @@ public class TeamTests
 
         await _fixture.Scenario(channel)
             .Given()
-                .TeamCreated(originalTeamName, originalMemberCount)
+                .Team().WithTeamName(originalTeamName).WithMemberCount(originalMemberCount)
             .When()
                 .UpdateTeam()
                     .WithOriginalTeamName(originalTeamName)
@@ -57,10 +56,10 @@ public class TeamTests
                     .WithMemberCount(updatedMemberCount)
             .Then()
                 .ShouldSucceed()
-                    .Satisfies(v => v
-                        .HasTeamName(updatedTeamName)
-                        .HasMemberCount(updatedMemberCount)
-                        .HasDescription(updatedDescription));
+                    .And()
+                        .Team(updatedTeamName)
+                            .HasMemberCount(updatedMemberCount)
+                            .HasDescription(updatedDescription);
     }
 
     [Trait("Category", "E2E")]

@@ -6,10 +6,13 @@ public class ThenStage<TSuccessResponse, TSuccessVerification>
     private readonly Func<Task<ExecutionResult<TSuccessResponse, TSuccessVerification>>> _lazyExecute;
     private Task<ExecutionResult<TSuccessResponse, TSuccessVerification>>? _execution;
 
-    internal ThenStage(Func<Task<ExecutionResult<TSuccessResponse, TSuccessVerification>>> lazyExecute)
+    internal ThenStage(UseCaseDsl app, Func<Task<ExecutionResult<TSuccessResponse, TSuccessVerification>>> lazyExecute)
     {
+        App = app;
         _lazyExecute = lazyExecute;
     }
+
+    internal UseCaseDsl App { get; }
 
     public ThenSuccess<TSuccessResponse, TSuccessVerification> ShouldSucceed() => new(this);
 
