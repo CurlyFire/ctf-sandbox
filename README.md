@@ -57,6 +57,7 @@ C4Context
         System(systemctf, "CTF Sandbox", "Manage challenges, teams, and competitions")
         System_Ext(systememail, "E-mail system", "SMTP testing tool for development")
         System_Ext(systemipinfo, "Ip Lookup system", "Ip information lookup")
+        System_Ext(systemtime, "Time provider", "System clock")
         System_Ext(bannedwords, "Banned words system", "Checks team names against a list of banned words")
 
         Rel(user, systemctf, "Registers, creates teams, participates")
@@ -68,7 +69,10 @@ C4Context
         Rel(systemctf, systemipinfo, "Lookup ip")
         UpdateRelStyle(systemctf, systemipinfo, $offsetX="10", $offsetY="-10")
 
+        Rel(systemctf, systemtime, "Gets current time")
+
         Rel(systemctf, bannedwords, "Checks team names")
+        UpdateRelStyle(systemctf, bannedwords, $offsetY="100")
     }
 ```
 
@@ -88,12 +92,14 @@ flowchart LR
         direction TB
         mailpit["E-mail system<br/>Mailpit SMTP"]
         ipinfo["IP lookup<br/>HTTP API"]
+        timeprovider["Time provider<br/>System clock / WireMock"]
         bannedwords["Banned words API<br/>HTTP JSON"]
     end
 
     user -->|Uses| webapp
     webapp -->|Sends email| mailpit
     webapp -->|Looks up IP| ipinfo
+    webapp -->|Gets current time| timeprovider
     webapp -->|Checks team names| bannedwords
 ```
 The CTF competition UI has all the features mentionned in the Sytem use cases section.  Mailpit is used as a SMPT server for invitations and registrations, however, the emails all stay there and can be seen from the mailpit UI.  If you require access to it, ask me and I will create a user for you to view all emails.
