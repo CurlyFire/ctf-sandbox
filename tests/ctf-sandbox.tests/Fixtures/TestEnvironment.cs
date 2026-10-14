@@ -22,7 +22,7 @@ using Microsoft.Playwright;
 
 namespace ctf_sandbox.tests.Fixtures;
 
-public abstract class CTFFixture
+public abstract class TestEnvironment
 {
     private IHost? _host;
     private IServiceScope _scope = null!;
@@ -30,7 +30,7 @@ public abstract class CTFFixture
     private bool disposedValue;
     public CTFConfiguration? Configuration { get; private set; }
 
-    public CTFFixture()
+    public TestEnvironment()
     {
         InitializeWebServer();
         InitializeServiceProvider();

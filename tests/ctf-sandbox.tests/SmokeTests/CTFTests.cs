@@ -5,22 +5,21 @@ using ctf_sandbox.tests.Utils;
 
 namespace tests.ctf_sandbox.tests.SmokeTests;
 
-[Collection(RealExternalSystemsTestCollection.Name)]
+[Collection(CTFTestCollection.Name)]
 public class CTFTests
 {
-    private readonly RealExternalSystemsCTFFixture _fixture;
+    private readonly TestEnvironments _testEnvironments;
 
-    public CTFTests(RealExternalSystemsCTFFixture fixture)
+    public CTFTests(TestEnvironments testEnvironments)
     {
-        _fixture = fixture;
+        _testEnvironments = testEnvironments;
     }
 
     [Trait("Category", "Smoke_CTF")]
-    [Theory]
-    [Channel(Channel.UI, Channel.API)]    
-    public async Task ShouldBeUpAndRunning(Channel channel)
+    [Theory, CombinatorialData]
+    public async Task ShouldBeUpAndRunning(Channel channel, ExternalSystem externalSystem)
     {
-        await _fixture.Scenario(channel)
+        await _testEnvironments.For(externalSystem).Scenario(channel)
             .Assume().MyShop().ShouldBeRunning();
     }
 }

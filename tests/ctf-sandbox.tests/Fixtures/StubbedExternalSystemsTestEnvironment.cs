@@ -2,7 +2,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace ctf_sandbox.tests.Fixtures;
 
-public class StubbedExternalSystemsCTFFixture : CTFFixture
+public class StubbedExternalSystemsTestEnvironment : TestEnvironment
 {
     override protected void ConfigureAppConfiguration(IConfigurationBuilder configBuilder)
     {

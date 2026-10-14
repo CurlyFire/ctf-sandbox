@@ -106,9 +106,9 @@ Each environment has it's own external system docker container instances.  The t
 | Email        | Mailpit Docker container   | Mailpit Docker container        |
 | Ip info      | https://ipinfo.io          | WireMock                        |
 | Time         | System clock               | WireMock                        |
-| Banned words | No real service configured | JSON Server (`banned-words-api`) |
+| Banned words | JSON Server (`banned-words-api`) | WireMock                        |
 
-The banned-words API is used when creating or updating a team: the app requests its banned-word list and rejects team names that contain a listed word. For local development, JSON Server serves the list in [`.devcontainer/banned-words-api.json`](.devcontainer/banned-words-api.json) at `http://localhost:8081/BannedWords` from the host, or `http://banned-words-api/BannedWords` from another container on the devcontainer network. Update the JSON file to change the local list.
+The banned-words API is used when creating or updating a team: the app requests its banned-word list and rejects team names that contain a listed word. The real service is a JSON Server container (`banned-words-api`) that serves the list in [`.devcontainer/banned-words-api.json`](.devcontainer/banned-words-api.json) at `http://localhost:8081/BannedWords` from the host, or `http://banned-words-api/BannedWords` from another container on the devcontainer network. Update the JSON file to change the list. The stubbed service is WireMock, which returns canned responses in the same format, so tests that need specific banned words can stub them.
 
 ## Configuring real vs stubbed
 ### Email
@@ -137,7 +137,7 @@ The contract used to get the current time is through the abstract class System.T
 
 ### Banned words
 
-The app gets the banned-word list over HTTP. Configure `BannedWords:BaseUrl` with the API base URL (without the `/BannedWords` path); for local development, the default is `http://banned-words-api`. The API should return a JSON array of objects with `id` and `word` fields.
+The app gets the banned-word list over HTTP. Configure `BannedWords:BaseUrl` with the API base URL (without the `/BannedWords` path); for local development, the default is `http://banned-words-api`. The API should return a JSON array of objects with `id` and `word` fields. To switch between real (JSON Server) and stubbed (WireMock), only change `BannedWords:BaseUrl`; both expose the same HTTP contract.
 
 ## Links to external systems
 | Environment | External system | Link |
@@ -166,8 +166,10 @@ example with appsettings.json
     "BaseUrl": "https://ipinfo.io"
   },
   "BannedWords": {
-    # Use the JSON Server container in the devcontainer network
+    # Real: the JSON Server container in the devcontainer network
     "BaseUrl": "http://banned-words-api"
+    # OR use the WireMock server to stub the banned words API
+    # "BaseUrl": "http://wiremockserver"
   },
 }
 

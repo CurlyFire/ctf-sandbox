@@ -5,22 +5,21 @@ using ctf_sandbox.tests.Utils;
 
 namespace ctf_sandbox.tests.E2ETests;
 
-[Collection(RealExternalSystemsTestCollection.Name)]
+[Collection(CTFTestCollection.Name)]
 public class TeamTests
 {
-    private readonly RealExternalSystemsCTFFixture _fixture;
+    private readonly TestEnvironment _testEnvironment;
 
-    public TeamTests(RealExternalSystemsCTFFixture fixture)
+    public TeamTests(TestEnvironments testEnvironments)
     {
-        _fixture = fixture;
+        _testEnvironment = testEnvironments.For(ExternalSystem.Real);
     }
 
     [Trait("Category", "E2E")]
-    [Theory]
-    [Channel(Channel.UI, Channel.API)]
+    [Theory, CombinatorialData]
     public async Task ShouldBeAbleToCreateTeam(Channel channel)
     {
-        await _fixture.Scenario(channel)
+        await _testEnvironment.Scenario(channel)
             .When()
                 .CreateTeam()
                     .WithTeamName("team")
@@ -31,11 +30,10 @@ public class TeamTests
     }
 
     [Trait("Category", "E2E")]
-    [Theory]
-    [Channel(Channel.UI, Channel.API)]
+    [Theory, CombinatorialData]
     public async Task ShouldBeAbleToUpdateExistingTeam(Channel channel)
     {
-        await _fixture.Scenario(channel)
+        await _testEnvironment.Scenario(channel)
             .Given()
                 .Team().WithTeamName("original team").WithMemberCount(3)
             .When()
@@ -53,11 +51,10 @@ public class TeamTests
     }
 
     [Trait("Category", "E2E")]
-    [Theory]
-    [Channel(Channel.API)]
-    public async Task ShouldFailToCreateTeamWithNameTooLong(Channel channel)
+    [Theory, CombinatorialData]
+    public async Task ShouldFailToCreateTeamWithNameTooLong([CombinatorialValues(Channel.API)] Channel channel)
     {
-        await _fixture.Scenario(channel)
+        await _testEnvironment.Scenario(channel)
             .When()
             .CreateTeam()
                 .WithTeamName(new string('A', 101))
@@ -68,11 +65,10 @@ public class TeamTests
     }
 
     [Trait("Category", "E2E")]
-    [Theory]
-    [Channel(Channel.UI, Channel.API)]
+    [Theory, CombinatorialData]
     public async Task ShouldFailToCreateTeamWithMissingName(Channel channel)
     {
-        await _fixture.Scenario(channel)
+        await _testEnvironment.Scenario(channel)
             .When()
                 .CreateTeam()
                     .WithTeamName(string.Empty)
@@ -82,11 +78,12 @@ public class TeamTests
     }
 
     [Trait("Category", "E2E")]
-    [Theory]
-    [Channel(Channel.UI)]
-    public async Task ShouldFailToCreateTeamWithBannedWordInName(Channel channel)
+    [Theory, CombinatorialData]
+    public async Task ShouldFailToCreateTeamWithBannedWordInName([CombinatorialValues(Channel.UI)] Channel channel)
     {
-        await _fixture.Scenario(channel)
+        var teamName = $"badword_{Guid.NewGuid()}";
+
+        await _testEnvironment.Scenario(channel)
             .Given()
                 .BannedWord()
                     .WithWord("badword")
@@ -107,7 +104,7 @@ public class TeamTests
     [InlineData(" 5 ")]
     public async Task API_ShouldFailToCreateTeamWithNonIntegerMemberCount(string memberCount)
     {
-        await _fixture.Scenario(Channel.API)
+        await _testEnvironment.Scenario(Channel.API)
             .When()
                 .CreateTeam()
                     .WithTeamName("team")

@@ -4,22 +4,21 @@ using ctf_sandbox.tests.Utils;
 
 namespace ctf_sandbox.tests.E2ETests;
 
-[Collection(RealExternalSystemsTestCollection.Name)]
+[Collection(CTFTestCollection.Name)]
 public class RegisterTests
 {
-    private readonly RealExternalSystemsCTFFixture _fixture;
+    private readonly TestEnvironment _testEnvironment;
 
-    public RegisterTests(RealExternalSystemsCTFFixture fixture)
+    public RegisterTests(TestEnvironments testEnvironments)
     {
-        _fixture = fixture;
+        _testEnvironment = testEnvironments.For(ExternalSystem.Real);
     }
 
     [Trait("Category", "E2E")]
-    [Theory]
-    [Channel(Channel.UI, Channel.API)]
+    [Theory, CombinatorialData]
     public async Task ShouldBeAbleToRegister(Channel channel)
     {
-        await _fixture.Scenario(channel)
+        await _testEnvironment.Scenario(channel)
             .Given()
                 .NotSignedIn()
             .And()

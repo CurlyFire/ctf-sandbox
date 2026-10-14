@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ctf_sandbox.tests.Fixtures;
 
-public class RealExternalSystemsCTFFixture : CTFFixture
+public class RealExternalSystemsTestEnvironment : TestEnvironment
 {
     override protected void ConfigureAppConfiguration(IConfigurationBuilder configBuilder)
     {
