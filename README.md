@@ -71,8 +71,7 @@ C4Context
 
         Rel(systemctf, systemtime, "Gets current time")
 
-        Rel(systemctf, bannedwords, "Checks team names")
-        UpdateRelStyle(systemctf, bannedwords, $offsetY="100")
+        Rel_R(systemctf, bannedwords, "Checks team names")
     }
 ```
 
