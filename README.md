@@ -50,29 +50,26 @@ MVC monolith
 
 ### System context diagram
 ```mermaid
-C4Context
-    UpdateLayoutConfig($c4ShapeInRow="2", $c4BoundaryInRow="1")
-    Person(user, "Competitor", "Creates or participates in CTF competitions")
-    Enterprise_Boundary(b0, "CTF") {
-        System(systemctf, "CTF Sandbox", "Manage challenges, teams, and competitions")
-        System_Ext(systememail, "E-mail system", "SMTP testing tool for development")
-        System_Ext(systemipinfo, "Ip Lookup system", "Ip information lookup")
-        System_Ext(systemtime, "Time provider", "System clock")
-        System_Ext(bannedwords, "Banned words system", "Checks team names against a list of banned words")
+flowchart LR
+    user(["Competitor<br/>Creates or participates in CTF competitions"])
 
-        Rel(user, systemctf, "Registers, creates teams, participates")
-        UpdateRelStyle(user, systemctf, $offsetX="-230", $offsetY="-45")
+    subgraph ctf["CTF"]
+        systemctf["CTF Sandbox<br/>Manage challenges, teams, and competitions"]
+    end
 
-        Rel(systemctf, systememail, "Sends email")
-        UpdateRelStyle(systemctf, systememail, $offsetX="-40", $offsetY="-10")
+    subgraph external["External systems"]
+        direction TB
+        systememail["E-mail system<br/>SMTP testing tool for development"]
+        systemipinfo["IP Lookup system<br/>IP information lookup"]
+        systemtime["Time provider<br/>System clock"]
+        bannedwords["Banned words system<br/>Checks team names against a list of banned words"]
+    end
 
-        Rel(systemctf, systemipinfo, "Lookup ip")
-        UpdateRelStyle(systemctf, systemipinfo, $offsetX="10", $offsetY="-10")
-
-        Rel(systemctf, systemtime, "Gets current time")
-
-        Rel_R(systemctf, bannedwords, "Checks team names")
-    }
+    user -->|Registers, creates teams, participates| systemctf
+    systemctf -->|Sends email| systememail
+    systemctf -->|Looks up IP| systemipinfo
+    systemctf -->|Gets current time| systemtime
+    systemctf -->|Checks team names| bannedwords
 ```
 
 ### Container diagram
