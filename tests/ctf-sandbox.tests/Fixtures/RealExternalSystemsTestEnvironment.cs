@@ -22,6 +22,7 @@ public class RealExternalSystemsTestEnvironment : TestEnvironment
         services.AddHttpClient<BannedWordsRealClient>(ConfigureBannedWordsHttpClient);
         services.AddSingleton<IIpInfoDriver, IPInfoRealDriver>();
         services.AddHttpClient<IpInfoRealClient>(ConfigureIpInfoHttpClient);
+        services.AddHttpClient<IpInfoRealClient>(ConfigureIpInfoHttpClient);
     }
 
     private void ConfigureEmailsHttpClient(HttpClient httpClient)

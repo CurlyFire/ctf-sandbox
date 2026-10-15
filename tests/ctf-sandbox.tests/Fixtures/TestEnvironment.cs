@@ -5,14 +5,15 @@ using ctf_sandbox.tests.Core.Clients.UI;
 using ctf_sandbox.tests.Core.Drivers.CTF;
 using ctf_sandbox.tests.Core.Drivers.CTF.API;
 using ctf_sandbox.tests.Core.Drivers.CTF.UI;
+using ctf_sandbox.tests.Core.Drivers.ExternalSystems;
 using ctf_sandbox.tests.Core.Dsl;
-using ctf_sandbox.tests.Core.Dsl.External.Clock;
 using ctf_sandbox.tests.Core.Dsl.External.BannedWords;
+using ctf_sandbox.tests.Core.Dsl.External.Clock;
 using ctf_sandbox.tests.Core.Dsl.External.Emails;
+using ctf_sandbox.tests.Core.Dsl.External.IpInfo;
 using ctf_sandbox.tests.Core.Dsl.UseCases;
 using ctf_sandbox.tests.Extensions;
 using ctf_sandbox.tests.Utils;
-using CtfSandbox.Tests.Core.Drivers.ExternalSystems;
 using ctf_sandbox.Time;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -20,8 +21,6 @@ using Microsoft.Extensions.Configuration.EnvironmentVariables;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Playwright;
-using ctf_sandbox.tests.Core.Drivers.ExternalSystems;
-using ctf_sandbox.tests.Core.Dsl.External.IpInfo;
 
 namespace ctf_sandbox.tests.Fixtures;
 
@@ -242,7 +241,6 @@ public abstract class TestEnvironment
     {
         services.AddSingleton(Configuration!);
         services.AddHttpClient().ConfigureHttpClientDefaults(ConfigureCTFHttpClient);
-        services.AddHttpClient<IpInfoRealClient>(ConfigureIpInfoHttpClient);
         services.AddTimeProviderBasedOn(_ctfWebHostConfiguration
             ?? throw new InvalidOperationException("CTF web host configuration has not been initialized."));
         services.AddSingleton<ClockRealClient>();

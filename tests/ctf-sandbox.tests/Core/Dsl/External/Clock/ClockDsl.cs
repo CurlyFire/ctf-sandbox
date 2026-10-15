@@ -1,6 +1,6 @@
 using ctf_sandbox.tests.Core.Dsl.UseCases;
 using ctf_sandbox.tests.Core.Dsl.External.Clock.UseCases;
-using CtfSandbox.Tests.Core.Drivers.ExternalSystems;
+using ctf_sandbox.tests.Core.Drivers.ExternalSystems;
 
 namespace ctf_sandbox.tests.Core.Dsl.External.Clock;
 
