@@ -1,4 +1,4 @@
-using ctf_sandbox.Areas.CTF.Models;
+using ctf_sandbox.tests.Core.Drivers.CTF.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Playwright;
 
@@ -29,12 +29,12 @@ public class ManageTeamsPage : ErrorPage
         return await Page.GetByText(teamName).IsVisibleAsync();
     }
 
-    public async Task<Result<Team?, ValidationProblemDetails>> GetTeam(string teamName)
+    public async Task<Result<GetTeamResponse?, ValidationProblemDetails>> GetTeam(string teamName)
     {
         // Check if team is visible first
         if (!await IsTeamVisible(teamName))
         {
-            return Result<Team?, ValidationProblemDetails>.Failure(new ValidationProblemDetails { Title = $"Team {teamName} not found" });
+            return Result<GetTeamResponse?, ValidationProblemDetails>.Failure(new ValidationProblemDetails { Title = $"Team {teamName} not found" });
         }
 
         // Find the card containing the team name
@@ -53,17 +53,17 @@ public class ManageTeamsPage : ErrorPage
         
         if (string.IsNullOrEmpty(memberCountText) || !uint.TryParse(memberCountText, out memberCount))
         {
-            return Result<Team?, ValidationProblemDetails>.Failure(new ValidationProblemDetails { Title = $"Could not read member count for team {teamName}" });
+            return Result<GetTeamResponse?, ValidationProblemDetails>.Failure(new ValidationProblemDetails { Title = $"Could not read member count for team {teamName}" });
         }
 
         
 
-        var team = new Team
+        var team = new GetTeamResponse
         {
             Name = teamNameFromPage ?? string.Empty,
             Description = description,
             MemberCount = memberCount
         };
-        return Result<Team?, ValidationProblemDetails>.Success(team);
+        return Result<GetTeamResponse?, ValidationProblemDetails>.Success(team);
     }
 }

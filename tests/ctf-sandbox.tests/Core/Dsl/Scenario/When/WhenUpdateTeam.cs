@@ -1,9 +1,9 @@
-using ctf_sandbox.Areas.CTF.Models;
+using ctf_sandbox.tests.Core.Drivers.CTF.Dtos;
 using ctf_sandbox.tests.Core.Dsl.UseCases;
 
 namespace ctf_sandbox.tests.Core.Dsl.Scenario.When;
 
-public class WhenUpdateTeam : BaseWhen<Team, UpdateTeamVerification>
+public class WhenUpdateTeam : BaseWhen<GetTeamResponse, UpdateTeamVerification>
 {
     private string _originalTeamName = string.Empty;
     private string _teamName = string.Empty;
@@ -39,7 +39,7 @@ public class WhenUpdateTeam : BaseWhen<Team, UpdateTeamVerification>
         return this;
     }
 
-    protected override async Task<ExecutionResult<Team, UpdateTeamVerification>> Execute(UseCaseDsl app)
+    protected override async Task<ExecutionResult<GetTeamResponse, UpdateTeamVerification>> Execute(UseCaseDsl app)
     {
         var result = await app.CTF.UpdateTeam().With(team =>
         {
@@ -49,6 +49,6 @@ public class WhenUpdateTeam : BaseWhen<Team, UpdateTeamVerification>
             team.MemberCount = _memberCount;
         }).Execute();
 
-        return new ExecutionResult<Team, UpdateTeamVerification>(result);
+        return new ExecutionResult<GetTeamResponse, UpdateTeamVerification>(result);
     }
 }

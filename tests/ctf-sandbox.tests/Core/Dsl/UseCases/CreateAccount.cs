@@ -20,7 +20,7 @@ public class CreateAccount : CTFUseCase<VoidValue, VoidVerification>
 
     public override async Task<CTFUseCaseResult<VoidValue, VoidVerification>> Execute()
     {
-        var result = await Driver.CreateAccount(_parameters.Email, _parameters.Password);
+        var result = await Driver.CreateAccount(Context.GetEmailParamValue(_parameters.Email)!, _parameters.Password);
         return new CTFUseCaseResult<VoidValue, VoidVerification>(
             result,
             Context,

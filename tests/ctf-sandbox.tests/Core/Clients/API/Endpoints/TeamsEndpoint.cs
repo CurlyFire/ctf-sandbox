@@ -1,4 +1,4 @@
-using ctf_sandbox.Areas.CTF.Models;
+using ctf_sandbox.tests.Core.Drivers.CTF.Dtos;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ctf_sandbox.tests.Core.Clients.API.Endpoints;
@@ -10,7 +10,7 @@ public class TeamsEndpoint : Endpoint
     {
     }
 
-    public async Task<Result<Team, ValidationProblemDetails>> CreateTeam(string? teamName, string memberCount, string jwt)
+    public async Task<Result<GetTeamResponse, ValidationProblemDetails>> CreateTeam(string? teamName, string memberCount, string jwt)
     {
         var createTeamRequest = new
         {
@@ -18,20 +18,20 @@ public class TeamsEndpoint : Endpoint
             MemberCount = memberCount
         };
 
-        return await JsonHttpClient.PostAsync<Team>("teams", createTeamRequest, jwt);
+        return await JsonHttpClient.PostAsync<GetTeamResponse>("teams", createTeamRequest, jwt);
     }
 
-    public async Task<Result<Team, ValidationProblemDetails>> CreateTeam(string? teamName, uint memberCount, string jwt)
+    public async Task<Result<GetTeamResponse, ValidationProblemDetails>> CreateTeam(string? teamName, uint memberCount, string jwt)
     {
         return await CreateTeam(teamName, memberCount.ToString(), jwt);
     }
 
-    public async Task<Result<IEnumerable<Team>, ValidationProblemDetails>> GetTeams(string jwt)
+    public async Task<Result<IEnumerable<GetTeamResponse>, ValidationProblemDetails>> GetTeams(string jwt)
     {
-        return await JsonHttpClient.GetAsync<IEnumerable<Team>>("teams", jwt);
+        return await JsonHttpClient.GetAsync<IEnumerable<GetTeamResponse>>("teams", jwt);
     }
 
-    public async Task<Result<Team, ValidationProblemDetails>> UpdateTeam(string teamId, string teamName, string? description, string memberCount, string jwt)
+    public async Task<Result<GetTeamResponse, ValidationProblemDetails>> UpdateTeam(string teamId, string teamName, string? description, string memberCount, string jwt)
     {
         var updateRequest = new 
         {
@@ -40,10 +40,10 @@ public class TeamsEndpoint : Endpoint
             MemberCount = memberCount
         };
 
-        return await JsonHttpClient.PutAsync<Team>($"teams/{teamId}", updateRequest, jwt);
+        return await JsonHttpClient.PutAsync<GetTeamResponse>($"teams/{teamId}", updateRequest, jwt);
     }
 
-    public async Task<Result<Team, ValidationProblemDetails>> UpdateTeam(int teamId, string teamName, string? description, uint memberCount, string jwt)
+    public async Task<Result<GetTeamResponse, ValidationProblemDetails>> UpdateTeam(int teamId, string teamName, string? description, uint memberCount, string jwt)
     {
         return await UpdateTeam(teamId.ToString(), teamName, description, memberCount.ToString(), jwt);
     }

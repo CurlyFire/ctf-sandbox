@@ -1,5 +1,4 @@
-using ctf_sandbox.Areas.CTF.Models;
-using ctf_sandbox.Models;
+using ctf_sandbox.tests.Core.Drivers.CTF.Dtos;
 using ctf_sandbox.tests.Core.Clients.UI;
 
 namespace ctf_sandbox.tests.Core.Drivers.CTF.UI;
@@ -47,7 +46,10 @@ public class UICTFDriver : ICTFDriver
         }
     }
 
-    public async Task<Result<Team, SystemError>> CreateTeam(string? teamName, uint memberCount = 4)
+    public Task<Result<GetTeamResponse, SystemError>> CreateTeam(string? teamName, string memberCount)
+        => throw new NotSupportedException("The UI only accepts a numeric member count.");
+
+    public async Task<Result<GetTeamResponse, SystemError>> CreateTeam(string? teamName, uint memberCount = 4)
     {
         var homePage = await _uiClient.OpenHomePage();
         var manageTeamsPage = await homePage.GoToManageTeamsPage();
@@ -57,21 +59,21 @@ public class UICTFDriver : ICTFDriver
         {
             var createdTeam = await result.Value.GetTeam(teamName ?? string.Empty);
             if (createdTeam.IsSuccess && createdTeam.Value is not null)
-                return Result<Team, SystemError>.Success(createdTeam.Value);
+                return Result<GetTeamResponse, SystemError>.Success(createdTeam.Value);
             else
                 return createdTeam.IsSuccess
-                    ? Result<Team, SystemError>.Failure(SystemError.Of("The created team could not be read from the page."))
-                    : Result<Team, SystemError>.Failure(ValidationProblemDetailsExtensions.MapError(createdTeam.Error));
+                    ? Result<GetTeamResponse, SystemError>.Failure(SystemError.Of("The created team could not be read from the page."))
+                    : Result<GetTeamResponse, SystemError>.Failure(ValidationProblemDetailsExtensions.MapError(createdTeam.Error));
         }
         if (!result.IsSuccess)
         {
-            return Result<Team, SystemError>.Failure(ValidationProblemDetailsExtensions.MapError(result.Error));
+            return Result<GetTeamResponse, SystemError>.Failure(ValidationProblemDetailsExtensions.MapError(result.Error));
         }        
 
-        return Result<Team, SystemError>.Failure(SystemError.Of("The create-team page was not available after team creation."));
+        return Result<GetTeamResponse, SystemError>.Failure(SystemError.Of("The create-team page was not available after team creation."));
     }
 
-    public async Task<Result<Team, SystemError>> UpdateTeam(string oldTeamName, string newTeamName, string? newDescription = null, uint? memberCount = null)
+    public async Task<Result<GetTeamResponse, SystemError>> UpdateTeam(string oldTeamName, string newTeamName, string? newDescription = null, uint? memberCount = null)
     {
         var homePage = await _uiClient.OpenHomePage();
         var manageTeamsPage = await homePage.GoToManageTeamsPage();
@@ -81,19 +83,19 @@ public class UICTFDriver : ICTFDriver
         {
             var team = await result.Value.GetTeam(newTeamName);
             if (team.IsSuccess && team.Value is not null)
-                return Result<Team, SystemError>.Success(team.Value);
+                return Result<GetTeamResponse, SystemError>.Success(team.Value);
 
             return team.IsSuccess
-                ? Result<Team, SystemError>.Failure(SystemError.Of("The updated team could not be read from the page."))
-                : Result<Team, SystemError>.Failure(ValidationProblemDetailsExtensions.MapError(team.Error));
+                ? Result<GetTeamResponse, SystemError>.Failure(SystemError.Of("The updated team could not be read from the page."))
+                : Result<GetTeamResponse, SystemError>.Failure(ValidationProblemDetailsExtensions.MapError(team.Error));
         }
         else
         {
-            return Result<Team, SystemError>.Failure(ValidationProblemDetailsExtensions.MapError(result.Error));
+            return Result<GetTeamResponse, SystemError>.Failure(ValidationProblemDetailsExtensions.MapError(result.Error));
         }
     }
 
-    public async Task<Result<Team?, SystemError>> GetTeam(string teamName)
+    public async Task<Result<GetTeamResponse?, SystemError>> GetTeam(string teamName)
     {
         var homePage = await _uiClient.OpenHomePage();
         var manageTeamsPage = await homePage.GoToManageTeamsPage();
@@ -101,15 +103,15 @@ public class UICTFDriver : ICTFDriver
         var result = await manageTeamsPage.GetTeam(teamName);
         if (result.IsSuccess)
         {
-            return Result<Team?, SystemError>.Success(result.Value);
+            return Result<GetTeamResponse?, SystemError>.Success(result.Value);
         }
         else
         {
-            return Result<Team?, SystemError>.Failure(ValidationProblemDetailsExtensions.MapError(result.Error));
+            return Result<GetTeamResponse?, SystemError>.Failure(ValidationProblemDetailsExtensions.MapError(result.Error));
         }
     }
 
-    public async Task<Result<IpInfo, SystemError>> GetIpInfo(string ipAddress)
+    public async Task<Result<GetIpInfoResponse, SystemError>> GetIpInfo(string ipAddress)
     {
         var homePage = await _uiClient.OpenHomePage();
         var ipInfoPage = await homePage.GoToIpInfoPage();
@@ -117,9 +119,9 @@ public class UICTFDriver : ICTFDriver
         var errors = await ipInfoPage.GetErrors();
         if (errors != null)
         {
-            return Result<IpInfo, SystemError>.Failure(ValidationProblemDetailsExtensions.MapError(errors));
+            return Result<GetIpInfoResponse, SystemError>.Failure(ValidationProblemDetailsExtensions.MapError(errors));
         }
-        return Result<IpInfo, SystemError>.Success(ipInfo);
+        return Result<GetIpInfoResponse, SystemError>.Success(ipInfo);
     }
 
     public async Task<Result<VoidValue, SystemError>> ConfirmIsUpAndRunning()

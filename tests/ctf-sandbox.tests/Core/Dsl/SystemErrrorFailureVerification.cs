@@ -16,6 +16,23 @@ public class SystemErrorFailureVerification : ErrorVerification<SystemError>
         return this;
     }
 
+    public SystemErrorFailureVerification FieldErrorMessageContaining(string expectedField, string expectedMessagePart)
+    {
+        var expandedExpectedField = Context.ExpandAliases(expectedField);
+        var expandedExpectedPart = Context.ExpandAliases(expectedMessagePart);
+        var fields = Response.Fields;
+
+        fields.ShouldNotBeNull("Expected field errors but none were found");
+        var messages = fields.Where(f => expandedExpectedField.Equals(f.Field)).Select(f => f.Message).ToList();
+
+        messages.ShouldNotBeEmpty(
+            $"Expected field error for field '{expandedExpectedField}', but field was not found in errors: {string.Join(", ", fields.Select(f => f.Field))}");
+        messages.ShouldContain(m => m != null && m.Contains(expandedExpectedPart),
+            $"Expected a field error message for '{expandedExpectedField}' containing '{expandedExpectedPart}', but got: {string.Join(" | ", messages)}");
+
+        return this;
+    }
+
     public SystemErrorFailureVerification FieldErrorMessage(string expectedField, string expectedMessage)
     {
         var expandedExpectedField = Context.ExpandAliases(expectedField);

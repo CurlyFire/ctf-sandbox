@@ -26,6 +26,12 @@ public class ThenFailure<TSuccessResponse, TSuccessVerification>
         return this;
     }
 
+    public ThenFailure<TSuccessResponse, TSuccessVerification> FieldErrorMessageContaining(string expectedField, string expectedMessagePart)
+    {
+        _assertions.Add(v => v.FieldErrorMessageContaining(expectedField, expectedMessagePart));
+        return this;
+    }
+
     public TaskAwaiter GetAwaiter() => Execute().GetAwaiter();
 
     private async Task Execute()

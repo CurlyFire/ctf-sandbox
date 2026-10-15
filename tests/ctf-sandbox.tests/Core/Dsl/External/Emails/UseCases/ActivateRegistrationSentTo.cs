@@ -23,7 +23,7 @@ public class ActivateRegistrationSentTo : EmailsUseCase<VoidValue, VoidVerificat
             throw new InvalidOperationException("Email is required");
         }
 
-        var result = await Driver.ActivateRegistrationSentTo(_email);
+        var result = await Driver.ActivateRegistrationSentTo(Context.GetEmailParamValue(_email)!);
         return new EmailsUseCaseResult<VoidValue, VoidVerification>(
             result,
             Context,

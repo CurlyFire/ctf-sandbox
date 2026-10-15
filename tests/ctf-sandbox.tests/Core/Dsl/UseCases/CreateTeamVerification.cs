@@ -1,17 +1,17 @@
-using ctf_sandbox.Areas.CTF.Models;
+using ctf_sandbox.tests.Core.Drivers.CTF.Dtos;
 using Shouldly;
 
 namespace ctf_sandbox.tests.Core.Dsl.UseCases;
 
-public class CreateTeamVerification : ResponseVerification<Team>
+public class CreateTeamVerification : ResponseVerification<GetTeamResponse>
 {
-    public CreateTeamVerification(Team response, UseCaseContext context) : base(response, context)
+    public CreateTeamVerification(GetTeamResponse response, UseCaseContext context) : base(response, context)
     {
     }
 
     public CreateTeamVerification HasTeamName(string expectedTeamName)
     {
-        Response.Name.ShouldBe(expectedTeamName);
+        Response.Name.ShouldBe(Context.GetParamValue(expectedTeamName));
         return this;
     }
 

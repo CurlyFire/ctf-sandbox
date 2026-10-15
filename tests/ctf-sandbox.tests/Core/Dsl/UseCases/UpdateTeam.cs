@@ -1,9 +1,9 @@
-using ctf_sandbox.Areas.CTF.Models;
+using ctf_sandbox.tests.Core.Drivers.CTF.Dtos;
 using ctf_sandbox.tests.Core.Drivers.CTF;
 
 namespace ctf_sandbox.tests.Core.Dsl.UseCases;
 
-public class UpdateTeam : CTFUseCase<Team, UpdateTeamVerification>
+public class UpdateTeam : CTFUseCase<GetTeamResponse, UpdateTeamVerification>
 {
     private readonly UpdateTeamParameters _parameters;
 
@@ -18,10 +18,10 @@ public class UpdateTeam : CTFUseCase<Team, UpdateTeamVerification>
         return this;
     }
 
-    public override async Task<CTFUseCaseResult<Team, UpdateTeamVerification>> Execute()
+    public override async Task<CTFUseCaseResult<GetTeamResponse, UpdateTeamVerification>> Execute()
     {
-        var result = await Driver.UpdateTeam(_parameters.OriginalTeamName, _parameters.TeamName, _parameters.Description, _parameters.MemberCount);
-        return new CTFUseCaseResult<Team, UpdateTeamVerification>(
+        var result = await Driver.UpdateTeam(Context.GetParamValue(_parameters.OriginalTeamName)!, Context.GetParamValue(_parameters.TeamName)!, _parameters.Description, _parameters.MemberCount);
+        return new CTFUseCaseResult<GetTeamResponse, UpdateTeamVerification>(
             result,
             Context,
             (response, ctx) => new UpdateTeamVerification(response, ctx));

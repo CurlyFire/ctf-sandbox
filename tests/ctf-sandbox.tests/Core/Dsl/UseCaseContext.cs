@@ -29,6 +29,28 @@ public class UseCaseContext
         return generatedValue;
     }
 
+    // Keeps the value a valid email: "alias@host" -> "alias-suffix@host"
+    public string? GetEmailParamValue(string? alias)
+    {
+        if (string.IsNullOrWhiteSpace(alias))
+        {
+            return alias;
+        }
+
+        if (_paramMap.TryGetValue(alias, out var value))
+        {
+            return value;
+        }
+
+        var at = alias.IndexOf('@');
+        var generatedValue = at < 0
+            ? GenerateParamValue(alias)
+            : $"{GenerateParamValue(alias[..at])}{alias[at..]}";
+        _paramMap[alias] = generatedValue;
+
+        return generatedValue;
+    }
+
     public string? GetParamValueOrLiteral(string? alias)
     {
         if (string.IsNullOrWhiteSpace(alias))

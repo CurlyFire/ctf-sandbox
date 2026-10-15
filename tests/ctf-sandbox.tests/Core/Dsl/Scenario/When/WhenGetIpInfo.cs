@@ -1,9 +1,9 @@
-using ctf_sandbox.Models;
+using ctf_sandbox.tests.Core.Drivers.CTF.Dtos;
 using ctf_sandbox.tests.Core.Dsl.UseCases;
 
 namespace ctf_sandbox.tests.Core.Dsl.Scenario.When;
 
-public class WhenGetIpInfo : BaseWhen<IpInfo, GetIpInfoVerification>
+public class WhenGetIpInfo : BaseWhen<GetIpInfoResponse, GetIpInfoVerification>
 {
     private string _ipAddress = string.Empty;
 
@@ -18,9 +18,9 @@ public class WhenGetIpInfo : BaseWhen<IpInfo, GetIpInfoVerification>
         return this;
     }
 
-    protected override async Task<ExecutionResult<IpInfo, GetIpInfoVerification>> Execute(UseCaseDsl app)
+    protected override async Task<ExecutionResult<GetIpInfoResponse, GetIpInfoVerification>> Execute(UseCaseDsl app)
     {
         var result = await app.CTF.GetIpInfo().With(ipInfo => ipInfo.IpAddress = _ipAddress).Execute();
-        return new ExecutionResult<IpInfo, GetIpInfoVerification>(result);
+        return new ExecutionResult<GetIpInfoResponse, GetIpInfoVerification>(result);
     }
 }

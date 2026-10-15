@@ -1,6 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
-using ctf_sandbox.Areas.CTF.Models;
-using ctf_sandbox.Models;
+using ctf_sandbox.tests.Core.Drivers.CTF.Dtos;
 using ctf_sandbox.tests.Core.Clients.API;
 
 namespace ctf_sandbox.tests.Core.Drivers.CTF.API;
@@ -23,12 +22,17 @@ public class APICTFDriver : ICTFDriver
         return await _apiClient.Account.CreateAccount(email, password).MapErrorAsync(ValidationProblemDetailsExtensions.MapError);
     }
 
-    public async Task<Result<Team, SystemError>> CreateTeam(string? teamName, uint memberCount = 4)
+    public async Task<Result<GetTeamResponse, SystemError>> CreateTeam(string? teamName, uint memberCount = 4)
     {
         return await _apiClient.Teams.CreateTeam(teamName, memberCount, _jwt).MapErrorAsync(ValidationProblemDetailsExtensions.MapError);
     }
 
-    public async Task<Result<Team, SystemError>> UpdateTeam(string oldTeamName, string newTeamName, string? newDescription = null, uint? memberCount = null)
+    public async Task<Result<GetTeamResponse, SystemError>> CreateTeam(string? teamName, string memberCount)
+    {
+        return await _apiClient.Teams.CreateTeam(teamName, memberCount, _jwt).MapErrorAsync(ValidationProblemDetailsExtensions.MapError);
+    }
+
+    public async Task<Result<GetTeamResponse, SystemError>> UpdateTeam(string oldTeamName, string newTeamName, string? newDescription = null, uint? memberCount = null)
     {
         var result = await _apiClient.Teams.GetTeams(_jwt);
         if (result.IsSuccess)
@@ -39,27 +43,27 @@ public class APICTFDriver : ICTFDriver
                 var updateResult = await _apiClient.Teams.UpdateTeam(team.Id, newTeamName, newDescription, memberCount ?? team.MemberCount, _jwt);
                 if (!updateResult.IsSuccess)
                 {
-                    return Result<Team, SystemError>.Failure(ValidationProblemDetailsExtensions.MapError(updateResult.Error));
+                    return Result<GetTeamResponse, SystemError>.Failure(ValidationProblemDetailsExtensions.MapError(updateResult.Error));
                 }
-                return Result<Team, SystemError>.Success(updateResult.Value);
+                return Result<GetTeamResponse, SystemError>.Success(updateResult.Value);
             }
             else
             {
-                return Result<Team, SystemError>.Failure(SystemError.Of($"Team '{oldTeamName}' not found"));
+                return Result<GetTeamResponse, SystemError>.Failure(SystemError.Of($"Team '{oldTeamName}' not found"));
             }
         }
         else
         {
-            return  Result<Team, SystemError>.Failure(ValidationProblemDetailsExtensions.MapError(result.Error));
+            return  Result<GetTeamResponse, SystemError>.Failure(ValidationProblemDetailsExtensions.MapError(result.Error));
         }
     }
 
-    public async Task<Result<IpInfo, SystemError>> GetIpInfo(string ipAddress)
+    public async Task<Result<GetIpInfoResponse, SystemError>> GetIpInfo(string ipAddress)
     {
         return await _apiClient.IpInfo.GetIpInfo(ipAddress, _jwt).MapErrorAsync(ValidationProblemDetailsExtensions.MapError);
     }
 
-    public async Task<Result<Team?, SystemError>> GetTeam(string teamName)
+    public async Task<Result<GetTeamResponse?, SystemError>> GetTeam(string teamName)
     {
         return await _apiClient.Teams.GetTeams(_jwt).MapErrorAsync(ValidationProblemDetailsExtensions.MapError).MapAsync(teams => teams.FirstOrDefault(t => t.Name == teamName));
     }

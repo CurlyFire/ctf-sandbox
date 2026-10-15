@@ -1,9 +1,9 @@
-using ctf_sandbox.Areas.CTF.Models;
+using ctf_sandbox.tests.Core.Drivers.CTF.Dtos;
 using ctf_sandbox.tests.Core.Drivers.CTF;
 
 namespace ctf_sandbox.tests.Core.Dsl.UseCases;
 
-public class GetTeam : CTFUseCase<Team, GetTeamVerification>
+public class GetTeam : CTFUseCase<GetTeamResponse, GetTeamVerification>
 {
     private string _teamName = string.Empty;
 
@@ -17,16 +17,17 @@ public class GetTeam : CTFUseCase<Team, GetTeamVerification>
         return this;
     }
 
-    public override async Task<CTFUseCaseResult<Team, GetTeamVerification>> Execute()
+    public override async Task<CTFUseCaseResult<GetTeamResponse, GetTeamVerification>> Execute()
     {
-        var result = await Driver.GetTeam(_teamName);
+        var teamName = Context.GetParamValue(_teamName)!;
+        var result = await Driver.GetTeam(teamName);
         var mapped = result.IsFailure
-            ? Result<Team, SystemError>.Failure(result.Error)
+            ? Result<GetTeamResponse, SystemError>.Failure(result.Error)
             : result.Value is null
-                ? Result<Team, SystemError>.Failure(SystemError.Of($"Team '{_teamName}' was not found."))
-                : Result<Team, SystemError>.Success(result.Value);
+                ? Result<GetTeamResponse, SystemError>.Failure(SystemError.Of($"Team '{teamName}' was not found."))
+                : Result<GetTeamResponse, SystemError>.Success(result.Value);
 
-        return new CTFUseCaseResult<Team, GetTeamVerification>(
+        return new CTFUseCaseResult<GetTeamResponse, GetTeamVerification>(
             mapped,
             Context,
             (response, ctx) => new GetTeamVerification(response, ctx));
