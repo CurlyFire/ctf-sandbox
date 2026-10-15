@@ -29,6 +29,7 @@ public class WhenSignIn : BaseWhen<VoidValue, VoidVerification>
         var result = await app.CTF.SignIn().With(credentials =>
         {
             credentials.UserName = _userName;
+            credentials.UserNameIsAlias = true;
             credentials.Password = _password;
         }).Execute();
 

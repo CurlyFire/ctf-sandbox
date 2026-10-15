@@ -1,4 +1,3 @@
-using ctf_sandbox.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ctf_sandbox.tests.Core.Clients.API.Endpoints;
@@ -12,7 +11,7 @@ public class AccountEndpoint : Endpoint
 
     public async Task<Result<VoidValue, ValidationProblemDetails>> CreateAccount(string email, string password)
     {
-        var result = await JsonHttpClient.PostAsync("account", new RegisterAccountRequest
+        var result = await JsonHttpClient.PostAsync("account", new
         {
             Email = email,
             Password = password

@@ -20,18 +20,14 @@ public class TeamTests
     [Channel(Channel.UI, Channel.API)]
     public async Task ShouldBeAbleToCreateTeam(Channel channel)
     {
-        var teamName = $"team_{Guid.NewGuid()}";
-        const uint memberCount = 5;
-
         await _fixture.Scenario(channel)
             .When()
                 .CreateTeam()
-                    .WithTeamName(teamName)
-                    .WithMemberCount(memberCount)
+                    .WithTeamName("team")
+                    .WithMemberCount(5)
             .Then()
                 .ShouldSucceed()
-                    .And().Team(teamName)
-                        .HasMemberCount(memberCount);
+                    .And().Team("team").HasMemberCount(5);
     }
 
     [Trait("Category", "E2E")]
@@ -39,27 +35,21 @@ public class TeamTests
     [Channel(Channel.UI, Channel.API)]
     public async Task ShouldBeAbleToUpdateExistingTeam(Channel channel)
     {
-        var originalTeamName = $"team_{Guid.NewGuid()}";
-        var updatedTeamName = $"updated_{Guid.NewGuid()}";
-        const string updatedDescription = "This is an updated team description";
-        const uint originalMemberCount = 3;
-        const uint updatedMemberCount = 6;
-
         await _fixture.Scenario(channel)
             .Given()
-                .Team().WithTeamName(originalTeamName).WithMemberCount(originalMemberCount)
+                .Team().WithTeamName("original team").WithMemberCount(3)
             .When()
                 .UpdateTeam()
-                    .WithOriginalTeamName(originalTeamName)
-                    .WithTeamName(updatedTeamName)
-                    .WithDescription(updatedDescription)
-                    .WithMemberCount(updatedMemberCount)
+                    .WithOriginalTeamName("original team")
+                    .WithTeamName("updated team")
+                    .WithDescription("This is an updated team description")
+                    .WithMemberCount(6)
             .Then()
                 .ShouldSucceed()
                     .And()
-                        .Team(updatedTeamName)
-                            .HasMemberCount(updatedMemberCount)
-                            .HasDescription(updatedDescription);
+                        .Team("updated team")
+                            .HasMemberCount(6)
+                            .HasDescription("This is an updated team description");
     }
 
     [Trait("Category", "E2E")]
@@ -96,15 +86,13 @@ public class TeamTests
     [Channel(Channel.UI)]
     public async Task ShouldFailToCreateTeamWithBannedWordInName(Channel channel)
     {
-        var teamName = $"badword_{Guid.NewGuid()}";
-
         await _fixture.Scenario(channel)
             .Given()
                 .BannedWord()
-                    .WithWord(teamName)
+                    .WithWord("badword")
             .When()
                 .CreateTeam()
-                    .WithTeamName(teamName)
+                    .WithTeamName("badword")
                     .WithMemberCount(4)
             .Then()
                 .ShouldFail()
@@ -119,22 +107,13 @@ public class TeamTests
     [InlineData(" 5 ")]
     public async Task API_ShouldFailToCreateTeamWithNonIntegerMemberCount(string memberCount)
     {
-        var client = _fixture.InteractWithCTFThroughAPIClient();
-        var authenticateResult = await client.Authentication.Authenticate(
-            _fixture.Configuration!.WebServerCredentials.Username,
-            _fixture.Configuration.WebServerCredentials.Password);
-        authenticateResult.ShouldBeSuccess();
-
-        var createTeamResult = await client.Teams.CreateTeam(
-            "TeamWithInvalidMemberCount",
-            memberCount,
-            authenticateResult.Value);
-
-        var problemDetails = createTeamResult.Error;
-        Assert.NotNull(problemDetails);
-        Assert.True(problemDetails!.Errors.TryGetValue($"$.{nameof(memberCount)}", out var errors));
-        Assert.NotNull(errors);
-        Assert.NotEmpty(errors);
-        Assert.Contains("The JSON value could not be converted to System.UInt32", errors[0]);
+        await _fixture.Scenario(Channel.API)
+            .When()
+                .CreateTeam()
+                    .WithTeamName("team")
+                    .WithMemberCount(memberCount)
+            .Then()
+                .ShouldFail()
+                    .FieldErrorMessageContaining("$.memberCount", "The JSON value could not be converted to System.UInt32");
     }
 }

@@ -21,7 +21,10 @@ public class SignIn : CTFUseCase<VoidValue, VoidVerification>
 
     public override async Task<CTFUseCaseResult<VoidValue, VoidVerification>> Execute()
     {
-        var result = await Driver.SignIn(_parameters.UserName, _parameters.Password);
+        var userName = _parameters.UserNameIsAlias
+            ? Context.GetEmailParamValue(_parameters.UserName)!
+            : _parameters.UserName;
+        var result = await Driver.SignIn(userName, _parameters.Password);
         return new CTFUseCaseResult<VoidValue, VoidVerification>(
             result,
             Context,
@@ -32,6 +35,7 @@ public class SignIn : CTFUseCase<VoidValue, VoidVerification>
 public record SignInParameters
 {
     public string UserName { get; set; } = string.Empty;
+    public bool UserNameIsAlias { get; set; }
     public string Password { get; set; } = string.Empty;
 
     public SignInParameters(CTFConfiguration config)

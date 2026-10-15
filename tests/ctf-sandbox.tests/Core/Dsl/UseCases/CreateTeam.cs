@@ -1,9 +1,9 @@
-using ctf_sandbox.Areas.CTF.Models;
+using ctf_sandbox.tests.Core.Drivers.CTF.Dtos;
 using ctf_sandbox.tests.Core.Drivers.CTF;
 
 namespace ctf_sandbox.tests.Core.Dsl.UseCases;
 
-public class CreateTeam : CTFUseCase<Team, CreateTeamVerification>
+public class CreateTeam : CTFUseCase<GetTeamResponse, CreateTeamVerification>
 {
     private readonly CreateTeamParameters _parameters;
 
@@ -18,10 +18,13 @@ public class CreateTeam : CTFUseCase<Team, CreateTeamVerification>
         return this;
     }
 
-    public override async Task<CTFUseCaseResult<Team, CreateTeamVerification>> Execute()
+    public override async Task<CTFUseCaseResult<GetTeamResponse, CreateTeamVerification>> Execute()
     {
-        var result = await Driver.CreateTeam(_parameters.TeamName, _parameters.MemberCount);
-        return new CTFUseCaseResult<Team, CreateTeamVerification>(
+        var teamName = Context.GetParamValue(_parameters.TeamName)!;
+        var result = _parameters.RawMemberCount is null
+            ? await Driver.CreateTeam(teamName, _parameters.MemberCount)
+            : await Driver.CreateTeam(teamName, _parameters.RawMemberCount);
+        return new CTFUseCaseResult<GetTeamResponse, CreateTeamVerification>(
             result,
             Context,
             (response, ctx) => new CreateTeamVerification(response, ctx));
@@ -32,5 +35,6 @@ public record CreateTeamParameters
 {
     public string TeamName { get; set; } = string.Empty;
     public uint MemberCount { get; set; } = 0;
+    public string? RawMemberCount { get; set; }
     
 }

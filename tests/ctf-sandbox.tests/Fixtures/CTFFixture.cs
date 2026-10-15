@@ -26,6 +26,7 @@ public abstract class CTFFixture
 {
     private IHost? _host;
     private IServiceScope _scope = null!;
+    private readonly System.Collections.Concurrent.ConcurrentBag<IServiceScope> _scenarioScopes = new();
     private bool disposedValue;
     public CTFConfiguration? Configuration { get; private set; }
 
@@ -61,22 +62,26 @@ public abstract class CTFFixture
 
     public UseCaseDsl InteractWithSystemThrough(Channel channel)
     {
+        // One scope per scenario, so each scenario gets its own UseCaseContext (alias -> unique value map)
+        var scenarioScope = _scope.ServiceProvider.CreateScope();
+        _scenarioScopes.Add(scenarioScope);
+        var sp = scenarioScope.ServiceProvider;
         ICTFDriver driver = channel switch
         {
-            Channel.UI => _scope.ServiceProvider.GetRequiredService<UICTFDriver>(),
-            Channel.API => _scope.ServiceProvider.GetRequiredService<APICTFDriver>(),
+            Channel.UI => sp.GetRequiredService<UICTFDriver>(),
+            Channel.API => sp.GetRequiredService<APICTFDriver>(),
             _ => throw new ArgumentOutOfRangeException(nameof(channel), channel, null)
         };
         //TODO: Replace all this manual creation with a more robust dependency injection library (autofac)
-        var ctfUseCaseFactory = ActivatorUtilities.CreateInstance<UseCaseFactory<ICTFDriver>>(_scope.ServiceProvider, driver);
-        var ctf = ActivatorUtilities.CreateInstance<CTFDsl>(_scope.ServiceProvider, ctfUseCaseFactory);
+        var ctfUseCaseFactory = ActivatorUtilities.CreateInstance<UseCaseFactory<ICTFDriver>>(sp, driver);
+        var ctf = ActivatorUtilities.CreateInstance<CTFDsl>(sp, ctfUseCaseFactory);
 
-        var ipInfoUseCaseFactory = ActivatorUtilities.CreateInstance<UseCaseFactory<IIpInfoDriver>>(_scope.ServiceProvider, _scope.ServiceProvider.GetRequiredService<IIpInfoDriver>());
-        var ipInfo = ActivatorUtilities.CreateInstance<IpInfoDsl>(_scope.ServiceProvider, ipInfoUseCaseFactory);
-        var email = ActivatorUtilities.CreateInstance<EmailsDsl>(_scope.ServiceProvider);
-        var bannedWords = ActivatorUtilities.CreateInstance<BannedWordsDsl>(_scope.ServiceProvider);
-        var externalSystems = ActivatorUtilities.CreateInstance<ExternalSystemsDsl>(_scope.ServiceProvider,ipInfo,email,bannedWords);
-        return ActivatorUtilities.CreateInstance<UseCaseDsl>(_scope.ServiceProvider, ctf, externalSystems);
+        var ipInfoUseCaseFactory = ActivatorUtilities.CreateInstance<UseCaseFactory<IIpInfoDriver>>(sp, sp.GetRequiredService<IIpInfoDriver>());
+        var ipInfo = ActivatorUtilities.CreateInstance<IpInfoDsl>(sp, ipInfoUseCaseFactory);
+        var email = ActivatorUtilities.CreateInstance<EmailsDsl>(sp);
+        var bannedWords = ActivatorUtilities.CreateInstance<BannedWordsDsl>(sp);
+        var externalSystems = ActivatorUtilities.CreateInstance<ExternalSystemsDsl>(sp,ipInfo,email,bannedWords);
+        return ActivatorUtilities.CreateInstance<UseCaseDsl>(sp, ctf, externalSystems);
     }
 
     /// <summary>
@@ -101,6 +106,7 @@ public abstract class CTFFixture
         {
             if (disposing)
             {
+                foreach (var scenarioScope in _scenarioScopes) scenarioScope.Dispose();
                 _scope.Dispose();
                 if (_host != null)
                 {

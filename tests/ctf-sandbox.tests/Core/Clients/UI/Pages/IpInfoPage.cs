@@ -1,4 +1,4 @@
-using ctf_sandbox.Models;
+using ctf_sandbox.tests.Core.Drivers.CTF.Dtos;
 using Microsoft.Playwright;
 
 namespace ctf_sandbox.tests.Core.Clients.UI.Pages;
@@ -9,7 +9,7 @@ public class IpInfoPage : ErrorPage
     {
     }
 
-    public async Task<IpInfo> GetIpInfo(string ipAddress)
+    public async Task<GetIpInfoResponse> GetIpInfo(string ipAddress)
     {
         // Enter IP address in the input field
         await Page.Locator("#ipAddress").FillAsync(ipAddress);
@@ -21,7 +21,7 @@ public class IpInfoPage : ErrorPage
         await Page.Locator("#results").WaitForAsync(new() { State = WaitForSelectorState.Visible });
         
         // Extract data from the results table
-        var ipInfo = new IpInfo
+        var ipInfo = new GetIpInfoResponse
         {
             Ip = await Page.Locator("[data-testid='result-ip']").TextContentAsync() ?? string.Empty,
             Hostname = await Page.Locator("[data-testid='result-hostname']").TextContentAsync(),

@@ -19,20 +19,17 @@ public class RegisterTests
     [Channel(Channel.UI, Channel.API)]
     public async Task ShouldBeAbleToRegister(Channel channel)
     {
-        var randomEmail = $"registertest_{Guid.NewGuid()}@test.com";
-        var password = "RegisterTest123!";
-
         await _fixture.Scenario(channel)
             .Given()
                 .NotSignedIn()
             .And()
                 .Account()
-                .WithEmail(randomEmail)
-                .WithPassword(password)
+                .WithEmail("registertest@test.com")
+                .WithPassword("RegisterTest123!")
             .When()
                 .SignIn()
-                    .WithUserName(randomEmail)
-                    .WithPassword(password)
+                    .WithUserName("registertest@test.com")
+                    .WithPassword("RegisterTest123!")
             .Then()
                 .ShouldSucceed();
     }

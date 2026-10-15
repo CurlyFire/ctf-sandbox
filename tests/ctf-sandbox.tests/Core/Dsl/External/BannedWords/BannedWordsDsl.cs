@@ -9,8 +9,11 @@ public class BannedWordsDsl
     private readonly IBannedWordsDriver _bannedWordsDriver;
     private readonly UseCaseFactory<IBannedWordsDriver> _useCaseFactory;
 
-    public BannedWordsDsl(IBannedWordsDriver bannedWordsDriver, IServiceProvider serviceProvider)
+    private readonly UseCaseContext _context;
+
+    public BannedWordsDsl(IBannedWordsDriver bannedWordsDriver, IServiceProvider serviceProvider, UseCaseContext context)
     {
+        _context = context;
         _bannedWordsDriver = bannedWordsDriver;
         _useCaseFactory = new UseCaseFactory<IBannedWordsDriver>(bannedWordsDriver, serviceProvider);
     }
@@ -19,6 +22,6 @@ public class BannedWordsDsl
 
     public async Task CreateBannedWord(string word)
     {
-        await _bannedWordsDriver.CreateBannedWordAsync(word);
+        await _bannedWordsDriver.CreateBannedWordAsync(_context.GetParamValue(word)!);
     }
 }

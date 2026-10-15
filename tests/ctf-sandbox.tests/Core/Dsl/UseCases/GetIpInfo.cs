@@ -1,9 +1,9 @@
-using ctf_sandbox.Models;
+using ctf_sandbox.tests.Core.Drivers.CTF.Dtos;
 using ctf_sandbox.tests.Core.Drivers.CTF;
 
 namespace ctf_sandbox.tests.Core.Dsl.UseCases;
 
-public class GetIpInfo : CTFUseCase<IpInfo, GetIpInfoVerification>
+public class GetIpInfo : CTFUseCase<GetIpInfoResponse, GetIpInfoVerification>
 {
     private readonly GetIpInfoParameters _parameters;
 
@@ -19,10 +19,10 @@ public class GetIpInfo : CTFUseCase<IpInfo, GetIpInfoVerification>
         return this;
     }
 
-    public override async Task<CTFUseCaseResult<IpInfo, GetIpInfoVerification>> Execute()
+    public override async Task<CTFUseCaseResult<GetIpInfoResponse, GetIpInfoVerification>> Execute()
     {
         var result = await Driver.GetIpInfo(_parameters.IpAddress);
-        return new CTFUseCaseResult<IpInfo, GetIpInfoVerification>(
+        return new CTFUseCaseResult<GetIpInfoResponse, GetIpInfoVerification>(
             result,
             Context,
             (response, ctx) => new GetIpInfoVerification(response, ctx));

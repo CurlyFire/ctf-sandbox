@@ -1,11 +1,11 @@
-using ctf_sandbox.Models;
+using ctf_sandbox.tests.Core.Drivers.CTF.Dtos;
 using Shouldly;
 
 namespace ctf_sandbox.tests.Core.Dsl.UseCases;
 
-public class GetIpInfoVerification : ResponseVerification<IpInfo>
+public class GetIpInfoVerification : ResponseVerification<GetIpInfoResponse>
 {
-    public GetIpInfoVerification(IpInfo response, UseCaseContext context)
+    public GetIpInfoVerification(GetIpInfoResponse response, UseCaseContext context)
         : base(response, context)
     {
     }
