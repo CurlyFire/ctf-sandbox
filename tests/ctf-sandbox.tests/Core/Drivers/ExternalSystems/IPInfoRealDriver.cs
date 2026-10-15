@@ -1,13 +1,12 @@
 using ctf_sandbox.tests.Core.Clients.ExternalSystems;
-using CtfSandbox.Tests.Core.Drivers.ExternalSystems;
 
 namespace ctf_sandbox.tests.Core.Drivers.ExternalSystems;
 
-public class IPInfoDriver : IIpInfoDriver
+public class IPInfoRealDriver : IIpInfoDriver
 {
     private readonly IpInfoRealClient _ipInfoRealClient;
 
-    public IPInfoDriver(IpInfoRealClient ipInfoRealClient)
+    public IPInfoRealDriver(IpInfoRealClient ipInfoRealClient)
     {
         _ipInfoRealClient = ipInfoRealClient;
     }

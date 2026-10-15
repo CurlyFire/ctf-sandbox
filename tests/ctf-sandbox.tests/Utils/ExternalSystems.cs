@@ -1,6 +1,6 @@
 namespace ctf_sandbox.tests.Utils;
-
-public enum ExternalSystem
+    
+public enum ExternalSystems
 {
     Real,
     Stubbed

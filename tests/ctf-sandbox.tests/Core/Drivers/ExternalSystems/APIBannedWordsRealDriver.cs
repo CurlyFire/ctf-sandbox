@@ -3,11 +3,11 @@ using ctf_sandbox.tests.Core.Clients.ExternalSystems;
 
 namespace ctf_sandbox.tests.Core.Drivers.ExternalSystems;
 
-public class APIBannedWordsDriver : IBannedWordsDriver
+public class APIBannedWordsRealDriver : IBannedWordsDriver
 {
     private readonly BannedWordsRealClient _client;
 
-    public APIBannedWordsDriver(BannedWordsRealClient client)
+    public APIBannedWordsRealDriver(BannedWordsRealClient client)
     {
         _client = client;
     }

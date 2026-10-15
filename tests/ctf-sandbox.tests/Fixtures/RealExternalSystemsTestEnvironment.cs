@@ -1,6 +1,5 @@
 using ctf_sandbox.tests.Core.Clients.ExternalSystems;
 using ctf_sandbox.tests.Core.Drivers.ExternalSystems;
-using CtfSandbox.Tests.Core.Drivers.ExternalSystems;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -17,11 +16,11 @@ public class RealExternalSystemsTestEnvironment : TestEnvironment
     protected override void ConfigureServices(IServiceCollection services)
     {
         base.ConfigureServices(services);
-        services.AddSingleton<IEmailsDriver, APIEmailsDriver>();
+        services.AddSingleton<IEmailsDriver, APIEmailsRealDriver>();
         services.AddHttpClient<MailpitRealClient>(ConfigureEmailsHttpClient);
-        services.AddSingleton<IBannedWordsDriver, APIBannedWordsDriver>();
+        services.AddSingleton<IBannedWordsDriver, APIBannedWordsRealDriver>();
         services.AddHttpClient<BannedWordsRealClient>(ConfigureBannedWordsHttpClient);
-        services.AddSingleton<IIpInfoDriver, IPInfoDriver>();
+        services.AddSingleton<IIpInfoDriver, IPInfoRealDriver>();
         services.AddHttpClient<IpInfoRealClient>(ConfigureIpInfoHttpClient);
     }
 

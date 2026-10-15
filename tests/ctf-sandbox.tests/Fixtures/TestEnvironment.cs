@@ -6,19 +6,22 @@ using ctf_sandbox.tests.Core.Drivers.CTF;
 using ctf_sandbox.tests.Core.Drivers.CTF.API;
 using ctf_sandbox.tests.Core.Drivers.CTF.UI;
 using ctf_sandbox.tests.Core.Dsl;
+using ctf_sandbox.tests.Core.Dsl.External.Clock;
 using ctf_sandbox.tests.Core.Dsl.External.BannedWords;
 using ctf_sandbox.tests.Core.Dsl.External.Emails;
 using ctf_sandbox.tests.Core.Dsl.UseCases;
 using ctf_sandbox.tests.Extensions;
 using ctf_sandbox.tests.Utils;
 using CtfSandbox.Tests.Core.Drivers.ExternalSystems;
-using CtfSandbox.Tests.Core.Dsl.External.IpInfo;
+using ctf_sandbox.Time;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.EnvironmentVariables;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Playwright;
+using ctf_sandbox.tests.Core.Drivers.ExternalSystems;
+using ctf_sandbox.tests.Core.Dsl.External.IpInfo;
 
 namespace ctf_sandbox.tests.Fixtures;
 
@@ -27,6 +30,7 @@ public abstract class TestEnvironment
     private IHost? _host;
     private IServiceScope _scope = null!;
     private readonly System.Collections.Concurrent.ConcurrentBag<IServiceScope> _scenarioScopes = new();
+    private IConfiguration? _ctfWebHostConfiguration;
     private bool disposedValue;
     public CTFConfiguration? Configuration { get; private set; }
 
@@ -78,9 +82,11 @@ public abstract class TestEnvironment
 
         var ipInfoUseCaseFactory = ActivatorUtilities.CreateInstance<UseCaseFactory<IIpInfoDriver>>(sp, sp.GetRequiredService<IIpInfoDriver>());
         var ipInfo = ActivatorUtilities.CreateInstance<IpInfoDsl>(sp, ipInfoUseCaseFactory);
+        var clockUseCaseFactory = ActivatorUtilities.CreateInstance<UseCaseFactory<IClockDriver>>(sp, sp.GetRequiredService<IClockDriver>());
+        var clock = ActivatorUtilities.CreateInstance<ClockDsl>(sp, clockUseCaseFactory);
         var email = ActivatorUtilities.CreateInstance<EmailsDsl>(sp);
         var bannedWords = ActivatorUtilities.CreateInstance<BannedWordsDsl>(sp);
-        var externalSystems = ActivatorUtilities.CreateInstance<ExternalSystemsDsl>(sp,ipInfo,email,bannedWords);
+        var externalSystems = ActivatorUtilities.CreateInstance<ExternalSystemsDsl>(sp, ipInfo, email, bannedWords, clock);
         return ActivatorUtilities.CreateInstance<UseCaseDsl>(sp, ctf, externalSystems);
     }
 
@@ -150,6 +156,7 @@ public abstract class TestEnvironment
             ctfWebHostConfiguration = GetExternalCTFWebHostConfiguration();
             webServerUrl = externalWebServerUrl;
         }
+        _ctfWebHostConfiguration = ctfWebHostConfiguration;
         Configuration = CreateConfiguration(webServerUrl, ctfWebHostConfiguration);
     }
 
@@ -236,6 +243,10 @@ public abstract class TestEnvironment
         services.AddSingleton(Configuration!);
         services.AddHttpClient().ConfigureHttpClientDefaults(ConfigureCTFHttpClient);
         services.AddHttpClient<IpInfoRealClient>(ConfigureIpInfoHttpClient);
+        services.AddTimeProviderBasedOn(_ctfWebHostConfiguration
+            ?? throw new InvalidOperationException("CTF web host configuration has not been initialized."));
+        services.AddSingleton<ClockRealClient>();
+        services.AddSingleton<IClockDriver, ClockRealDriver>();
         services.AddTransient<UIClient>();
         services.AddTransient<UICTFDriver>();
         services.AddTransient<APICTFDriver>();
@@ -261,6 +272,7 @@ public abstract class TestEnvironment
         services.AddSingleton<CTFDsl>();
         services.AddSingleton<ExternalSystemsDsl>();
         services.AddSingleton<IpInfoDsl>();
+        services.AddSingleton<ClockDsl>();
         services.AddSingleton<ExternalSystemsDsl>();
         services.AddSingleton<EmailsDsl>();
         services.AddSingleton<BannedWordsDsl>();

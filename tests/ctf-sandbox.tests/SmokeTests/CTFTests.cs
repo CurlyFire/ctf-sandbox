@@ -17,7 +17,7 @@ public class CTFTests
 
     [Trait("Category", "Smoke_CTF")]
     [Theory, CombinatorialData]
-    public async Task ShouldBeUpAndRunning(Channel channel, ExternalSystem externalSystem)
+    public async Task ShouldBeUpAndRunning(Channel channel, ExternalSystems externalSystem)
     {
         await _testEnvironments.For(externalSystem).Scenario(channel)
             .Assume().MyShop().ShouldBeRunning();

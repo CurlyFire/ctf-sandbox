@@ -1,7 +1,6 @@
-using ctf_sandbox.tests.Core.Dsl;
-using CtfSandbox.Tests.Core.Drivers.ExternalSystems;
+using ctf_sandbox.tests.Core.Drivers.ExternalSystems;
 
-namespace CtfSandbox.Tests.Core.Dsl.External.IpInfo;
+namespace ctf_sandbox.tests.Core.Dsl.External.IpInfo;
 
 public abstract class IpInfoUseCase<TResponse, TVerification>
     where TVerification : ResponseVerification<TResponse>

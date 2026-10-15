@@ -1,6 +1,4 @@
-using ctf_sandbox.tests.Core;
-
-namespace CtfSandbox.Tests.Core.Drivers.ExternalSystems;
+namespace ctf_sandbox.tests.Core.Drivers.ExternalSystems;
 
 public interface IIpInfoDriver
 {

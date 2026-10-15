@@ -7,34 +7,42 @@ namespace ctf_sandbox.tests.SmokeTests;
 [Collection(CTFTestCollection.Name)]
 public class ExternalSystemsHealthTests
 {
-    private readonly TestEnvironment _testEnvironment;
+    private readonly TestEnvironments _testEnvironments;
 
     public ExternalSystemsHealthTests(TestEnvironments testEnvironments)
     {
-        _testEnvironment = testEnvironments.For(ExternalSystem.Real);
+        _testEnvironments = testEnvironments;
     }
 
     [Trait("Category", "Smoke_ExternalSystemsHealth")]
-    [Fact]
-    public async Task Mailpit_ShouldBeUpAndRunning()
+    [Theory, CombinatorialData]
+    public async Task Mailpit_ShouldBeUpAndRunning(Channel channel, ExternalSystems externalSystem)
     {
-        await _testEnvironment.Scenario()
+        await _testEnvironments.For(externalSystem).Scenario(channel)
             .Assume().Mailpit().ShouldBeRunning();
     }
 
-    [Fact]
     [Trait("Category", "Smoke_ExternalSystemsHealth")]
-    public async Task IpInfo_ShouldBeUpAndRunning()
+    [Theory, CombinatorialData]
+    public async Task IpInfo_ShouldBeUpAndRunning(Channel channel, ExternalSystems externalSystem)
     {
-        await _testEnvironment.Scenario()
+        await _testEnvironments.For(externalSystem).Scenario(channel)
             .Assume().IpInfo().ShouldBeRunning();
     }
 
-    [Fact]
     [Trait("Category", "Smoke_ExternalSystemsHealth")]
-    public async Task BannedWordsApi_ShouldBeUpAndRunning()
+    [Theory, CombinatorialData]
+    public async Task Clock_ShouldBeUpAndRunning(Channel channel, ExternalSystems externalSystem)
     {
-        await _testEnvironment.Scenario()
+        await _testEnvironments.For(externalSystem).Scenario(channel)
+            .Assume().Clock().ShouldBeRunning();
+    }
+
+    [Trait("Category", "Smoke_ExternalSystemsHealth")]
+    [Theory, CombinatorialData]
+    public async Task BannedWordsApi_ShouldBeUpAndRunning(Channel channel, ExternalSystems externalSystem)
+    {
+        await _testEnvironments.For(externalSystem).Scenario(channel)
             .Assume().BannedWords().ShouldBeRunning();
     }
 }

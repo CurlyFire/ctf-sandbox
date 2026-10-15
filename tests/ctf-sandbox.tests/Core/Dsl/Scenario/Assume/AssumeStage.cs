@@ -33,6 +33,14 @@ public class AssumeStage
         }, this);
     }
 
+    public AssumeRunningAction Clock()
+    {
+        return new AssumeRunningAction(async () =>
+        {
+            (await _app.ExternalSystems.Clock.GoToClock().Execute()).ShouldSucceed();
+        }, this);
+    }
+
     public AssumeRunningAction BannedWords()
     {
         return new AssumeRunningAction(async () =>

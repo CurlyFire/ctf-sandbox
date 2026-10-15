@@ -1,8 +1,8 @@
+using ctf_sandbox.tests.Core.Drivers.ExternalSystems;
+using ctf_sandbox.tests.Core.Dsl.External.IpInfo.UseCases;
 using ctf_sandbox.tests.Core.Dsl.UseCases;
-using CtfSandbox.Tests.Core.Drivers.ExternalSystems;
-using CtfSandbox.Tests.Core.Dsl.External.IpInfo.UseCases;
 
-namespace CtfSandbox.Tests.Core.Dsl.External.IpInfo;
+namespace ctf_sandbox.tests.Core.Dsl.External.IpInfo;
 
 public class IpInfoDsl
 {

@@ -11,7 +11,7 @@ public class RegisterTests
 
     public RegisterTests(TestEnvironments testEnvironments)
     {
-        _testEnvironment = testEnvironments.For(ExternalSystem.Real);
+        _testEnvironment = testEnvironments.For(ExternalSystems.Real);
     }
 
     [Trait("Category", "E2E")]

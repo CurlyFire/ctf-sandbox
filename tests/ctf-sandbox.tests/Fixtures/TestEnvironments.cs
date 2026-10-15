@@ -9,10 +9,10 @@ public class TestEnvironments : IDisposable
     private readonly Lazy<TestEnvironment> _stubbed = new(() => new StubbedExternalSystemsTestEnvironment());
 
     //TODO: Add support to control parallel execution of test environments
-    public TestEnvironment For(ExternalSystem externalSystem) => externalSystem switch
+    public TestEnvironment For(ExternalSystems externalSystem) => externalSystem switch
     {
-        ExternalSystem.Real => _real.Value,
-        ExternalSystem.Stubbed => _stubbed.Value,
+        ExternalSystems.Real => _real.Value,
+        ExternalSystems.Stubbed => _stubbed.Value,
         _ => throw new ArgumentOutOfRangeException(nameof(externalSystem))
     };
 

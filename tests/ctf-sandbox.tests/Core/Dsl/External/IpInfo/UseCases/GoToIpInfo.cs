@@ -1,8 +1,5 @@
-using ctf_sandbox.tests.Core;
-using ctf_sandbox.tests.Core.Dsl;
-using CtfSandbox.Tests.Core.Drivers.ExternalSystems;
-
-namespace CtfSandbox.Tests.Core.Dsl.External.IpInfo.UseCases;
+using ctf_sandbox.tests.Core.Drivers.ExternalSystems;
+namespace ctf_sandbox.tests.Core.Dsl.External.IpInfo.UseCases;
 
 public class GoToIpInfo : IpInfoUseCase<VoidValue, VoidVerification>
 {
