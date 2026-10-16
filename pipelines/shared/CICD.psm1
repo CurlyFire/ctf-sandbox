@@ -122,7 +122,7 @@ class CICDConfig {
         $this.TestCategories = $rawConfig.TestCategories
     }
 
-    [string[]] GetTestCategories([string]$stage, [string]$env = "Default") {
+    [object[]] GetTestCategories([string]$stage, [string]$env = "Default") {
         if (-not $this.TestCategories.ContainsKey($stage)) {
             throw "❌ Stage '$stage' is not defined in the configuration."
         }
@@ -159,6 +159,32 @@ function Build-DotNetSolution {
     Invoke-NativeCommandWithoutReturn dotnet build $solutionPath -c Debug
 }
 
+# A step is a category name, or a hashtable with a Category and optional test argument values
+# (for example @{ Category = "Smoke_CTF"; externalSystem = "Real" }) matched against the test display name.
+function ConvertTo-TestStep {
+    param($Step)
+
+    if ($Step -is [string]) {
+        $Step = @{ Category = $Step }
+    }
+    if (-not $Step.Category) {
+        throw "❌ Test step must define a Category."
+    }
+
+    $filter = "Category=$($Step.Category)"
+    $nameParts = @($Step.Category)
+    foreach ($key in ($Step.Keys | Where-Object { $_ -ne 'Category' } | Sort-Object)) {
+        $filter += "&DisplayName~$($key): $($Step[$key])"
+        $nameParts += $Step[$key]
+    }
+
+    return [pscustomobject]@{
+        Filter      = $filter
+        Description = $filter
+        TrxName     = ($nameParts -join '_')
+    }
+}
+
 function Invoke-Tests {
     param(
         [string]$Stage,
@@ -182,9 +208,21 @@ function Invoke-Tests {
         } else {
             Write-Log "No deployment configuration provided, using app settings from config"
         }
-        foreach ($category in $Categories) {
-            Write-Log "Running tests for category: $category"
-            Invoke-NativeCommandWithoutReturn dotnet test $config.App.GetSolutionPath() -c Debug --filter "Category=$category" --logger "trx;LogFilePath=$category.trx"
+        $solutionPath = $config.App.GetSolutionPath()
+        foreach ($step in $Categories) {
+            $testStep = ConvertTo-TestStep $step
+            Write-Log "Running tests: $($testStep.Description)"
+
+            $listed = & dotnet test $solutionPath -c Debug --list-tests --filter $testStep.Filter
+            if ($LASTEXITCODE -ne 0) {
+                throw "❌ Failed to list tests for: $($testStep.Description)"
+            }
+            $matchedCount = @($listed | Where-Object { $_ -match '^\s{4}\S' }).Count
+            if ($matchedCount -eq 0) {
+                throw "❌ No tests matched for: $($testStep.Description) (filter: $($testStep.Filter))"
+            }
+
+            Invoke-NativeCommandWithoutReturn dotnet test $solutionPath -c Debug --filter $testStep.Filter --logger "trx;LogFilePath=$($testStep.TrxName).trx"
         }
     }
     finally {

@@ -27,11 +27,24 @@
             Default    = @("Unit", "NarrowIntegration", "Component", "ContractVerification")
         }
         acceptance = @{
-            Default    = @("Smoke_ExternalSystems", "Smoke_CTF", "Acceptance")
-            e2e        = @("Smoke_ExternalSystems", "Smoke_CTF", "Acceptance", "ExternalSystemContract", "E2E")
+            Default    = @(
+                @{ Category = "Smoke_ExternalSystemsHealth"; externalSystem = "Stubbed" }
+                @{ Category = "Smoke_CTF"; externalSystem = "Stubbed" }
+                @{ Category = "ExternalSystemContract"; externalSystem = "Stubbed" }
+                "Acceptance"
+            )
+            e2e        = @(
+                @{ Category = "Smoke_ExternalSystemsHealth"; externalSystem = "Real" }
+                @{ Category = "Smoke_CTF"; externalSystem = "Real" }
+                @{ Category = "ExternalSystemContract"; externalSystem = "Real" }
+                "E2E"
+            )
         }
         release = @{
-            Default    = @("Smoke_ExternalSystems", "Smoke_CTF")
+            Default    = @(
+                @{ Category = "Smoke_ExternalSystemsHealth"; externalSystem = "Real" }
+                @{ Category = "Smoke_CTF"; externalSystem = "Real" }
+            )
         }
     }
 }
