@@ -1,9 +1,8 @@
-using ctf_sandbox.tests;
 using ctf_sandbox.tests.Core.Dsl.Scenario;
 using ctf_sandbox.tests.Fixtures;
 using ctf_sandbox.tests.Utils;
 
-namespace tests.ctf_sandbox.tests.SmokeTests;
+namespace ctf_sandbox.tests.SmokeTests;
 
 [Collection(CTFTestCollection.Name)]
 public class CTFTests
@@ -20,6 +19,6 @@ public class CTFTests
     public async Task ShouldBeUpAndRunning(Channel channel, ExternalSystems externalSystem)
     {
         await _testEnvironments.For(externalSystem).Scenario(channel)
-            .Assume().MyShop().ShouldBeRunning();
+            .Assume().CTF().ShouldBeRunning();
     }
 }

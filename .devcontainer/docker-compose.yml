@@ -10,6 +10,9 @@ services:
       - mailpit
     links:
       - mailpit
+      - wiremock-clock
+      - wiremock-ipinfo
+      - wiremock-bannedwords
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
 
@@ -32,13 +35,35 @@ services:
       - ./banned-words-api.json:/data/db.json
     command: --watch /data/db.json --host 0.0.0.0
   
-  wiremockserver:
+  wiremock-clock:
     image: sheyenrath/wiremock.net
     ports:
       - "9091:80"
     command: --verbose
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9091/__admin"]
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:80/__admin"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  wiremock-ipinfo:
+    image: sheyenrath/wiremock.net
+    ports:
+      - "9092:80"
+    command: --verbose
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:80/__admin"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  wiremock-bannedwords:
+    image: sheyenrath/wiremock.net
+    ports:
+      - "9093:80"
+    command: --verbose
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:80/__admin"]
       interval: 5s
       timeout: 3s
       retries: 5

@@ -1,5 +1,6 @@
 using ctf_sandbox.tests.Core.Clients.ExternalSystems;
 using ctf_sandbox.tests.Core.Drivers.ExternalSystems;
+using ctf_sandbox.tests.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RestEase;
@@ -7,7 +8,7 @@ using WireMock.Client;
 
 namespace ctf_sandbox.tests.Fixtures;
 
-public class StubbedExternalSystemsTestEnvironment : TestEnvironment
+public class StubbedExternalSystemsTestEnvironment : RealExternalSystemsTestEnvironment
 {
     override protected void ConfigureAppConfiguration(IConfigurationBuilder configBuilder)
     {
@@ -17,23 +18,13 @@ public class StubbedExternalSystemsTestEnvironment : TestEnvironment
 
     protected override void ConfigureServices(IServiceCollection services)
     {
-        base.ConfigureServices(services);
-        services.AddSingleton<IClockDriver, ClockStubbedDriver>(sp =>
-        {
-            var api = RestClient.For<IWireMockAdminApi>();
-            return ActivatorUtilities.CreateInstance<ClockStubbedDriver>(sp, api);
-        });
-        services.AddHttpClient<ClockStubbedClient>(ConfigureClockStubbedHttpClient);
+        services.AddSingleton<IClockDriver, ClockStubbedDriver>();
         services.AddSingleton<IEmailsDriver, APIEmailsRealDriver>();
-        //services.AddHttpClient<MailpitRealClient>(ConfigureEmailsHttpClient);
-        services.AddSingleton<IBannedWordsDriver, APIBannedWordsRealDriver>();
-        //services.AddHttpClient<BannedWordsRealClient>(ConfigureBannedWordsHttpClient);
-        services.AddSingleton<IIpInfoDriver, IPInfoRealDriver>();
-        //services.AddHttpClient<IpInfoRealClient>(ConfigureIpInfoHttpClient);        
-    }
-
-    private void ConfigureClockStubbedHttpClient(HttpClient httpClient)
-    {
-        httpClient.BaseAddress = new Uri(Configuration!.MailpitUrl + "/api/v1/");
+        services.AddHttpClient<MailpitRealClient>(ConfigureEmailsHttpClient);
+        services.AddSingleton<IBannedWordsDriver, BannedWordsStubbedDriver>();
+        services.AddRestEaseClient<BannedWordsStubbedClient, IWireMockAdminApi>(() => Configuration!.BannedWordsUrl);
+        services.AddSingleton<IIpInfoDriver, IpInfoStubbedDriver>();
+        services.AddRestEaseClient<IpInfoStubbedClient, IWireMockAdminApi>(() => Configuration!.IpInfoUrl);
+        services.AddRestEaseClient<ClockStubbedClient, IWireMockAdminApi>(() => Configuration!.TimeProviderOptions.Url!);
     }
 }

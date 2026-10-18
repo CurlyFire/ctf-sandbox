@@ -1,4 +1,6 @@
 
+using ctf_sandbox.Time;
+
 namespace ctf_sandbox.tests.Fixtures;
 
 public class CTFConfiguration
@@ -17,6 +19,8 @@ public class CTFConfiguration
 
     public Credentials MailpitCredentials { get; private set; }
 
+    public TimeProviderOptions TimeProviderOptions { get; private set; }
+
     public CTFConfiguration(
         string webServerUrl,
         string mailpitUrl,
@@ -24,7 +28,8 @@ public class CTFConfiguration
         string bannedWordsUrl,
         string databaseConnectionString,
         Credentials webServerCredentials,
-        Credentials mailpitCredentials)
+        Credentials mailpitCredentials,
+        TimeProviderOptions timeProviderOptions)
     {
         WebServerUrl = webServerUrl;
         MailpitUrl = mailpitUrl;
@@ -33,5 +38,6 @@ public class CTFConfiguration
         DatabaseConnectionString = databaseConnectionString;
         WebServerCredentials = webServerCredentials;
         MailpitCredentials = mailpitCredentials;
+        TimeProviderOptions = timeProviderOptions;
     }
 }

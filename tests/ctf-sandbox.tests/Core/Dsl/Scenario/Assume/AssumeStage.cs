@@ -9,7 +9,7 @@ public class AssumeStage
         _app = app;
     }
 
-    public AssumeRunningAction MyShop()
+    public AssumeRunningAction CTF()
     {
         return new AssumeRunningAction(async () =>
         {

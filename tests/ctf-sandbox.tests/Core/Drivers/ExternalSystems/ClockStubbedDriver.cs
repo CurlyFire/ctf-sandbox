@@ -1,16 +1,15 @@
-using RestEase;
-using WireMock.Client;
+using ctf_sandbox.tests.Core.Clients.ExternalSystems;
 
 namespace ctf_sandbox.tests.Core.Drivers.ExternalSystems;
 
 public class ClockStubbedDriver : IClockDriver
 {
-    public ClockStubbedDriver(IWireMockAdminApi api)
+    private readonly ClockStubbedClient _clockStubbedClient;
+
+    public ClockStubbedDriver(ClockStubbedClient clockStubbedClient)
     {
+        _clockStubbedClient = clockStubbedClient;
     }
 
-    public Task<Result<VoidValue, SystemError>> GoToClock()
-    {
-        return Task.FromResult(Result.Success<SystemError>());
-    }
+    public Task<Result<VoidValue, SystemError>> GoToClock() => _clockStubbedClient.CheckHealth();
 }

@@ -168,7 +168,7 @@ public abstract class TestEnvironment
         Configure(_scope.ServiceProvider);
     }
 
-    private IConfiguration GetTestsConfiguration()
+    protected IConfiguration GetTestsConfiguration()
     {
         var configBuilder = new ConfigurationBuilder();
         configBuilder.Sources.Clear();
@@ -233,7 +233,10 @@ public abstract class TestEnvironment
             new Credentials(
                 ctfWebHostConfiguration.GetValue<string>("EmailSettings:Username") ?? string.Empty,
                 ctfWebHostConfiguration.GetValue<string>("EmailSettings:Password") ?? string.Empty
-            ));
+            ),
+            ctfWebHostConfiguration
+                .GetSection(TimeProviderOptions.ConfigurationSection)
+                .Get<TimeProviderOptions>() ?? new TimeProviderOptions());
         return configuration;
     }
 

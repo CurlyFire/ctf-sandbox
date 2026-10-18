@@ -16,33 +16,33 @@ public class ExternalSystemsHealthTests
 
     [Trait("Category", "Smoke_ExternalSystemsHealth")]
     [Theory, CombinatorialData]
-    public async Task Mailpit_ShouldBeUpAndRunning(Channel channel, ExternalSystems externalSystem)
+    public async Task Mailpit_ShouldBeUpAndRunning(ExternalSystems externalSystem)
     {
-        await _testEnvironments.For(externalSystem).Scenario(channel)
+        await _testEnvironments.For(externalSystem).Scenario()
             .Assume().Mailpit().ShouldBeRunning();
     }
 
     [Trait("Category", "Smoke_ExternalSystemsHealth")]
     [Theory, CombinatorialData]
-    public async Task IpInfo_ShouldBeUpAndRunning(Channel channel, ExternalSystems externalSystem)
+    public async Task IpInfo_ShouldBeUpAndRunning(ExternalSystems externalSystem)
     {
-        await _testEnvironments.For(externalSystem).Scenario(channel)
+        await _testEnvironments.For(externalSystem).Scenario()
             .Assume().IpInfo().ShouldBeRunning();
     }
 
     [Trait("Category", "Smoke_ExternalSystemsHealth")]
     [Theory, CombinatorialData]
-    public async Task Clock_ShouldBeUpAndRunning(Channel channel, ExternalSystems externalSystem)
+    public async Task Clock_ShouldBeUpAndRunning(ExternalSystems externalSystem)
     {
-        await _testEnvironments.For(externalSystem).Scenario(channel)
+        await _testEnvironments.For(externalSystem).Scenario()
             .Assume().Clock().ShouldBeRunning();
     }
 
     [Trait("Category", "Smoke_ExternalSystemsHealth")]
     [Theory, CombinatorialData]
-    public async Task BannedWordsApi_ShouldBeUpAndRunning(Channel channel, ExternalSystems externalSystem)
+    public async Task BannedWordsApi_ShouldBeUpAndRunning(ExternalSystems externalSystem)
     {
-        await _testEnvironments.For(externalSystem).Scenario(channel)
+        await _testEnvironments.For(externalSystem).Scenario()
             .Assume().BannedWords().ShouldBeRunning();
     }
 }
