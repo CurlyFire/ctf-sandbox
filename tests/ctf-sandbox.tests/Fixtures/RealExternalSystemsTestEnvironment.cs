@@ -1,12 +1,13 @@
-using ctf_sandbox.tests.Core.Clients.ExternalSystems;
+using ctf_sandbox.tests.Core.Clients.ExternalSystems.BannedWords;
+using ctf_sandbox.tests.Core.Clients.ExternalSystems.IpInfo;
+using ctf_sandbox.tests.Core.Clients.ExternalSystems.Mailpit;
 using ctf_sandbox.tests.Core.Drivers.ExternalSystems;
-using CtfSandbox.Tests.Core.Drivers.ExternalSystems;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ctf_sandbox.tests.Fixtures;
 
-public class RealExternalSystemsCTFFixture : CTFFixture
+public class RealExternalSystemsTestEnvironment : TestEnvironment
 {
     override protected void ConfigureAppConfiguration(IConfigurationBuilder configBuilder)
     {
@@ -17,25 +18,26 @@ public class RealExternalSystemsCTFFixture : CTFFixture
     protected override void ConfigureServices(IServiceCollection services)
     {
         base.ConfigureServices(services);
-        services.AddSingleton<IEmailsDriver, APIEmailsDriver>();
+        services.AddSingleton<IEmailsDriver, EmailsRealDriver>();
         services.AddHttpClient<MailpitRealClient>(ConfigureEmailsHttpClient);
-        services.AddSingleton<IBannedWordsDriver, APIBannedWordsDriver>();
+        services.AddSingleton<IBannedWordsDriver, BannedWordsRealDriver>();
         services.AddHttpClient<BannedWordsRealClient>(ConfigureBannedWordsHttpClient);
-        services.AddSingleton<IIpInfoDriver, IPInfoDriver>();
+        services.AddSingleton<IIpInfoDriver, IpInfoRealDriver>();
+        services.AddHttpClient<IpInfoRealClient>(ConfigureIpInfoHttpClient);
         services.AddHttpClient<IpInfoRealClient>(ConfigureIpInfoHttpClient);
     }
 
-    private void ConfigureEmailsHttpClient(HttpClient httpClient)
+    protected void ConfigureEmailsHttpClient(HttpClient httpClient)
     {
-        httpClient.BaseAddress = new Uri(Configuration!.MailpitUrl + "/api/v1/");
+        httpClient.BaseAddress = new Uri(Configuration!.MailpitUrl);
     }
 
-    private void ConfigureBannedWordsHttpClient(HttpClient httpClient)
+    protected void ConfigureBannedWordsHttpClient(HttpClient httpClient)
     {
         httpClient.BaseAddress = new Uri(Configuration!.BannedWordsUrl);
     }
 
-    private void ConfigureIpInfoHttpClient(HttpClient httpClient)
+    protected void ConfigureIpInfoHttpClient(HttpClient httpClient)
     {
         httpClient.BaseAddress = new Uri(Configuration!.IpInfoUrl);
     }

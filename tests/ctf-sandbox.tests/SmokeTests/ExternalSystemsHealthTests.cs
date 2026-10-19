@@ -1,39 +1,48 @@
 using ctf_sandbox.tests.Core.Dsl.Scenario;
 using ctf_sandbox.tests.Fixtures;
+using ctf_sandbox.tests.Utils;
 
 namespace ctf_sandbox.tests.SmokeTests;
 
-[Collection(RealExternalSystemsTestCollection.Name)]
+[Collection(CTFTestCollection.Name)]
 public class ExternalSystemsHealthTests
 {
-    private readonly RealExternalSystemsCTFFixture _fixture;
+    private readonly TestEnvironments _testEnvironments;
 
-    public ExternalSystemsHealthTests(RealExternalSystemsCTFFixture fixture)
+    public ExternalSystemsHealthTests(TestEnvironments testEnvironments)
     {
-        _fixture = fixture;
+        _testEnvironments = testEnvironments;
     }
 
     [Trait("Category", "Smoke_ExternalSystemsHealth")]
-    [Fact]
-    public async Task Mailpit_ShouldBeUpAndRunning()
+    [Theory, CombinatorialData]
+    public async Task Mailpit_ShouldBeUpAndRunning(ExternalSystems externalSystem)
     {
-        await _fixture.Scenario()
+        await _testEnvironments.For(externalSystem).Scenario()
             .Assume().Mailpit().ShouldBeRunning();
     }
 
-    [Fact]
     [Trait("Category", "Smoke_ExternalSystemsHealth")]
-    public async Task IpInfo_ShouldBeUpAndRunning()
+    [Theory, CombinatorialData]
+    public async Task IpInfo_ShouldBeUpAndRunning(ExternalSystems externalSystem)
     {
-        await _fixture.Scenario()
+        await _testEnvironments.For(externalSystem).Scenario()
             .Assume().IpInfo().ShouldBeRunning();
     }
 
-    [Fact]
     [Trait("Category", "Smoke_ExternalSystemsHealth")]
-    public async Task BannedWordsApi_ShouldBeUpAndRunning()
+    [Theory, CombinatorialData]
+    public async Task Clock_ShouldBeUpAndRunning(ExternalSystems externalSystem)
     {
-        await _fixture.Scenario()
+        await _testEnvironments.For(externalSystem).Scenario()
+            .Assume().Clock().ShouldBeRunning();
+    }
+
+    [Trait("Category", "Smoke_ExternalSystemsHealth")]
+    [Theory, CombinatorialData]
+    public async Task BannedWordsApi_ShouldBeUpAndRunning(ExternalSystems externalSystem)
+    {
+        await _testEnvironments.For(externalSystem).Scenario()
             .Assume().BannedWords().ShouldBeRunning();
     }
 }

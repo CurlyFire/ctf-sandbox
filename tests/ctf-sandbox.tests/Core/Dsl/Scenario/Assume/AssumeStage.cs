@@ -9,7 +9,7 @@ public class AssumeStage
         _app = app;
     }
 
-    public AssumeRunningAction MyShop()
+    public AssumeRunningAction CTF()
     {
         return new AssumeRunningAction(async () =>
         {
@@ -30,6 +30,14 @@ public class AssumeStage
         return new AssumeRunningAction(async () =>
         {
             (await _app.ExternalSystems.IpInfo.GoToIpInfo().Execute()).ShouldSucceed();
+        }, this);
+    }
+
+    public AssumeRunningAction Clock()
+    {
+        return new AssumeRunningAction(async () =>
+        {
+            (await _app.ExternalSystems.Clock.GoToClock().Execute()).ShouldSucceed();
         }, this);
     }
 

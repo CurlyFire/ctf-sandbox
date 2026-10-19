@@ -1,4 +1,4 @@
-namespace ctf_sandbox.tests.Core.Clients.ExternalSystems;
+namespace ctf_sandbox.tests.Core.Clients.ExternalSystems.IpInfo;
 
 public class IpInfoRealClient : HealthyTcpClient
 {

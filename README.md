@@ -50,26 +50,26 @@ MVC monolith
 
 ### System context diagram
 ```mermaid
-C4Context
-    UpdateLayoutConfig($c4ShapeInRow="2", $c4BoundaryInRow="1")
-    Person(user, "Competitor", "Creates or participates in CTF competitions")
-    Enterprise_Boundary(b0, "CTF") {
-        System(systemctf, "CTF Sandbox", "Manage challenges, teams, and competitions")
-        System_Ext(systememail, "E-mail system", "SMTP testing tool for development")
-        System_Ext(systemipinfo, "Ip Lookup system", "Ip information lookup")
-        System_Ext(bannedwords, "Banned words system", "Checks team names against a list of banned words")
+flowchart LR
+    user(["Competitor<br/>Creates or participates in CTF competitions"])
 
-        Rel(user, systemctf, "Registers, creates teams, participates")
-        UpdateRelStyle(user, systemctf, $offsetX="-230", $offsetY="-45")
+    subgraph ctf["CTF"]
+        systemctf["CTF Sandbox<br/>Manage challenges, teams, and competitions"]
+    end
 
-        Rel(systemctf, systememail, "Sends email")
-        UpdateRelStyle(systemctf, systememail, $offsetX="-40", $offsetY="-10")
+    subgraph external["External systems"]
+        direction TB
+        systememail["E-mail system<br/>SMTP testing tool for development"]
+        systemipinfo["IP Lookup system<br/>IP information lookup"]
+        systemtime["Time provider<br/>System clock"]
+        bannedwords["Banned words system<br/>Checks team names against a list of banned words"]
+    end
 
-        Rel(systemctf, systemipinfo, "Lookup ip")
-        UpdateRelStyle(systemctf, systemipinfo, $offsetX="10", $offsetY="-10")
-
-        Rel(systemctf, bannedwords, "Checks team names")
-    }
+    user -->|Registers, creates teams, participates| systemctf
+    systemctf -->|Sends email| systememail
+    systemctf -->|Looks up IP| systemipinfo
+    systemctf -->|Gets current time| systemtime
+    systemctf -->|Checks team names| bannedwords
 ```
 
 ### Container diagram
@@ -88,12 +88,14 @@ flowchart LR
         direction TB
         mailpit["E-mail system<br/>Mailpit SMTP"]
         ipinfo["IP lookup<br/>HTTP API"]
+        timeprovider["Time provider<br/>System clock / WireMock"]
         bannedwords["Banned words API<br/>HTTP JSON"]
     end
 
     user -->|Uses| webapp
     webapp -->|Sends email| mailpit
     webapp -->|Looks up IP| ipinfo
+    webapp -->|Gets current time| timeprovider
     webapp -->|Checks team names| bannedwords
 ```
 The CTF competition UI has all the features mentionned in the Sytem use cases section.  Mailpit is used as a SMPT server for invitations and registrations, however, the emails all stay there and can be seen from the mailpit UI.  If you require access to it, ask me and I will create a user for you to view all emails.
@@ -106,9 +108,9 @@ Each environment has it's own external system docker container instances.  The t
 | Email        | Mailpit Docker container   | Mailpit Docker container        |
 | Ip info      | https://ipinfo.io          | WireMock                        |
 | Time         | System clock               | WireMock                        |
-| Banned words | No real service configured | JSON Server (`banned-words-api`) |
+| Banned words | JSON Server (`banned-words-api`) | WireMock                        |
 
-The banned-words API is used when creating or updating a team: the app requests its banned-word list and rejects team names that contain a listed word. For local development, JSON Server serves the list in [`.devcontainer/banned-words-api.json`](.devcontainer/banned-words-api.json) at `http://localhost:8081/BannedWords` from the host, or `http://banned-words-api/BannedWords` from another container on the devcontainer network. Update the JSON file to change the local list.
+The banned-words API is used when creating or updating a team: the app requests its banned-word list and rejects team names that contain a listed word. The real service is a JSON Server container (`banned-words-api`) that serves the list in [`.devcontainer/banned-words-api.json`](.devcontainer/banned-words-api.json) at `http://localhost:8081/BannedWords` from the host, or `http://banned-words-api/BannedWords` from another container on the devcontainer network. Update the JSON file to change the list. The stubbed service is WireMock, which returns canned responses in the same format, so tests that need specific banned words can stub them.
 
 ## Configuring real vs stubbed
 ### Email
@@ -137,7 +139,7 @@ The contract used to get the current time is through the abstract class System.T
 
 ### Banned words
 
-The app gets the banned-word list over HTTP. Configure `BannedWords:BaseUrl` with the API base URL (without the `/BannedWords` path); for local development, the default is `http://banned-words-api`. The API should return a JSON array of objects with `id` and `word` fields.
+The app gets the banned-word list over HTTP. Configure `BannedWords:BaseUrl` with the API base URL (without the `/BannedWords` path); for local development, the default is `http://banned-words-api`. The API should return a JSON array of objects with `id` and `word` fields. To switch between real (JSON Server) and stubbed (WireMock), only change `BannedWords:BaseUrl`; both expose the same HTTP contract.
 
 ## Links to external systems
 | Environment | External system | Link |
@@ -166,8 +168,10 @@ example with appsettings.json
     "BaseUrl": "https://ipinfo.io"
   },
   "BannedWords": {
-    # Use the JSON Server container in the devcontainer network
+    # Real: the JSON Server container in the devcontainer network
     "BaseUrl": "http://banned-words-api"
+    # OR use the WireMock server to stub the banned words API
+    # "BaseUrl": "http://wiremockserver"
   },
 }
 

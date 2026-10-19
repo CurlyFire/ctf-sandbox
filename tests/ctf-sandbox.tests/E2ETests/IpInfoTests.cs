@@ -4,22 +4,21 @@ using ctf_sandbox.tests.Utils;
 
 namespace ctf_sandbox.tests.E2ETests;
 
-[Collection(RealExternalSystemsTestCollection.Name)]
+[Collection(CTFTestCollection.Name)]
 public class IpInfoTests
 {
-    private readonly RealExternalSystemsCTFFixture _fixture;
+    private readonly TestEnvironment _testEnvironment;
 
-    public IpInfoTests(RealExternalSystemsCTFFixture fixture)
+    public IpInfoTests(TestEnvironments testEnvironments)
     {
-        _fixture = fixture;
+        _testEnvironment = testEnvironments.For(ExternalSystems.Real);
     }
 
     [Trait("Category", "E2E")]
-    [Theory]
-    [Channel(Channel.UI, Channel.API)]
+    [Theory, CombinatorialData]
     public async Task ShouldBeAbleToGetIpInfo(Channel channel)
     {
-        await _fixture.Scenario(channel)
+        await _testEnvironment.Scenario(channel)
             .Given().SignedIn()
             .When().GetIpInfo().WithIpAddress("8.8.8.8")
             .Then().ShouldSucceed()

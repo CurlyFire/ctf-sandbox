@@ -1,4 +1,5 @@
 using System.Net.Mail;
+using ctf_sandbox.Email;
 using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace ctf_sandbox.Services;
@@ -7,20 +8,16 @@ public class EmailSender : IEmailSender
 {
     private readonly IConfiguration _configuration;
 
-    public EmailSender(IConfiguration configuration)
+    private readonly ISmtpClient _smtpClient;
+
+    public EmailSender(IConfiguration configuration, ISmtpClient smtpClient)
     {
         _configuration = configuration;
+        _smtpClient = smtpClient;
     }
 
     public async Task SendEmailAsync(string email, string subject, string htmlMessage)
     {
-        var smtpClient = new SmtpClient(_configuration["EmailSettings:SmtpServer"])
-        {
-            Port = int.Parse(_configuration["EmailSettings:SmtpPort"] ?? "1025"),
-            DeliveryMethod = SmtpDeliveryMethod.Network,
-            EnableSsl = false
-        };
-
         var mailMessage = new MailMessage
         {
             From = new MailAddress(
@@ -33,6 +30,6 @@ public class EmailSender : IEmailSender
         };
         mailMessage.To.Add(email);
 
-        await smtpClient.SendMailAsync(mailMessage);
+        await _smtpClient.SendMailAsync(mailMessage);
     }
 }

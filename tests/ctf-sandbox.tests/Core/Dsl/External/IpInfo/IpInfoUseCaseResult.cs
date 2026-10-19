@@ -1,7 +1,4 @@
-using ctf_sandbox.tests.Core;
-using ctf_sandbox.tests.Core.Dsl;
-
-namespace CtfSandbox.Tests.Core.Dsl.External.IpInfo;
+namespace ctf_sandbox.tests.Core.Dsl.External.IpInfo;
 
 public class IpInfoUseCaseResult<TSuccessResponse, TSuccessVerification>
     : UseCaseResult<TSuccessResponse, SystemError, TSuccessVerification, SystemErrorFailureVerification>
