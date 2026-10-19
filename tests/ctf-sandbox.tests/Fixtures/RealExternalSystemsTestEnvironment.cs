@@ -27,7 +27,7 @@ public class RealExternalSystemsTestEnvironment : TestEnvironment
 
     protected void ConfigureEmailsHttpClient(HttpClient httpClient)
     {
-        httpClient.BaseAddress = new Uri(Configuration!.MailpitUrl + "/api/v1/");
+        httpClient.BaseAddress = new Uri(Configuration!.MailpitUrl);
     }
 
     protected void ConfigureBannedWordsHttpClient(HttpClient httpClient)

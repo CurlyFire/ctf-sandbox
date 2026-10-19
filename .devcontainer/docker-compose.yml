@@ -13,6 +13,7 @@ services:
       - wiremock-clock
       - wiremock-ipinfo
       - wiremock-bannedwords
+      - wiremock-mailpit
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
 
@@ -61,6 +62,17 @@ services:
     image: sheyenrath/wiremock.net
     ports:
       - "9093:80"
+    command: --verbose
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:80/__admin"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  wiremock-mailpit:
+    image: sheyenrath/wiremock.net
+    ports:
+      - "9094:80"
     command: --verbose
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:80/__admin"]

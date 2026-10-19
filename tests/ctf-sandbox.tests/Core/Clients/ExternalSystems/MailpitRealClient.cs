@@ -5,17 +5,19 @@ namespace ctf_sandbox.tests.Core.Clients.ExternalSystems;
 
 public class MailpitRealClient : HealthyTcpClient
 {
-    private readonly HttpClient _httpClient;
+    protected const string ApiPath = "/api/v1";
+
+    protected readonly HttpClient _httpClient;
 
     public MailpitRealClient(HttpClient httpClient) : base(httpClient.BaseAddress!)
     {
         _httpClient = httpClient;
     }
 
-    public async Task ActivateRegistrationSentTo(string email)
+    public virtual async Task ActivateRegistrationSentTo(string email)
     {
         // Search for messages sent to the email
-        var searchResponse = await _httpClient.GetAsync($"search?query=to:{email}");
+        var searchResponse = await _httpClient.GetAsync($"{ApiPath}/search?query=to:{email}");
         searchResponse.EnsureSuccessStatusCode();
         
         var searchResult = await searchResponse.Content.ReadFromJsonAsync<MailpitSearchResult>();
@@ -35,7 +37,7 @@ public class MailpitRealClient : HealthyTcpClient
         }
         
         // Get the full message with HTML content
-        var messageResponse = await _httpClient.GetAsync($"message/{registrationEmail.ID}");
+        var messageResponse = await _httpClient.GetAsync($"{ApiPath}/message/{registrationEmail.ID}");
         messageResponse.EnsureSuccessStatusCode();
         
         var message = await messageResponse.Content.ReadFromJsonAsync<MailpitMessage>();
@@ -76,14 +78,14 @@ public class MailpitRealClient : HealthyTcpClient
 }
 
 // DTOs for Mailpit API responses
-internal class MailpitSearchResult
+public class MailpitSearchResult
 {
     public int Total { get; set; }
     public int Count { get; set; }
     public List<MailpitMessageSummary> Messages { get; set; } = new();
 }
 
-internal class MailpitMessageSummary
+public class MailpitMessageSummary
 {
     public string ID { get; set; } = string.Empty;
     public string Subject { get; set; } = string.Empty;
@@ -92,7 +94,7 @@ internal class MailpitMessageSummary
     public DateTime Created { get; set; }
 }
 
-internal class MailpitMessage
+public class MailpitMessage
 {
     public string ID { get; set; } = string.Empty;
     public string Subject { get; set; } = string.Empty;
@@ -100,7 +102,7 @@ internal class MailpitMessage
     public string Text { get; set; } = string.Empty;
 }
 
-internal class MailpitAddress
+public class MailpitAddress
 {
     public string Name { get; set; } = string.Empty;
     public string Address { get; set; } = string.Empty;

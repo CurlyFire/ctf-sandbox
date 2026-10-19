@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using ctf_sandbox.Email;
 using ctf_sandbox.Time;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -77,6 +78,7 @@ public class Startup
         services.AddTransient<IEmailSender, EmailSender>();
         services.AddHttpContextAccessor();
         services.AddTimeProviderBasedOn(Configuration);
+        services.AddSmtpClientBasedOn(Configuration);
         services.AddHttpClient();
         services.Configure<IpInfoOptions>(Configuration.GetSection("IpInfo"));
         services.AddScoped<IIpInfoService, IpInfoService>();

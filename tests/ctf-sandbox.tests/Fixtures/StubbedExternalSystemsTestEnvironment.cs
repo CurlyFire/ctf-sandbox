@@ -3,7 +3,6 @@ using ctf_sandbox.tests.Core.Drivers.ExternalSystems;
 using ctf_sandbox.tests.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using RestEase;
 using WireMock.Client;
 
 namespace ctf_sandbox.tests.Fixtures;
@@ -19,12 +18,23 @@ public class StubbedExternalSystemsTestEnvironment : RealExternalSystemsTestEnvi
     protected override void ConfigureServices(IServiceCollection services)
     {
         services.AddSingleton<IClockDriver, ClockStubbedDriver>();
-        services.AddSingleton<IEmailsDriver, APIEmailsRealDriver>();
-        services.AddHttpClient<MailpitRealClient>(ConfigureEmailsHttpClient);
+        services.AddSingleton<IEmailsDriver, EmailsStubbedDriver>();
+        services.AddRestEaseClient<MailpitStubbedClient, IWireMockAdminApi>(ConfigureEmailsHttpClient);
         services.AddSingleton<IBannedWordsDriver, BannedWordsStubbedDriver>();
-        services.AddRestEaseClient<BannedWordsStubbedClient, IWireMockAdminApi>(() => Configuration!.BannedWordsUrl);
+        services.AddRestEaseClient<BannedWordsStubbedClient, IWireMockAdminApi>(ConfigureBannedWordsHttpClient);
         services.AddSingleton<IIpInfoDriver, IpInfoStubbedDriver>();
-        services.AddRestEaseClient<IpInfoStubbedClient, IWireMockAdminApi>(() => Configuration!.IpInfoUrl);
-        services.AddRestEaseClient<ClockStubbedClient, IWireMockAdminApi>(() => Configuration!.TimeProviderOptions.Url!);
+        services.AddRestEaseClient<IpInfoStubbedClient, IWireMockAdminApi>(ConfigureIpInfoHttpClient);
+        services.AddRestEaseClient<ClockStubbedClient, IWireMockAdminApi>(ConfigureClockHttpClient);
     }
+
+    protected override void Configure(IServiceProvider serviceProvider)
+    {
+        base.Configure(serviceProvider);
+        serviceProvider.GetRequiredService<MailpitStubbedClient>().SetupSendEmail().GetAwaiter().GetResult();
+    }
+
+    protected void ConfigureClockHttpClient(HttpClient httpClient)
+    {
+        httpClient.BaseAddress = new Uri(Configuration!.TimeProviderOptions.Url!);
+    }    
 }
