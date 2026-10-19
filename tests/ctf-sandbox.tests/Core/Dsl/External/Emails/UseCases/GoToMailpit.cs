@@ -1,5 +1,3 @@
-using ctf_sandbox.tests.Core;
-using ctf_sandbox.tests.Core.Dsl;
 using ctf_sandbox.tests.Core.Drivers.ExternalSystems;
 
 namespace ctf_sandbox.tests.Core.Dsl.External.Emails.UseCases;

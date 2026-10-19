@@ -1,13 +1,12 @@
-using ctf_sandbox.tests.Core;
 using ctf_sandbox.tests.Core.Clients.ExternalSystems.BannedWords;
 
 namespace ctf_sandbox.tests.Core.Drivers.ExternalSystems;
 
-public class APIBannedWordsRealDriver : IBannedWordsDriver
+public class BannedWordsRealDriver : IBannedWordsDriver
 {
     private readonly BannedWordsRealClient _client;
 
-    public APIBannedWordsRealDriver(BannedWordsRealClient client)
+    public BannedWordsRealDriver(BannedWordsRealClient client)
     {
         _client = client;
     }

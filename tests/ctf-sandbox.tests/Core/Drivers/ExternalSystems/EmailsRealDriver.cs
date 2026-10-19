@@ -2,12 +2,12 @@ using ctf_sandbox.tests.Core.Clients.ExternalSystems.Mailpit;
 
 namespace ctf_sandbox.tests.Core.Drivers.ExternalSystems;
 
-public class APIEmailsRealDriver : IEmailsDriver
+public class EmailsRealDriver : IEmailsDriver
 {
 
     private readonly MailpitRealClient _client;
 
-    public APIEmailsRealDriver(MailpitRealClient client)
+    public EmailsRealDriver(MailpitRealClient client)
     {
         _client = client;
     }

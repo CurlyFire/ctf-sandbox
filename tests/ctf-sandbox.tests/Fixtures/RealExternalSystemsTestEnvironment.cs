@@ -18,9 +18,9 @@ public class RealExternalSystemsTestEnvironment : TestEnvironment
     protected override void ConfigureServices(IServiceCollection services)
     {
         base.ConfigureServices(services);
-        services.AddSingleton<IEmailsDriver, APIEmailsRealDriver>();
+        services.AddSingleton<IEmailsDriver, EmailsRealDriver>();
         services.AddHttpClient<MailpitRealClient>(ConfigureEmailsHttpClient);
-        services.AddSingleton<IBannedWordsDriver, APIBannedWordsRealDriver>();
+        services.AddSingleton<IBannedWordsDriver, BannedWordsRealDriver>();
         services.AddHttpClient<BannedWordsRealClient>(ConfigureBannedWordsHttpClient);
         services.AddSingleton<IIpInfoDriver, IpInfoRealDriver>();
         services.AddHttpClient<IpInfoRealClient>(ConfigureIpInfoHttpClient);
