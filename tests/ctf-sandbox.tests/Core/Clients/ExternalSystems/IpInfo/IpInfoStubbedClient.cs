@@ -1,12 +1,12 @@
 using WireMock.Client;
 
-namespace ctf_sandbox.tests.Core.Clients.ExternalSystems;
+namespace ctf_sandbox.tests.Core.Clients.ExternalSystems.IpInfo;
 
-public class BannedWordsStubbedClient : BannedWordsRealClient
+public class IpInfoStubbedClient : IpInfoRealClient
 {
     private readonly IWireMockAdminApi _adminApi;
 
-    public BannedWordsStubbedClient(HttpClient httpClient, IWireMockAdminApi adminApi) : base(httpClient)
+    public IpInfoStubbedClient(HttpClient client, IWireMockAdminApi adminApi) : base(client)
     {
         _adminApi = adminApi;
     }
@@ -18,11 +18,11 @@ public class BannedWordsStubbedClient : BannedWordsRealClient
             var health = await _adminApi.GetHealthAsync();
             return string.Equals(health?.Trim(), "Healthy", StringComparison.OrdinalIgnoreCase)
                 ? Result.Success<SystemError>()
-                : Result.Failure<SystemError>(SystemError.Of($"BannedWords stub is not healthy: {health}"));
+                : Result.Failure<SystemError>(SystemError.Of($"IpInfo stub is not healthy: {health}"));
         }
         catch (Exception ex)
         {
-            return Result.Failure<SystemError>(SystemError.Of($"BannedWords stub health check failed: {ex.Message}"));
+            return Result.Failure<SystemError>(SystemError.Of($"IpInfo stub health check failed: {ex.Message}"));
         }
     }
 }

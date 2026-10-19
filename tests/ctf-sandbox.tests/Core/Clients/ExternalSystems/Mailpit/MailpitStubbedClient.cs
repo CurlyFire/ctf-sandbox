@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 using WireMock.Admin.Mappings;
 using WireMock.Client;
 
-namespace ctf_sandbox.tests.Core.Clients.ExternalSystems;
+namespace ctf_sandbox.tests.Core.Clients.ExternalSystems.Mailpit;
 
 public class MailpitStubbedClient : MailpitRealClient
 {

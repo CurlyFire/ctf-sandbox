@@ -1,5 +1,5 @@
 using ctf_sandbox.tests.Core;
-using ctf_sandbox.tests.Core.Clients.ExternalSystems;
+using ctf_sandbox.tests.Core.Clients.ExternalSystems.BannedWords;
 
 namespace ctf_sandbox.tests.Core.Drivers.ExternalSystems;
 

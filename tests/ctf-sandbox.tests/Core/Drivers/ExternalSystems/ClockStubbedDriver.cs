@@ -1,4 +1,4 @@
-using ctf_sandbox.tests.Core.Clients.ExternalSystems;
+using ctf_sandbox.tests.Core.Clients.ExternalSystems.Clock;
 
 namespace ctf_sandbox.tests.Core.Drivers.ExternalSystems;
 

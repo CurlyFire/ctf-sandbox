@@ -1,13 +1,15 @@
 using WireMock.Client;
 
-namespace ctf_sandbox.tests.Core.Clients.ExternalSystems;
+namespace ctf_sandbox.tests.Core.Clients.ExternalSystems.Clock;
 
-public class IpInfoStubbedClient : IpInfoRealClient
+public class ClockStubbedClient
 {
+    private readonly HttpClient _httpClient;
     private readonly IWireMockAdminApi _adminApi;
 
-    public IpInfoStubbedClient(HttpClient client, IWireMockAdminApi adminApi) : base(client)
+    public ClockStubbedClient(HttpClient httpClient, IWireMockAdminApi adminApi)
     {
+        _httpClient = httpClient;
         _adminApi = adminApi;
     }
 
@@ -18,11 +20,11 @@ public class IpInfoStubbedClient : IpInfoRealClient
             var health = await _adminApi.GetHealthAsync();
             return string.Equals(health?.Trim(), "Healthy", StringComparison.OrdinalIgnoreCase)
                 ? Result.Success<SystemError>()
-                : Result.Failure<SystemError>(SystemError.Of($"IpInfo stub is not healthy: {health}"));
+                : Result.Failure<SystemError>(SystemError.Of($"Clock stub is not healthy: {health}"));
         }
         catch (Exception ex)
         {
-            return Result.Failure<SystemError>(SystemError.Of($"IpInfo stub health check failed: {ex.Message}"));
+            return Result.Failure<SystemError>(SystemError.Of($"Clock stub health check failed: {ex.Message}"));
         }
     }
 }

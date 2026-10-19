@@ -1,7 +1,8 @@
 using System.Net.Http.Json;
 using System.Text.RegularExpressions;
+using ctf_sandbox.tests.Core.Clients.ExternalSystems.Mailpit.Dtos;
 
-namespace ctf_sandbox.tests.Core.Clients.ExternalSystems;
+namespace ctf_sandbox.tests.Core.Clients.ExternalSystems.Mailpit;
 
 public class MailpitRealClient : HealthyTcpClient
 {
@@ -75,35 +76,4 @@ public class MailpitRealClient : HealthyTcpClient
         
         return null;
     }
-}
-
-// DTOs for Mailpit API responses
-public class MailpitSearchResult
-{
-    public int Total { get; set; }
-    public int Count { get; set; }
-    public List<MailpitMessageSummary> Messages { get; set; } = new();
-}
-
-public class MailpitMessageSummary
-{
-    public string ID { get; set; } = string.Empty;
-    public string Subject { get; set; } = string.Empty;
-    public MailpitAddress From { get; set; } = new();
-    public List<MailpitAddress> To { get; set; } = new();
-    public DateTime Created { get; set; }
-}
-
-public class MailpitMessage
-{
-    public string ID { get; set; } = string.Empty;
-    public string Subject { get; set; } = string.Empty;
-    public string HTML { get; set; } = string.Empty;
-    public string Text { get; set; } = string.Empty;
-}
-
-public class MailpitAddress
-{
-    public string Name { get; set; } = string.Empty;
-    public string Address { get; set; } = string.Empty;
 }

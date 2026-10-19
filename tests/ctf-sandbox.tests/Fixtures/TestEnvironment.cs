@@ -1,6 +1,6 @@
 using ctf_sandbox.tests.Core.Clients.API;
 using ctf_sandbox.tests.Core.Clients.API.Endpoints;
-using ctf_sandbox.tests.Core.Clients.ExternalSystems;
+using ctf_sandbox.tests.Core.Clients.ExternalSystems.Clock;
 using ctf_sandbox.tests.Core.Clients.UI;
 using ctf_sandbox.tests.Core.Drivers.CTF;
 using ctf_sandbox.tests.Core.Drivers.CTF.API;
