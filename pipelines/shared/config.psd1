@@ -28,16 +28,16 @@
         }
         acceptance = @{
             Default    = @(
-                @{ Category = "Smoke_ExternalSystemsHealth"; externalSystem = "Stubbed" }
-                @{ Category = "Smoke_CTF"; externalSystem = "Stubbed" }
-                @{ Category = "ExternalSystemContract"; externalSystem = "Stubbed" }
-                "Acceptance"
+                @{ Category = "Smoke_ExternalSystemsHealth"}
+                @{ Category = "Smoke_CTF" }
+                @{ Category = "ExternalSystemContract" }
+                @{ Category = "Acceptance"; externalSystem = "Stubbed" }
             )
             e2e        = @(
                 @{ Category = "Smoke_ExternalSystemsHealth"; externalSystem = "Real" }
                 @{ Category = "Smoke_CTF"; externalSystem = "Real" }
                 @{ Category = "ExternalSystemContract"; externalSystem = "Real" }
-                "E2E"
+                @{ Category = "E2E"; externalSystem = "Real" }
             )
         }
         release = @{
